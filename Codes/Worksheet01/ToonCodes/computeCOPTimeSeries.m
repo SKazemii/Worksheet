@@ -22,16 +22,16 @@ function COPTS = computeCOPTimeSeries(Footprint3D,varargin)
     parse(p,Footprint3D,varargin{:});
     
     % Convert 3D grayscale image to 3D binary image
-    BW3D = convertGS2BW(p.Results.Footprint3D,'Binarize',p.Results.Binarize);
     % Low-pass Butterworth filter
     [b,a] = butter(p.Results.Filter_Order,p.Results.Filter_CutOffFreq/(p.Results.Filter_SampFreq/2));
-    t_max = size(BW3D,3); % t frames
+    t_max = size(Footprint3D,3); % t frames
     COPTrajectory = zeros(t_max,2); % 2 for x-and y-axis
     
     for t = 1:t_max
         Footprint2D = p.Results.Footprint3D(:,:,t);
         Footprint2D(isnan(Footprint2D)) = 0; % Replace NaNs with Zeros
-        BW2D = BW3D(:,:,t);
+        BW2D = convertGS2BW(Footprint2D,'Binarize',p.Results.Binarize);
+
         props = regionprops(double(BW2D),Footprint2D,'Centroid','WeightedCentroid');
         if(isempty(props))
             COPTrajectory(t,:) = NaN; % Replace empty with NaN

@@ -1,0 +1,56 @@
+
+#################################################################################################
+#################################################################################################
+#################################################################################################
+
+THRESHOLDs:                                                                          85.19339073152717
+EER:                                                                                 0.29345454545454547
+False Positive (FP):                                                                 212.1875
+False Negative (FN):                                                                 2.125
+True Positive (TP):                                                                  4.125
+True Negative (TN):                                                                  647.1875
+True Positive Rate (TPR)(Recall):                                                    0.66
+True Negative Rate (TNR)(Specificity):                                               0.7530909090909091
+Positive Predictive Value (PPV)(Precision):                                          0.019069633054030626
+Negative Predictive Value (NPV):                                                     0.996727307729329
+False Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      0.2469090909090909
+False Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  0.34
+False Discovery Rate (FDR):                                                          0.9809303669459694
+Overall accuracy (ACC):                                                              0.7524187725631769
+#################################################################################################
+#################################################################################################
+#################################################################################################
+#################################################################################################
+
+THRESHOLDs:                                                                          100.0
+EER:                                                                                 0.31476363636363636
+False Positive (FP):                                                                 283.1875
+False Negative (FN):                                                                 1.875
+True Positive (TP):                                                                  4.375
+True Negative (TN):                                                                  576.1875
+True Positive Rate (TPR)(Recall):                                                    0.7
+True Negative Rate (TNR)(Specificity):                                               0.6704727272727272
+Positive Predictive Value (PPV)(Precision):                                          0.015214083894805478
+Negative Predictive Value (NPV):                                                     0.9967564060979566
+False Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      0.3295272727272727
+False Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  0.3
+False Discovery Rate (FDR):                                                          0.9847859161051945
+Overall accuracy (ACC):                                                              0.6706859205776173
+#################################################################################################
+#################################################################################################
+#################################################################################################
+#################################################################################################
+
+THRESHOLDs:                                                                          100.0
+EER:                                                                                 0.3008363636363637
+False Positive (FP):                                                                 276.4375
+False Negative (FN):                                                                 1.75
+True Positive (TP):                                                                  4.5
+True Negative (TN):                                                                  582.9375
+True Positive Rate (TPR)(Recall):                                                    0.72
+True Negative Rate (TNR)(Specificity):                                               0.6783272727272728
+Negative Predictive Value (NPV):                                                     0.9970069481560663
+False Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      0.3216727272727273
+False Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  0.28
+Overall accuracy (ACC):                                                              0.6786281588447654
+#################################################################################################
