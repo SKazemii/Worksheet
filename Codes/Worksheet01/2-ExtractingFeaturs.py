@@ -17,47 +17,48 @@ metadata = np.load("./Datasets/metadatalist.npy")
 print("[INFO] data shape: ", data.shape)
 print("[INFO] metadata shape: ",metadata.shape)
 
-features = list()
+pfeatures = list()
+afeatures = list()
 
 for j in range(data.shape[0]):
     COPTS = fe.computeCOPTimeSeries(data[j])
-    COATS = fe.computeCOATimeSeries(data[j], Binarize = "simple", Threshold = 1)
+    # COATS = fe.computeCOATimeSeries(data[j], Binarize = "simple", Threshold = 1)
 
     pMDIST = fe.computeMDIST(COPTS)    
-    aMDIST = fe.computeMDIST(COATS)    
+    # aMDIST = fe.computeMDIST(COATS)    
     
     pRDIST = fe.computeRDIST(COPTS)
-    aRDIST = fe.computeRDIST(COATS)
+    # aRDIST = fe.computeRDIST(COATS)
 
     pTOTEX = fe.computeTOTEX(COPTS)
-    aTOTEX = fe.computeTOTEX(COATS)
+    # aTOTEX = fe.computeTOTEX(COATS)
 
     pMVELO = fe.computeMVELO(COPTS)
-    aMVELO = fe.computeMVELO(COATS)
+    # aMVELO = fe.computeMVELO(COATS)
 
     pRANGE = fe.computeRANGE(COPTS)
-    aRANGE = fe.computeRANGE(COATS)
+    # aRANGE = fe.computeRANGE(COATS)
 
     pAREACC = fe.computeAREACC(COPTS)
-    aAREACC = fe.computeAREACC(COATS)
+    # aAREACC = fe.computeAREACC(COATS)
 
     pAREACE = fe.computeAREACE(COPTS)
-    aAREACE = fe.computeAREACE(COATS)
+    # aAREACE = fe.computeAREACE(COATS)
 
     pAREASW = fe.computeAREASW(COPTS)
-    aAREASW = fe.computeAREASW(COATS)
+    # aAREASW = fe.computeAREASW(COATS)
 
     pMFREQ = fe.computeMFREQ(COPTS)
-    aMFREQ = fe.computeMFREQ(COATS)
+    # aMFREQ = fe.computeMFREQ(COATS)
 
     pFDPD = fe.computeFDPD(COPTS)
-    aFDPD = fe.computeFDPD(COATS)
+    # aFDPD = fe.computeFDPD(COATS)
 
     pFDCC = fe.computeFDCC(COPTS)
-    aFDCC = fe.computeFDCC(COATS)
+    # aFDCC = fe.computeFDCC(COATS)
 
     pFDCE = fe.computeFDCE(COPTS)
-    aFDCE = fe.computeFDCE(COATS)
+    # aFDCE = fe.computeFDCE(COATS)
 
     # sys.exit()
 
@@ -80,13 +81,15 @@ for j in range(data.shape[0]):
 
     # plt.show()
     
-    features.append(np.concatenate((pMDIST, aMDIST, pRDIST, aRDIST, pTOTEX, aTOTEX, pMVELO, aMVELO, pRANGE, aRANGE, [pAREACC], [aAREACC], [pAREACE], [aAREACE], pMFREQ, aMFREQ, pFDPD, aFDPD, [pFDCC], [aFDCC], [pFDCE], [aFDCE], metadata[j,0:2]), axis = 0) )
+    pfeatures.append(np.concatenate((pMDIST, pRDIST, pTOTEX, pMVELO, pRANGE, [pAREACC], [pAREACE], pMFREQ, pFDPD, [pFDCC], [pFDCE], [pAREASW], metadata[j,0:2]), axis = 0) )
+    # afeatures.append(np.concatenate((aMDIST, aRDIST, aTOTEX, aMVELO, aRANGE, [aAREACC], [aAREACE], aMFREQ, aFDPD, [aFDCC], [aFDCE], metadata[j,0:2]), axis = 0) )
     
 
 
-np.save("./Datasets/features.npy", features)
-print("[INFO] Done!!!")
+np.save("./Datasets/pfeatures.npy", pfeatures)
+# np.save("./Datasets/afeatures.npy", afeatures)
 
+print("[INFO] Done!!!")
 
 
 
