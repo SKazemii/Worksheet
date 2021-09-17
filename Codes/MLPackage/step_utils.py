@@ -330,7 +330,7 @@ def extractFootPrints(data1):
     datathresh = 100; #np.percentile(np.sum(data,(0,1)),25) + 500;   
     footmask = data[:,:,:] > thresh;
 
-    ys = 80; xs = 60; ts = 200; #the dimensions of a footprint "box" 
+    ys = 80; xs = 80; ts = 100; #the dimensions of a footprint "box" 
     footprints = []; yclist = []; xclist = []; tclist = [];
     GRF = np.sum(np.sum(footmask,1),0);    
     iterI = -1; 

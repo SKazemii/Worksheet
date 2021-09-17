@@ -8,11 +8,13 @@ from scipy.spatial import distance
 
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from MLPackage import util as perf
 
+test_ratio = 0.2
 persentage = 0.95
 model_type = "average" #min median average
 THRESHOLDs = np.linspace(0, 10, 50)
@@ -65,14 +67,14 @@ columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "
 DF_features_PCA = (pd.DataFrame(np.concatenate((PCA_out[:,:num_pc],DF_features.iloc[:, -2:].values), axis = 1), columns = columnsName))
 ###############################
 
-DF_features_PCA = DF_features.copy()
+# DF_features_PCA = DF_features.copy()
 
 EER_L = list(); FAR_L = list(); FRR_L = list()
 EER_R = list(); FAR_R = list(); FRR_R = list()
 
 EER_L_1 = list(); FAR_L_1 = list(); FRR_L_1 = list()
 EER_R_1 = list(); FAR_R_1 = list(); FRR_R_1 = list()
-
+ACC_L = list(); ACC_R = list()
 print(DF_features_PCA.head())
 # sys.exit()
 for subject in subjects:
@@ -94,8 +96,15 @@ for subject in subjects:
         DF_featuresL4 = DF_featuresL[DF_featuresL["subject ID"] == subject]
         DF_featuresLImposter = DF_featuresL[DF_featuresL["subject ID"] != subject]
 
+        DF_featuresL4_test = DF_featuresL4.sample(frac = test_ratio, replace = False, random_state = 2)#frac =0.50
+        DF_featuresL4_train = DF_featuresL4.drop(DF_featuresL4_test.index)
 
-        distModel1, distModel2 = perf.compute_model(DF_featuresL4.iloc[:, :-2].values, DF_featuresLImposter.iloc[:, :-2].values, mode = "dist")
+        DF_featuresLImposter_test = DF_featuresLImposter.sample(frac = test_ratio, replace = False, random_state = 2)#frac =0.50
+        DF_featuresLImposter_train = DF_featuresLImposter.drop(DF_featuresLImposter_test.index)
+
+
+
+        distModel1, distModel2 = perf.compute_model(DF_featuresL4_train.iloc[:, :-2].values, DF_featuresLImposter_train.iloc[:, :-2].values, mode = "dist")
 
         np.save(path + "distModel1.npy", distModel1)
         np.save(path + "distModel2.npy", distModel2)
@@ -149,15 +158,53 @@ for subject in subjects:
         perf.ROC_plot_v2(FAR_temp, FRR_temp, THRESHOLDs, path + model_type)
         EER_temp = (perf.compute_eer(FAR_temp, FRR_temp))
 
+
+        samples_test = np.concatenate((DF_featuresL4_test.iloc[:, :-2].values, DF_featuresLImposter_test.iloc[:, :-2].values),axis = 0)
+        one = (np.ones((DF_featuresL4_test.iloc[:, -2:-1].values.shape)))
+        zero = (np.zeros((DF_featuresLImposter_test.iloc[:, -2:-1].values.shape)))
+        label_test = np.concatenate((one, zero),axis = 0)
+        _ , distModel2 = perf.compute_model(DF_featuresL4_train.iloc[:, :-2].values, samples_test, mode = "dist")
+
+        if model_type == "average":
+            Model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+              
+        elif model_type == "min":  
+            Model_imposter = np.min(distModel2, axis = 0)
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+                 
+        elif model_type == "median":
+            Model_imposter = np.median(distModel2, axis = 0)
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+
+        t_idx = EER_temp[1]
+        
+        y_pred = np.zeros((Model_imposter.shape))
+        y_pred[Model_imposter < THRESHOLDs[t_idx]] = 1
+
+        # print(accuracy_score(label_test, y_pred)*100)
+        temp = (accuracy_score(label_test, y_pred)*100)
+
+        # ACC.append([subject, idx, temp, DF_featuresLImposter_test.shape[0], DF_featuresL4_test.shape[0], test_ratio])
+
+
         if direction == "left_0":
             EER_L.append(EER_temp)
             FAR_L.append(FAR_temp)
             FRR_L.append(FRR_temp)
+            ACC_L.append([subject, idx, temp, DF_featuresLImposter_test.shape[0], DF_featuresL4_test.shape[0], test_ratio])
+
             
         elif direction == "right_1":
             EER_R.append(EER_temp)
             FAR_R.append(FAR_temp)
             FRR_R.append(FRR_temp)
+            ACC_R.append([subject, idx, temp, DF_featuresLImposter_test.shape[0], DF_featuresL4_test.shape[0], test_ratio])
+
+        # print(ACC)
+        # sys.exit()
+
+
 
         
 
@@ -195,6 +242,16 @@ np.save("./Datasets/NPY/EER_L_B.npy", EER_L)
 np.save("./Datasets/NPY/FAR_L_B.npy", FAR_L)
 np.save("./Datasets/NPY/FRR_L_B.npy", FRR_L)
 
+
+np.save("./Datasets/NPY/ACC_L.npy", ACC_L)
+print(np.mean(ACC_L, axis=0))
+print(np.min(ACC_L, axis=0))
+print(np.max(ACC_L, axis=0))
+
+np.save("./Datasets/NPY/ACC_R.npy", ACC_R)
+print(np.mean(ACC_R, axis=0))
+print(np.min(ACC_R, axis=0))
+print(np.max(ACC_R, axis=0))
 
 print("[INFO] Done!!!")
 

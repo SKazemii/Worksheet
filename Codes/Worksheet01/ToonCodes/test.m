@@ -1,11 +1,16 @@
-EER_L = readNPY('EER_L_B.npy');
+ACC_L = readNPY('ACC_L.npy');
 
-a = [round(EER_L(:,1),2)];
+a = [round(ACC_L(1:79,3),2);round(ACC_L(81:end,3),2)];
 mean(a)
 min(a)
 max(a)
 
+ACC_R = readNPY('ACC_R.npy');
 
+a = [round(ACC_R(1:79,3),2);round(ACC_R(81:end,3),2)];
+mean(a)
+min(a)
+max(a)
 
 
 

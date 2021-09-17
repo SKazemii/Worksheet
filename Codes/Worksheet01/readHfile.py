@@ -66,7 +66,7 @@ if True:
     in_foot_list=[]
     for x in d1[0]:
         tmp=np.vstack(x)
-        in_foot_list.append(tmp.reshape(80,60,200))
+        in_foot_list.append(tmp.reshape(80,80,100))
         
     print((in_foot_list[0].shape))
 
