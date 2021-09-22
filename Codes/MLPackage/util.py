@@ -6,9 +6,102 @@ import os
 
 from scipy.spatial import distance
 
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+
+def PCA_func(DF_features, persentage ):
+    # Scale data befor applying PCA
+    scaling = StandardScaler()
+    Scaled_data = scaling.fit_transform(DF_features.iloc[:, :-2])
+
+    principal = PCA()
+    PCA_out = principal.fit_transform(Scaled_data)
+
+    variance_ratio = (np.cumsum(principal.explained_variance_ratio_))
+    high_var_PC = np.zeros(variance_ratio.shape)
+    high_var_PC[variance_ratio <= persentage] = 1
+
+    loadings = principal.components_
+    num_pc = int(np.sum(high_var_PC))
+
+
+    columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
+    DF_features_PCA = (pd.DataFrame(np.concatenate((PCA_out[:,:num_pc],DF_features.iloc[:, -2:].values), axis = 1), columns = columnsName))
+
+    return DF_features_PCA
+
+
+
+
+
+def model(distModel1, distModel2, model_type = "average", score = None ):
+    if score == None:
+        if model_type == "average":
+            # Model_client = (np.sum(distModel1, axis = 0))/(distModel1.shape[1]-1)
+            Model_client = np.mean(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
+            Model_client = np.expand_dims(Model_client,-1)
+            
+            Model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+                
+        elif model_type == "min":
+
+            Model_client = np.min(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
+            Model_client = np.expand_dims(Model_client,-1)
+            
+            Model_imposter = np.min(np.ma.masked_where(distModel2==0,distModel2), axis = 0)
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+                    
+        elif model_type == "median":
+            # temp = np.ma.masked_where(distModel1 == 0, distModel1)
+            # Model_client = np.ma.median(temp, axis = 0).filled(0)
+            Model_client = np.median(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
+            Model_client = np.expand_dims(Model_client,-1)
+            # print(Model_client.shape)
+            
+
+            Model_imposter = np.median(distModel2, axis = 0)
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+            # print(Model_imposter.shape)
+            # sys.exit()
+    if score != None:
+        if model_type == "average":
+            Model_client = np.mean(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
+            # Model_client = (np.sum(distModel1, axis = 0))/(distModel1.shape[1]-1)
+            Model_client = np.expand_dims(Model_client,-1)
+            
+            Model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+                
+        elif model_type == "min":
+
+            Model_client = np.max(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
+            Model_client = np.expand_dims(Model_client,-1)
+            
+            Model_imposter = np.max(np.ma.masked_where(distModel2==1,distModel2), axis = 0)
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+                    
+        elif model_type == "median":
+            # temp = np.ma.masked_where(distModel1 == 1, distModel1)
+            # Model_client = np.ma.median(temp, axis = 1).filled(0)
+            Model_client = np.median(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
+            Model_client = np.expand_dims(Model_client,-1)
+            # print(Model_client.shape)
+            
+
+            Model_imposter = np.median(distModel2, axis = 0)
+            Model_imposter = np.expand_dims(Model_imposter, -1)
+            # print(Model_imposter.shape)
+            # sys.exit()       
+
+    return Model_client, Model_imposter
+
 def compute_score(distance, mode = "A"):
+    distance = np.array(distance)
+
     if mode == "A":
-        return 1/(distance+1) 
+        return np.power(distance+1, -1) 
     elif mode =="B":
         return 1/np.exp(distance)
 
@@ -253,25 +346,23 @@ def compute_model(positive_samples, negative_samples, mode = "dist", score = Non
 
 
 def main():
-    features = np.load("./Datasets/pfeatures.npy")
+    features = [[4.48283092],[3.26954198],
+            [4.38550358],
+            [3.63498196],
+            [3.38680787],
+            [3.38417218],
+            [2.66482688],
+            [2.49328531],
+            [2.36398827],
+            [2.83137372],
+            [2.63417024],
+            [2.99511643]]
 
 
-    print(features.shape)
-    columnsName = ["feature_" + str(i) for i in range(25)] + [ "subject ID", "left(0)/right(1)"]
-
-    DF_features = pd.DataFrame(
-        features,
-        columns = columnsName 
-    )
-
-    DF_features = DF_features[DF_features["left(0)/right(1)"] == 0]
-    DF_featuresL4 = DF_features[DF_features["subject ID"] == 4]
-    DF_featuresLImposter = DF_features[DF_features["subject ID"] != 4]
-
-    # for subject in [4,5]:
-    #     pass
-    a, b = compute_model(DF_featuresL4.iloc[:, :-2].values, DF_featuresLImposter.iloc[:, :-2].values, mode = "corr")
-    print(b)
+    features = np.array(features)
+    print(features)
+    print(compute_score(features, mode = "B"))
+    
     print("[INFO] Done!!!")
 
 
