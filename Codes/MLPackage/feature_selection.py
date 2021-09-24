@@ -89,9 +89,7 @@ def min_red_calc(features):
 
 
 def mRMR(features, labels, n, measure = "d_prime"):
-    _, _, D, F = max_rel_calc(features, labels, n, measure)
-    print(D)
-
+    _, _, D, _ = max_rel_calc(features, labels, n, measure)
 
     redundancy_matrix = np.empty( [features.shape[1], features.shape[1]] )
     # print(redundancy_matrix.shape)
@@ -112,12 +110,12 @@ def mRMR(features, labels, n, measure = "d_prime"):
 
 
             redundancy_matrix[sl][zl] = input_correl
-            zl = zl +1
+            zl = zl + 1
         sl = sl + 1
 
     DF_rm = pd.DataFrame(redundancy_matrix)
-    print(DF_rm)
-    a = list()
+
+
     minimum = 0
     for set in range(2,features.shape[1]-1):
         comb = combinations(range(features.shape[1]),set)
@@ -126,7 +124,7 @@ def mRMR(features, labels, n, measure = "d_prime"):
             sumation = DF_rm.loc[i,i].abs().sum().sum()
             # print(i)
             d = (np.sum([D[j] for j in i]))
-            MIQ=d/sumation
+            MIQ = d / sumation
             if MIQ > minimum:
                 # print(i)
                 minimum = MIQ
@@ -136,8 +134,6 @@ def mRMR(features, labels, n, measure = "d_prime"):
     print(best_set)
     print(minimum)
 
-
-    # sys.exit()
     return features[:,best_set], best_set, minimum
 
 
@@ -145,11 +141,37 @@ def mRMR(features, labels, n, measure = "d_prime"):
 
 def main():
     pfeatures = np.load("./Datasets/pfeatures.npy")
-    # print(min_red_calc(pfeatures[:,0:5]))
-    labels = np.array(pfeatures[:,-1])
 
-    mRMR(pfeatures[:,0:5], labels, n=20, measure = "d_prime")
+    features = pfeatures
+
+    print("[INFO] feature shape: ", features.shape)
+    columnsName = ["feature_" + str(i) for i in range(features.shape[1]-2)] + [ "subject_ID", "left(0)/right(1)"]
+
+    DF_features = pd.DataFrame(
+        features,
+        columns = columnsName 
+    )
+    DF_side = DF_features[DF_features["left(0)/right(1)"] == 0]
+    DF_side.loc[DF_side.subject_ID == 4.0, "left(0)/right(1)"] = 1
+    DF_side.loc[DF_side.subject_ID != 4.0, "left(0)/right(1)"] = 0
+    # DF_side = DF_side[DF_side["left(0)/right(1)"] == 0]
+
+    # print(min_red_calc(pfeatures[:,0:5]))
+    pfeatures = DF_side.iloc[:,0:5].values
+    labels = DF_side.iloc[:,-1].values
+    # print(pfeatures)
+    # print(labels)
+
+    mRMR(pfeatures, labels, n=10, measure = "d_prime")
     print("[INFO] Done!!!")
+
+    import pymrmr
+    df = pd.read_csv('some_df.csv')
+    # Pass a dataframe with a predetermined configuration. 
+    # Check http://home.penglab.com/proj/mRMR/ for the dataset requirements
+    pymrmr.mRMR(df, 'MIQ', 10)
+    sys.exit()
+    
 
     sys.exit()
     pfeatures = np.load("./Datasets/pfeatures.npy")

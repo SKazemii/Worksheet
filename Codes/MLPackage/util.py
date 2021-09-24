@@ -97,6 +97,7 @@ def model(distModel1, distModel2, model_type = "average", score = None ):
 
     return Model_client, Model_imposter
 
+
 def compute_score(distance, mode = "A"):
     distance = np.array(distance)
 
@@ -133,7 +134,7 @@ def ROC_plot(TPR, FPR, path):
 def ROC_plot_v2(FPR, FNR,THRESHOLDs, path):
     """plot ROC curve"""
     plt.figure()
-    auc = 1 + np.trapz( FPR,FNR)
+    auc = 1/(1 + np.trapz( FPR,FNR))
     plt.plot(FPR, FNR, linestyle='--', marker='o', color='darkorange', lw = 2, label='ROC curve', clip_on=False)
     plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
     plt.xlim([0.0, 1.0])
@@ -325,14 +326,14 @@ def compute_model(positive_samples, negative_samples, mode = "dist", score = Non
 
         for i in range(positive_samples.shape[0]):
             for j in range(positive_samples.shape[0]):
-                positive_model[i, j] = np.corrcoef(
+                positive_model[i, j] = abs(np.corrcoef(
                     positive_samples[i, :], positive_samples[j, :]
-                )[0,1]
+                )[0,1])
 
             for j in range(negative_samples.shape[0]):
-                negative_model[i, j] = np.corrcoef(
+                negative_model[i, j] = abs(np.corrcoef(
                     positive_samples[i, :], negative_samples[j, :]
-                )[0,1]
+                )[0,1])
         return positive_model, negative_model
 
 
