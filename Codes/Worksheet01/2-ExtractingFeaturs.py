@@ -60,10 +60,13 @@ for j in range(data.shape[0]):
     pFDCE = fe.computeFDCE(COPTS)
     # aFDCE = fe.computeFDCE(COATS)
 
+
+    # print(pFDPD)
+    # print(pFDCE)
+    # print(pFDCC)
+
     # sys.exit()
 
-    
-    # print(pFDCE)
     # plt.figure()
     # plt.plot(range(100), COPTS[2])
     # plt.figure()
@@ -81,7 +84,7 @@ for j in range(data.shape[0]):
 
     # plt.show()
     
-    pfeatures.append(np.concatenate((pMDIST, pRDIST, pTOTEX, pMVELO, pRANGE, [pAREACC], [pAREACE], pMFREQ, pFDPD, [pFDCC], [pFDCE], [pAREASW], metadata[j,0:2]), axis = 0) )
+    pfeatures.append(np.concatenate((pMDIST, pRDIST, pTOTEX, pMVELO, pRANGE, [pAREACC], [pAREACE], [pAREASW], pMFREQ, pFDPD, [pFDCC], [pFDCE], metadata[j,0:2]), axis = 0) )
     # afeatures.append(np.concatenate((aMDIST, aRDIST, aTOTEX, aMVELO, aRANGE, [aAREACC], [aAREACE], aMFREQ, aFDPD, [aFDCC], [aFDCE], metadata[j,0:2]), axis = 0) )
     
 
