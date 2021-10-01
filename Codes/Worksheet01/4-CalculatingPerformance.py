@@ -34,11 +34,11 @@ cols = ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in ran
 FXR_R_DF = pd.DataFrame(np.empty((1080, 200)), columns=cols)
 
 
-cols = ["Mode", "Model Type", "Test Size", "Normalizition", "Features Set", "PCA",
-"Mean Accuracy Left", "Mean EER Left", "Mean Accuracy Right", "Mean EER Right",
-"Min Accuracy Left", "Min EER Left", "Min Accuracy Right", "Min EER Right",
-"Max Accuracy Left", "Max EER Left", "Max Accuracy Right", "Max EER Right",
-"Median Accuracy Left", "Median EER Left", "Median Accuracy Right", "Median EER Right"]
+cols = ["Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA",
+"Mean_Accuracy_Left", "Mean_EER_Left", "Mean_Accuracy_Right", "Mean_EER_Right",
+"Min_Accuracy_Left", "Min_EER_Left", "Min_Accuracy_Right", "Min_EER_Right",
+"Max_Accuracy_Left", "Max_EER_Left", "Max_Accuracy_Right", "Max_EER_Right",
+"Median_Accuracy_Left", "Median_EER_Left", "Median_Accuracy_Right", "Median_EER_Right"]
 
 Results_DF = pd.DataFrame(columns=cols)
 working_path = os.getcwd()
