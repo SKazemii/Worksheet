@@ -10,10 +10,17 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from MLPackage import Features as fe
 
+working_path = os.getcwd()
+
+print(sys.platform)
+print(working_path)
+
+data_path = os.path.join(working_path, 'Datasets', 'datalist.npy')
+meta_path = os.path.join(working_path, 'Datasets', 'metadatalist.npy')
 
 
-data = np.load("./Datasets/datalist.npy")
-metadata = np.load("./Datasets/metadatalist.npy")
+data = np.load(data_path)
+metadata = np.load(meta_path)
 print("[INFO] data shape: ", data.shape)
 print("[INFO] metadata shape: ",metadata.shape)
 
@@ -88,9 +95,10 @@ for j in range(data.shape[0]):
     # afeatures.append(np.concatenate((aMDIST, aRDIST, aTOTEX, aMVELO, aRANGE, [aAREACC], [aAREACE], aMFREQ, aFDPD, [aFDCC], [aFDCE], metadata[j,0:2]), axis = 0) )
     
 
-
-np.save("./Datasets/pfeatures.npy", pfeatures)
-# np.save("./Datasets/afeatures.npy", afeatures)
+saving_path = os.path.join(working_path, 'Datasets', 'pfeatures.npy')
+np.save(saving_path, pfeatures)
+saving_path = os.path.join(working_path, 'Datasets', 'afeatures.npy')
+# np.save(saving_path, afeatures)
 
 print("[INFO] Done!!!")
 

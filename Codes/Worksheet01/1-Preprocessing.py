@@ -2,14 +2,24 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 import matplotlib.pyplot as plt
-import sys
+import sys, os
 from scipy.spatial import distance
 
 
+working_path = os.getcwd()
+
+print(sys.platform)
+print(working_path)
+
+meta_path = os.path.join(working_path, 'Datasets', 'RSScanData', 'perFootDataBarefoot', 'PerFootMetaDataBarefoot.npy')
+
+
+print(meta_path)
 print('[INFO] datalist and metadatalist\n Header of metsdata:\t\n1-"subject ID",\t\n2-"left(0)/right(1) foot classification",\t\n3-"foot index in gait cycle",\t\n4-"partial",\t\n5-" y center-offset",\t\n6-"x center-offset",\t\n7-"time center-offset"')
 PerFootMetaDataBarefoot = np.load(
-    "./Datasets/RSScanData/perFootDataBarefoot/PerFootMetaDataBarefoot.npy"
+    meta_path
 )
+
 PerFootMetaDataBarefoot = pd.DataFrame(
     PerFootMetaDataBarefoot,
     columns=[
@@ -21,8 +31,7 @@ PerFootMetaDataBarefoot = pd.DataFrame(
         "x center-offset",
         "time center-offset",
     ],
-)
-PerFootMetaDataBarefoot = PerFootMetaDataBarefoot.reset_index()
+).reset_index()
 
 CompleteMetaDataBarefoot = PerFootMetaDataBarefoot[
     PerFootMetaDataBarefoot["partial"] == 0
@@ -30,9 +39,11 @@ CompleteMetaDataBarefoot = PerFootMetaDataBarefoot[
 print("[INFO] shape of Meta Data", CompleteMetaDataBarefoot.shape)
 CompleteMetaDataBarefoot = CompleteMetaDataBarefoot.reset_index()
 
+# Dataset_path = r"C:\Users\skazemi1\Documents\Projects\Worksheet\Datasets/RSScanData//AlignedFootDataBarefoot.npz"
+dataset_path = os.path.join(working_path, 'Datasets', 'RSScanData', 'alignedPerFootDataBarefoot', 'AlignedFootDataBarefoot.npz')
 
 AlignedFootDataBarefoot = np.load(
-    "Datasets/RSScanData/alignedPerFootDataBarefoot/AlignedFootDataBarefoot.npz"
+    dataset_path
 )
 files = AlignedFootDataBarefoot.files
 
@@ -43,6 +54,12 @@ for i in CompleteMetaDataBarefoot.index:
     metadatalist.append(CompleteMetaDataBarefoot.iloc[i,:].values[2:])
 print("[INFO] length of data", len(datalist))
 
+saving_path = os.path.join(working_path, 'Datasets', 'datalist.npy')
+np.save(saving_path, datalist)
 
-np.save("./Datasets/datalist.npy", datalist)
-np.save("./Datasets/metadatalist.npy", metadatalist)
+saving_path = os.path.join(working_path, 'Datasets', 'metadatalist.npy')
+np.save(saving_path, metadatalist)
+
+
+
+print("[INFO] Done!!!")

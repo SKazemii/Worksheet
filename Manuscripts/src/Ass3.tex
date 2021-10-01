@@ -1,0 +1,127 @@
+\documentclass[12pt]{article}
+
+\usepackage{Preamble}
+
+\input{acronyms.tex}
+
+\title{Assignment \#3}				% Title
+\author{Saeed Kazemi}				% Author
+\date{\today}						% Date
+
+\makeatletter
+\let\theauthor\@author
+\let\thedate\@date
+\let\thetitle\@title
+\makeatother
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{titlepage}
+	\centering
+    \vspace*{0.4 cm}
+    \includegraphics[scale = 0.5]{figures/unb.jpg}\\[1.0 cm]	% University Logo
+    \textsc{\LARGE \newline\newline University of New Brunswick}\\[1.8 cm]	% University Name
+	\textsc{\Large Time Series Analysis\\(EE 6563)}\\[0.5 cm]				% Course Code
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \thetitle}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.5\textwidth}
+		\begin{flushleft} \large
+			\emph{Professor:}\\
+			Erik Scheme\\
+            Electrical and Computer Engineering\\
+			\end{flushleft}
+			\end{minipage}~
+			\begin{minipage}{0.5\textwidth}
+            
+			\begin{flushright} \large
+			\emph{Author:} \\
+			Saeed Kazemi\\ (3713280)\\
+
+		\end{flushright}
+        
+	\end{minipage}\\[1 cm]
+	
+	
+    \thedate
+    
+    
+    
+	
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%================================================================
+\begin{enumerate}
+
+\item \textbf{Explore the dataset and find additional information from the resources listed below.}
+\begin{enumerate}
+\item \textit{Activity Recognition from a Single  Chest-Mounted Accelerometer:} This dataset was  collected from a wearable accelerometer mounted on the chest from 15 participants performing 7 activities. More details about the dataset can be found in this \href{paper:https://link.springer.com/chapter/10.1007/978-3 -642-21257-4_36}{ source}.
+\item The dataset can be downloaded from: (\href{https://archive.ics.uci.edu/ml/datasets/Activity+Recognition+from+Single+Chest-Mounted+Accelerometer2}{ This link}).
+
+\end{enumerate}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%% Question 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\input{Questions/Ass3-Q2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%% Question 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\input{Questions/Ass3-Q3}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%% Question 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\input{Questions/Ass3-Q4}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%% Question 4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newpage
+%\input{Questions/Ass1-Q4}
+
+
+
+
+
+
+
+
+
+\end{enumerate}
+
+
+
+%\newpage
+%\section*{REFERENCES}
+%\label{sec:sec6}
+%\printbibliography[heading=none]
+
+%\bibliography{references}
+
+
+%\newpage
+%\section*{Appendix (codes)}
+%\subsection*{The script of sun.py}
+
+%\begin{lstlisting}
+%"""https://www.machinelearningplus.com/time-series/time-series-analysis-python/"""
+%import warnings
+
+%\end{lstlisting}
+
+\end{document}

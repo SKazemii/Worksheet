@@ -1,0 +1,69 @@
+ 
+%\documentclass[review]{elsarticle}
+\documentclass[final,twocolumn]{elsarticle}
+%\documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage{xspace}
+\usepackage{project}
+
+\input{acronyms.tex}
+
+\begin{document}
+
+    \input{Questions/B0-titleAbstract}
+
+    \input{Questions/B1-introduction}
+
+    \input{manuscript/src/Questions/B2-Literature Review}
+
+    \input{manuscript/src/Questions/B3-Methodology}
+
+    \input{manuscript/src/Questions/B4-Results}
+
+    \input{manuscript/src/Questions/B5-Discussion Progress}
+
+
+  
+
+%    \newpage
+%    \input{Questions/5-Draft}
+    
+%\section*{\#TODO:}
+%\begin{enumerate}[(1)]
+%\item should normalized
+%\item You want to focus on temporal information, and how it will help.\\
+
+%\item Aren't they both time-series?  Are you just referring to the method that they are stored?   An array of images over time (video) is still a time series.\\ 
+%\item You should show them as separate frames; how can you show the temporal aspects better?\\
+%\item But these are just spatial features plotted over time? What are the proposed temporal features? \\
+%\item Are you only thinking about within cycle information?  What about inter-stride information?  (for example, inter-stride variability is a well known gait feature).\\
+%\item Have you explored relationships between pixels/features over time?
+%\item Does Costilla-Reye's work deserve a bit more discussion?  Is that the current state-of-the-art?
+ 
+
+%\item Focus on what is important; where is the temporal information going to come from?  Time series of spatial information?  Temporal features?  Temporal algorithms applied to spatial features?  Are the features only within stride, or are your features going to be inter-stride?
+
+
+%\item Is this the main benefit? (No)
+
+
+%\end{enumerate}    
+    
+%\nolinenumbers
+\bibliography{references}
+ 
+
+\newpage
+%\pagenumbering{gobble}
+%\begin{landscape}
+%\newgeometry{left=1cm}
+\onecolumn
+\appendix
+
+\section{List of features}
+\label{appendix:1}
+The list of features from several categories used in this project (Table \ref{tab:Features_list}):
+\input{manuscript/src/tables/project/2_features_list.tex}
+
+%\input{manuscript/src/Questions/B6-CNN}
+
+\end{document}

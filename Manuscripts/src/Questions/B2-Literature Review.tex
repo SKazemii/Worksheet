@@ -1,0 +1,27 @@
+\section{Literature Review}
+
+%\subsection{The subsection also appears in the bookmarks}
+DARPA, the Defense Advanced Research Projects Agency of the USA, started to research gait recognition by vision data in the early 2000s \cite{Connor2018BiometricFeatures}. Besides vision data \cite{Chen2006GaitModel}, some studies have instead used accelerometry from smartphones \cite{Mantyjarvi2005IdentifyingAccelerometers}, audio \cite{Geiger2013Gait-basedFeatures}, and underfoot pressures data \cite{Nakajima2000Footprint-BasedRecognition}. 
+
+Addlesee in \cite{Addlesee1997TheFloor} used a new sensor (Active floor) for the first investigations into footprint recognition. This sensor was a square carpet tile maintained at the corners by some load cells and supplied the \gls{grf}. Orr and Abowd \cite{Orr2000TheTracking} extracted ten temporal features from the \gls{grf} curve. 
+
+Moustakidis et al. \cite{Moustakidis2008SubjectSignals} extracted temporal features from the wavelet decomposition of \gls{grf} and then applied a kernel-based support vector machine. These studies have limitations in terms of the small sample sizes used for classification (e.g., 15 \cite{Orr2000TheTracking}, 10 \cite{Moustakidis2008SubjectSignals}, and 15 \cite{MiddletonARecognition}), and moderate classification rates ($CR < 90\%$).
+
+Pataky in \cite{Pataky2012GaitIndividuals} achieved a 99.6\% classification rate in a 104-participant dataset. This result was based on spatial alignment and automated dimensionality reduction. He used a template image that was made in \cite{Pataky2011AnEvaluation}. Pataky named this template the Munster-104 template.
+
+In 2015, Cantoral-Ceballos \cite{Cantoral-Ceballos2015IntelligentEnvironments} introduced an intelligent carpet system. This carpet system (iMAGiMAT) worked based on the deformation of 116 distributed \gls{pof}. So that applying pressure to this system would change the intensity of the transmitted light. Thus the nature of the output of this sensor is time-series data.
+ 
+Costilla-Reyes et al. \cite{Costilla-Reyes2016TemporalSystem} extracted five features directly from raw data of the iMAGiMAT sensor. These features were spatial Average (SA), standard deviation (SD), adjacent mean (AM), cumulative sum (CS), and cumulative product (CP).
+They implemented 14 various machine learning methods for classification. The best result belonged to the Random Forest model with a validation score of $90.84 \pm 2.46\%$. 
+
+ 
+%**Almost all machine learning approaches, except for those based on deep learning, require feature extracting process. These process can cause some information to be loss by expert mistake. On the contrary, deep learning models already incorporate this kind of feature engineering internally, optimizing it and eliminating the need to do it manually. Therefore they are able to extract information from the time series in a faster, more direct, and more complete way.
+Costilla-Reyes et al. in \cite{Costilla-Reyes2018DeepSensors} used an end-to-end convolutional neural network to extract Spatio-temporal features automatically. This technique increased F-score performance to about 97.88\% $\pm$ 1.7\%. They reconstructed pressure images from the time-series data to feed to deep networks. Some papers used other techniques like Continuous Wavelet Transform (CWT) \cite{Wang2021AutomaticNetwork}, Recurrence Plots (RP) \cite{Hatami2017ClassificationNetworks}, and short-time Fourier transform (STFT) \cite{Huang2019ECGNetwork} to produce a 2D representation of time-series. Therefore, time series classification can change to a texture image recognition task.
+
+
+ 
+
+%Barandas et al. in \cite{Barandas2020TSFEL:Library} introduced a Python package entitled Time Series Feature Extraction Library (TSFEL). This Python package could compute more than 60 different features from the time-series data.
+
+
+% The UoM-Gait-Dataset was obtained from iMAGiMAT sensor \cite{Cantoral-Ceballos2015IntelligentEnvironments} (an optical floor sensor). This sensor contains about 160 distributed \gls{pof} that indicate the foot pressure signals over time. Some studies like \cite{Costilla-Reyes2020DeepHealthcare} used this dataset to construct images for their research.

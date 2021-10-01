@@ -1,0 +1,120 @@
+
+\section{Methodology}
+\subsection{Image to Time-Series Encoding}
+The nature of data in the Stepscan dataset is a video-based dataset. There are several methods for converting a tensor (like video) to 2D time-series data. 
+
+Chen et al. in \cite{Chen2006GaitModel} used contour width for defining a one-dimensional signal. They utilized some morphological operations on the background-subtracted silhouette image to extract the outer contour. Afterwards, according to the contour width of each image row, a one-dimensional signal was generated.
+
+Another method could be that the pixel values in each frame are plotted over frame number. By this means, the $H * W$ time-series will be produced for each sample.
+
+In the final method, some spatial features are extracted from each frame (e.g. centroid and maximum pressure in each frame). Afterwards, we track these values over time (next frames). As a result, 3D videos with size $T \times H \times W$ are converted to the four 2D time-series data. Costilla-Reyes et al. utilized this method to combine the output of 160 distributed \acrshort{pof} \cite{Costilla-Reyes2018DeepSensors}.
+
+In this research, the last mentioned method was applied to produce time-series data. Figure \ref{fig:extracted_features} depicts the time series extracted from the Stepscan dataset. %The spatial features extracted in each frame were maximum pressure (figure \ref{fig:extracted_features_max}), the center of pressure (COP) (figures \ref{fig:extracted_features_yCe} and \ref{fig:extracted_features_xCe}), and the average pressure (figure \ref{fig:extracted_features_sum}). 
+The values of maximum pressure (figure \ref{fig:extracted_features_max}), the center of pressure (COP) (figures \ref{fig:extracted_features_yCe} and \ref{fig:extracted_features_xCe}), and the average pressure (figure \ref{fig:extracted_features_sum}) have been tracked over each frame to produce these time series. 
+
+
+%%*********
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=0.9\textwidth]{figures/project/df_max.png}
+         \caption{The maximum pressure in each frame}
+         \label{fig:extracted_features_max}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=0.9\textwidth]{figures/project/df_sum.png}
+         \caption{The average pressure in each frame}
+         \label{fig:extracted_features_sum}
+     \end{subfigure}
+     \vfill
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=0.9\textwidth]{figures/project/df_xCe.png}
+         \caption{The x position in the center of pressure (COP) in each frame}
+         \label{fig:extracted_features_xCe}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=0.9\textwidth]{manuscript/src/figures/project/df_yCe.png}
+         \caption{The y position in the center of pressure (COP) in each frame}
+         \label{fig:extracted_features_yCe}
+     \end{subfigure} 
+        \caption{The time series extracted from the Stepscan dataset based on four spatial features. The horizontal axis indicates the frame number. }
+        \label{fig:extracted_features}
+\end{figure}
+
+
+
+
+
+
+
+\subsection{Conventional Classifiers}
+
+This method consists of feature extraction, feature selection, and classification, as shown in Figure \ref{fig:flow}. In the following, each step would be described. 
+ 
+
+\begin{center}
+	\begin{figure*}[!t]
+    	\centering
+        \begin{minipage}[b]{\textwidth}
+            \includegraphics[width=\textwidth]{manuscript/src/figures/project/flowchart.png}
+        \end{minipage}
+        \hspace{-1em}
+        \caption{Flowchart of implemented method.}
+        \label{fig:flow}
+	\end{figure*}
+\end{center}
+
+
+
+
+
+
+
+\subsubsection{Features Extraction and Selection}
+
+As mentioned before, our goal is to develop a classification model. For this classification task, we use about $32$ features in four categories. These feature sets are explained briefly here, and more details about them can be found in \ref{appendix:1}.
+
+After extracting features from each time series, some low variance and high-correlated features were eliminated. Feature selection causes the complexity of the model to reduce. Ten percent of data were set aside for testing our classifier, and others were divided into 10-fold cross-validation for evaluation and training. 
+
+To have an equally balanced class population in the test set and cross-validation set, the Stratified and StratifiedKFold methods were used. As a result, each set includes approximately the same percentage of samples of each class as the complete set. %for extracting features from each time series, we need to consider a windows that size with over  Each group of features implemented on a size for extracting features from each time series, we need to consider a windows that  
+
+
+\subsubsubsection{Temporal Features;}
+The first set of features extracted was temporal features. In this set, we focused on features that related to the time axis. Features like Entropy, Absolute energy, Centroid, Area under the curve fall into this group. The number of features extracted was 10.
+
+\subsubsubsection{Statistical Features;}
+Statistical information was another feature set that was extracted from the dataset. Min, Max, variance, and standard deviation were some of the statistical features. The total number of features in this group is about 9 for each time series.  
+
+\subsubsubsection{Spectral Features;}
+In the third category, both FFT and wavelet transform were used to extract spectral information from the dataset. Not only the time complexity but also the number of features were more than two other feature sets. 
+Max power spectrum, Maximum frequency, Spectral centroid, Wavelet energy, and FFT mean coefficient were spectral features extracted from the dataset.
+
+\subsubsubsection{\Gls{AR} coefficients;}
+The final set of features in this research was the coefficients of \gls{AR}. In this set, the first-order differencing used to make our data stationary. Then based on significant lag on \gls{PACF}, the order of the model  was selected. This approach extracted two features for each time-series signal.
+
+\subsubsection{Machine learning algorithms}
+
+These time-series features were fed to four different types of machine learning models with tuned hyperparameters. The hyperparameters tuning was implemented by grid search and performance evaluation with 10-StratifiedKFold cross-validation. Table \ref{tab:1_ML} shows these models along with their best-tuned hyper-parameters.
+
+\subsection{Deep Learning Approaches}
+  
+As Figure \ref{fig:flow} shows, two approaches of Deep Neural Network were implemented. In this subsection, these approaches would be reviewed.
+
+
+\subsubsection{Transfer Learning Approach}
+For this project, two famous CNN architectures were implemented, including VGG16 \cite{Simonyan2015VeryRecognition} and MobileNet \cite{Howard2017MobileNets:Applications}. These architectures ensure complete feature extraction by automatically generating features from the raw data. 
+Due to the small size of the dataset, it is impossible to train networks on our dataset. As a result, pre-trained networks were downloaded from http://image-net.org/. Then, the top layer of these networks was replaced with four machine learning algorithms such as Random Forests classifier, LDA, SVM, and KNN. 
+A major limitation of the pre-trained networks is that the data are required to be of the type of image, while our data are time series. As a result, the 2D-scalogram of each time-series signal was calculated and fed to CNNs. 
+
+
+
+\subsubsection{Fully Convolutional Networks}
+Another model which was implemented in this project is a Fully Convolutional Network (FCN) \cite{WangTimeBaseline}. This model is an end-to-end convolutional network with three blocks. Each block has a convolutional layer followed by batch normalization and ReLU activation layer. The output of the third block is averaged over the time dimension, which corresponds to the global average pooling (GAP) layer. Finally, a softmax layer is fully connected to the GAP layer’s output to produce the final label.
+
+

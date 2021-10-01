@@ -17,6 +17,28 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from MLPackage import util as perf
 
 
+
+working_path = os.getcwd()
+
+
+
+Results_DF = pd.read_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
+FXR_L_DF = pd.read_excel(os.path.join(working_path, 'results', 'FXR_L_DF.xlsx'))
+FXR_R_DF = pd.read_excel(os.path.join(working_path, 'results', 'FXR_R_DF.xlsx'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+sys.exit()
 test_ratio = [0.2, 0.35, 0.5]
 persentage = [1.0, 0.95]
 mode = ["corr", "dist"]

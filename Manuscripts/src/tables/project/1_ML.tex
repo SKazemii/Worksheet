@@ -1,0 +1,45 @@
+{\small
+\begin{tabular}{lllr}
+\toprule
+Classifier & $Features^{*}$ & Hyper-parameter(s) & Accuraccy \\
+\midrule
+LDA & All & {'n\_components': 10 }& 69.28\% \\
+kNN & All & {'n\_neighbors': 9, 'metric': manhattan,'weights': distance }& 42.85\% \\
+SVM & All & {'kernel': rbf, 'decision\_function\_shape': ovr, 'C': 1000, 'gamma': 0.0001 }& 60.00\%                 \\
+$RFC^{**}$ & All & {'criterion': entropy, 'max\_depth': 11 }& 28.57\% \\ \hline
+
+
+
+LDA & temporal & {'n\_components': 10 }& 47.43\%   \\
+kNN & temporal & {'n\_neighbors': 21, 'metric': manhattan,'weights': distance}& 34.29\%    \\
+SVM & temporal & {'kernel': rbf, 'decision\_function\_shape': ovr, 'C': 10, 'gamma': 0.01}& 46.29\%   \\
+RFC & temporal & {'criterion': entropy, 'max\_depth': 9 }& 28.57\%     \\ \hline
+
+
+
+
+LDA & statistical & {'n\_components': 10 }& 48.00\% \\
+kNN & statistical & {'n\_neighbors': 15, 'metric': manhattan,'weights': distance }& 36.57\%               \\
+SVM & statistical & {'kernel': linear, 'decision\_function\_shape': ovr, 'C': 10, 'gamma': 1 }& 43.43\% \\
+RFC & statistical & {'criterion': gini, 'max\_depth': 23 }& 26.86\%     \\ \hline
+
+
+ 
+ 
+ 
+ LDA & spectral & {'n\_components': 10 }& 57.71\%               \\
+kNN & spectral & {'n\_neighbors': 7, 'metric': manhattan,'weights': distance }& 39.43\%               \\
+SVM & spectral & {'kernel': linear, 'decision\_function\_shape': ovr, 'C': 0.1, 'gamma': 1 }& 48.57\%                 \\
+RFC & spectral & {'criterion': entropy, 'max\_depth': 7 }& 32.00\%     \\ \hline
+
+
+ 
+LDA & AR & {'n\_components': 1 }& 4.57\%               \\
+kNN & AR & {'n\_neighbors': 21, 'metric': manhattan,'weights': distance }& 2.86\%               \\
+SVM & AR & {'kernel': linear, 'decision\_function\_shape': ovr, 'C': 1000, 'gamma': 1 }& 8.00\%  \\
+RFC & AR & {'criterion': gini, 'max\_depth': 19 }& 1.14\%     \\ 
+\bottomrule
+\multicolumn{3}{l}{ *   All features were standardized.}\\
+\multicolumn{3}{l}{** Random Forest Classifier}
+\end{tabular}
+}

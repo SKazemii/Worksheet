@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.fromnumeric import shape
 import pandas as pd
 from pandas.core.frame import DataFrame
 from scipy import ndimage
@@ -14,28 +15,50 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from MLPackage import util as perf
 
-test_ratio = 0.2
-persentage = 1.0
-mode = "corr"#corr dist
-model_type = "min" #min median average
+test_ratios = [0.2, 0.35, 0.5]
+persentages = [1.0, 0.95]
+modes = ["corr", "dist"]
+model_types = ["min", "median", "average"]
 THRESHOLDs = np.linspace(0, 1, 100)
-score = None#"B"
 score = "A"#"B"
-normilizing = "z-score"#"minmax"
+normilizings = ["z-score", "minmax", "None"]
 
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
-pfeatures = np.load("/Users/saeedkazemi/Documents/Python/Worksheet/Datasets/pfeatures.npy")
+
+
+cols = ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)]
+FXR_L_DF = pd.DataFrame(np.empty((1080, 200)), columns=cols)
+
+cols = ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+FXR_R_DF = pd.DataFrame(np.empty((1080, 200)), columns=cols)
+
+
+cols = ["Mode", "Model Type", "Test Size", "Normalizition", "Features Set", "PCA",
+"Mean Accuracy Left", "Mean EER Left", "Mean Accuracy Right", "Mean EER Right",
+"Min Accuracy Left", "Min EER Left", "Min Accuracy Right", "Min EER Right",
+"Max Accuracy Left", "Max EER Left", "Max Accuracy Right", "Max EER Right",
+"Median Accuracy Left", "Median EER Left", "Median Accuracy Right", "Median EER Right"]
+
+Results_DF = pd.DataFrame(columns=cols)
+working_path = os.getcwd()
+
+
+print(sys.platform)
+print(working_path)
+
+feature_path = os.path.join(working_path, 'Datasets', 'pfeatures.npy')
+pfeatures = np.load(feature_path)
 # afeatures = np.load("./Datasets/afeatures.npy")
 
 
 # features = np.concatenate((pfeatures[:, :-2],afeatures), axis = -1)
 features = pfeatures
 
+index =0
 
-
-for persentage in [1.0, 0.95]:
-    for normilizing in ["minmax",  "None" ]:#"z-score",
+for persentage in persentages:
+    for normilizing in normilizings:
         if normilizing == "minmax":
             scaling = preprocessing.MinMaxScaler()
             Scaled_data = scaling.fit_transform(features[:, :-2])
@@ -68,6 +91,7 @@ for persentage in [1.0, 0.95]:
         ###############################
         # pMDIST, pRDIST, pTOTEX, pMVELO, pRANGE, [pAREACC], [pAREACE], pMFREQ, pFDPD, [pFDCC], [pFDCE], [pAREASW]
         for x in range(-3,features.shape[1]-2,3):
+        # for x in range(-3,5,3):
             if x == -3:
                 DF_features = DF_features_all.copy()
                 feat_name = "All"
@@ -87,12 +111,10 @@ for persentage in [1.0, 0.95]:
 
 
 
-            for mode in ["corr", "dist" ]:
-                for model_type in ["average", "median", "min"]:
-                    for test_ratio in [0.2, 0.35, 0.5]:
-                        # if test_ratio==0.35:
-                        #     break
-                        #     continue
+            for mode in modes:
+                for model_type in model_types:
+                    for test_ratio in test_ratios:
+
                         
 
                         EER_L = list(); FAR_L = list(); FRR_L = list()
@@ -104,28 +126,33 @@ for persentage in [1.0, 0.95]:
 
 
                         folder = mode + "_" + model_type + "_" + str(persentage) + "_" + str(test_ratio) + "_" + normilizing + "_" + feat_name
-                        os.system("mkdir " + "/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder)
+
+                        folder_path = os.path.join(working_path, 'results', folder)
+
+                        os.system("mkdir " + folder_path )
 
                         print(folder)
 
                         # sys.exit()
                         for subject in subjects:
+                            if (subject % 86) == 0:
+                                continue
                             
-                            if (subject % 3) == 0:
+                            if (subject % 5) == 0:
                                 print("[INFO] subject number: ", subject)
                                 break
                             
                             for idx, direction in enumerate(["left_0", "right_1"]):
                                 DF_side = DF_features_PCA[DF_features_PCA["left(0)/right(1)"] == idx]
 
-                        
-                                path = "/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/subject_" + str(int(subject)) + "/" + direction + "/"
+                                path = os.path.join(folder_path, "subject_" + str(int(subject)), direction)
+                                # path = "/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/subject_" + str(int(subject)) + "/" + direction + "/"
                                 if not os.path.exists(path):
-                                    os.chdir("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder)
+                                    os.chdir(folder_path)
 
                                     os.system("mkdir " + "subject_" + str(int(subject)))
-                                    os.system("mkdir " + "subject_" + str(int(subject)) + "/" + direction)
-                                    os.system("touch subject_" + str(int(subject)) + "/" + direction + "/file.txt")
+                                    os.system("mkdir " + os.path.join("subject_" + str(int(subject)), direction))
+                                    # os.system("touch subject_" + str(int(subject)) + "/" + direction + "/file.txt")
 
                             
                                 DF_positive_samples = DF_side[DF_side["subject ID"] == subject]
@@ -142,8 +169,8 @@ for persentage in [1.0, 0.95]:
                                 distModel1, distModel2 = perf.compute_model(DF_positive_samples_train.iloc[:, :-2].values, DF_negative_samples_train.iloc[:, :-2].values, mode = mode, score = score)
                                 Model_client, Model_imposter = perf.model(distModel1, distModel2, model_type = model_type, score = score )
                                 
-                                np.save(path + "distModel1.npy", distModel1)
-                                np.save(path + "distModel2.npy", distModel2)
+                                # np.save(os.path.join(path, "distModel1.npy"), distModel1)
+                                # np.save(os.path.join(path, "distModel2.npy"), distModel2)
 
                                 
 
@@ -220,51 +247,79 @@ for persentage in [1.0, 0.95]:
                                     FRR_R.append(FRR_temp)
                                     ACC_R.append([subject, idx, temp, DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
-
-
-
-
-
                         plt.close()
-                        os.chdir("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder)
+
+                        os.chdir(folder_path)
                         os.system("mkdir " + "NPY")
 
 
                         far = (np.mean(FAR_L, axis=0))
                         frr = (np.mean(FRR_L, axis=0))
-                        perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/L_" + folder)
+                        
+                        # perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/L_" + folder)
 
-                        # print(np.mean(EER_L, axis=0))
-                        # print(np.min(EER_L, axis=0))
-                        # print(np.max(EER_L, axis=0))
 
                         far = (np.mean(FAR_R, axis=0))
                         frr = (np.mean(FRR_R, axis=0))
-                        perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/R_" + folder)
-
-                        # print(np.mean(EER_R, axis=0))
-                        # print(np.min(EER_R, axis=0))
-                        # print(np.max(EER_R, axis=0))
-
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY/EER_R.npy", EER_R)
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY/FAR_R.npy", FAR_R)
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY/FRR_R.npy", FRR_R)
+                        # perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/R_" + folder)
 
 
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY/EER_L.npy", EER_L)
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY/FAR_L.npy", FAR_L)
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY/FRR_L.npy", FRR_L)
+                        os.path.join(folder_path, 'NPY', 'EER_R.npy')
+                        np.save(os.path.join(folder_path, 'NPY', 'EER_R.npy'), EER_R)
+                        np.save(os.path.join(folder_path, 'NPY', 'FAR_R.npy'), FAR_R)
+                        np.save(os.path.join(folder_path, 'NPY', 'FRR_R.npy'), FRR_R)
 
 
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY//ACC_L.npy", ACC_L)
-                        # print(np.mean(ACC_L, axis=0))
-                        # print(np.min(ACC_L, axis=0))
-                        # print(np.max(ACC_L, axis=0))
+                        np.save(os.path.join(folder_path, 'NPY', 'EER_L.npy'), EER_L)
+                        np.save(os.path.join(folder_path, 'NPY', 'FAR_L.npy'), FAR_L)
+                        np.save(os.path.join(folder_path, 'NPY', 'FRR_L.npy'), FRR_L)
 
-                        np.save("/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/NPY/ACC_R.npy", ACC_R)
-                        # print(np.mean(ACC_R, axis=0))
-                        # print(np.min(ACC_R, axis=0))
-                        # print(np.max(ACC_R, axis=0))
 
-                        print("[INFO] Done!!!")
+                        np.save(os.path.join(folder_path, 'NPY', 'ACC_L.npy'), ACC_L)
+                        np.save(os.path.join(folder_path, 'NPY', 'ACC_R.npy'), ACC_R)
 
+
+
+                        
+                        A = [[mode, model_type, test_ratio, normilizing, feat_name, persentage, 
+                        np.mean( np.array(ACC_L)[:,2] ), 
+                        np.mean( np.array(EER_L)[:,0] ),
+                        np.mean( np.array(ACC_R)[:,2] ),
+                        np.mean( np.array(EER_R)[:,0] ),
+
+                        np.min( np.array(ACC_L)[:,2] ),
+                        np.min( np.array(EER_L)[:,0] ),
+                        np.min( np.array(ACC_R)[:,2] ),
+                        np.min( np.array(EER_R)[:,0] ),
+
+                        np.max( np.array(ACC_L)[:,2] ),
+                        np.max( np.array(EER_L)[:,0] ),
+                        np.max( np.array(ACC_R)[:,2] ),
+                        np.max( np.array(EER_R)[:,0] ),
+
+                        np.median( np.array(ACC_L)[:,2] ),
+                        np.median( np.array(EER_L)[:,0] ),
+                        np.median( np.array(ACC_R)[:,2] ),
+                        np.median( np.array(EER_R)[:,0] )]]
+                        z = pd.DataFrame(A, columns = cols)
+
+                        Results_DF = Results_DF.append(z)
+
+                        
+                        FXR_L_DF.loc[index] = np.concatenate((np.mean(np.array(FAR_L), axis=0), np.mean(np.array(FRR_L), axis=0)), axis=0)
+                        FXR_R_DF.loc[index] = np.concatenate((np.mean(np.array(FAR_R), axis=0), np.mean(np.array(FRR_R), axis=0)), axis=0)
+
+                        index = index + 1
+
+
+
+
+
+print(Results_DF.head(  ))                       
+
+Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
+FXR_L_DF.to_excel(os.path.join(working_path, 'results', 'FXR_L_DF.xlsx'))
+FXR_R_DF.to_excel(os.path.join(working_path, 'results', 'FXR_R_DF.xlsx'))
+
+
+print("[INFO] Done!!!")
