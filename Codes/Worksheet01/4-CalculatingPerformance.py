@@ -5,6 +5,8 @@ from pandas.core.frame import DataFrame
 from scipy import ndimage
 import matplotlib.pyplot as plt
 import sys, os
+from pathlib import Path as Pathlb
+
 from scipy.spatial import distance
 
 from sklearn import preprocessing
@@ -129,39 +131,41 @@ for persentage in persentages:
 
                         folder_path = os.path.join(working_path, 'results', folder)
 
-                        os.system("mkdir " + folder_path )
+                        Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
 
-                        print(folder)
+                        # os.system("mkdir " + folder_path )
+
+                        print("[INFO] Working Directory:  ", folder)
 
                         # sys.exit()
                         for subject in subjects:
                             if (subject % 86) == 0:
                                 continue
                             
-                            if (subject % 5) == 0:
-                                print("[INFO] subject number: ", subject)
+                            if (subject % 10) == 0:
+                                print("[INFO] --------------- Subject Number: ", subject)
                                 break
                             
                             for idx, direction in enumerate(["left_0", "right_1"]):
                                 DF_side = DF_features_PCA[DF_features_PCA["left(0)/right(1)"] == idx]
 
-                                path = os.path.join(folder_path, "subject_" + str(int(subject)), direction)
+                                # path = os.path.join(folder_path, "subject_" + str(int(subject)), direction)
                                 # path = "/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/subject_" + str(int(subject)) + "/" + direction + "/"
-                                if not os.path.exists(path):
-                                    os.chdir(folder_path)
+                                # if not os.path.exists(path):
+                                #     os.chdir(folder_path)
 
-                                    os.system("mkdir " + "subject_" + str(int(subject)))
-                                    os.system("mkdir " + os.path.join("subject_" + str(int(subject)), direction))
+                                #     os.system("mkdir " + "subject_" + str(int(subject)))
+                                #     os.system("mkdir " + os.path.join("subject_" + str(int(subject)), direction))
                                     # os.system("touch subject_" + str(int(subject)) + "/" + direction + "/file.txt")
 
                             
                                 DF_positive_samples = DF_side[DF_side["subject ID"] == subject]
                                 DF_negative_samples = DF_side[DF_side["subject ID"] != subject]
 
-                                DF_positive_samples_test = DF_positive_samples.sample(frac = test_ratio, replace = False, random_state = 2)#frac =0.50
+                                DF_positive_samples_test = DF_positive_samples.sample(frac = test_ratio, replace = False, random_state = 2)
                                 DF_positive_samples_train = DF_positive_samples.drop(DF_positive_samples_test.index)
 
-                                DF_negative_samples_test = DF_negative_samples.sample(frac = test_ratio, replace = False, random_state = 2)#frac =0.50
+                                DF_negative_samples_test = DF_negative_samples.sample(frac = test_ratio, replace = False, random_state = 2)
                                 DF_negative_samples_train = DF_negative_samples.drop(DF_negative_samples_test.index)
 
 
@@ -214,7 +218,7 @@ for persentage in persentages:
                                 # sys.exit()
 
 
-                                perf.ROC_plot_v2(FAR_temp, FRR_temp, THRESHOLDs, path + model_type)
+                                # perf.ROC_plot_v2(FAR_temp, FRR_temp, THRESHOLDs, path + model_type)
                                 EER_temp = (perf.compute_eer(FAR_temp, FRR_temp))
 
 
@@ -230,7 +234,7 @@ for persentage in persentages:
                                 
                                 y_pred = np.zeros((Model_test.shape))
                                 y_pred[Model_test > THRESHOLDs[t_idx]] = 1
-                                temp = (accuracy_score(label_test, y_pred)*100)
+                                acc = (accuracy_score(label_test, y_pred)*100)
                                 # print(THRESHOLDs[t_idx])
 
 
@@ -238,45 +242,45 @@ for persentage in persentages:
                                     EER_L.append(EER_temp)
                                     FAR_L.append(FAR_temp)
                                     FRR_L.append(FRR_temp)
-                                    ACC_L.append([subject, idx, temp, DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                                    ACC_L.append([subject, idx, acc, DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
                                     
                                 elif direction == "right_1":
                                     EER_R.append(EER_temp)
                                     FAR_R.append(FAR_temp)
                                     FRR_R.append(FRR_temp)
-                                    ACC_R.append([subject, idx, temp, DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                                    ACC_R.append([subject, idx, acc, DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
-                        plt.close()
+                        # plt.close()
 
-                        os.chdir(folder_path)
-                        os.system("mkdir " + "NPY")
+                        # os.chdir(folder_path)
+                        # os.system("mkdir " + "NPY")
 
 
-                        far = (np.mean(FAR_L, axis=0))
-                        frr = (np.mean(FRR_L, axis=0))
+                        # far = (np.mean(FAR_L, axis=0))
+                        # frr = (np.mean(FRR_L, axis=0))
                         
-                        # perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/L_" + folder)
+                        # # perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/L_" + folder)
 
 
-                        far = (np.mean(FAR_R, axis=0))
-                        frr = (np.mean(FRR_R, axis=0))
+                        # far = (np.mean(FAR_R, axis=0))
+                        # frr = (np.mean(FRR_R, axis=0))
                         # perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/R_" + folder)
 
 
-                        os.path.join(folder_path, 'NPY', 'EER_R.npy')
-                        np.save(os.path.join(folder_path, 'NPY', 'EER_R.npy'), EER_R)
-                        np.save(os.path.join(folder_path, 'NPY', 'FAR_R.npy'), FAR_R)
-                        np.save(os.path.join(folder_path, 'NPY', 'FRR_R.npy'), FRR_R)
+                        # os.path.join(folder_path, 'EER_R.npy')
+                        np.save(os.path.join(folder_path,   'EER_R.npy'), EER_R)
+                        np.save(os.path.join(folder_path,   'FAR_R.npy'), FAR_R)
+                        np.save(os.path.join(folder_path,   'FRR_R.npy'), FRR_R)
 
 
-                        np.save(os.path.join(folder_path, 'NPY', 'EER_L.npy'), EER_L)
-                        np.save(os.path.join(folder_path, 'NPY', 'FAR_L.npy'), FAR_L)
-                        np.save(os.path.join(folder_path, 'NPY', 'FRR_L.npy'), FRR_L)
+                        np.save(os.path.join(folder_path,   'EER_L.npy'), EER_L)
+                        np.save(os.path.join(folder_path,   'FAR_L.npy'), FAR_L)
+                        np.save(os.path.join(folder_path,   'FRR_L.npy'), FRR_L)
 
 
-                        np.save(os.path.join(folder_path, 'NPY', 'ACC_L.npy'), ACC_L)
-                        np.save(os.path.join(folder_path, 'NPY', 'ACC_R.npy'), ACC_R)
+                        np.save(os.path.join(folder_path,   'ACC_L.npy'), ACC_L)
+                        np.save(os.path.join(folder_path,   'ACC_R.npy'), ACC_R)
 
 
 
@@ -311,15 +315,9 @@ for persentage in persentages:
 
                         index = index + 1
 
-
-
-
+                        Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
+                        FXR_L_DF.to_excel(os.path.join(working_path, 'results', 'FXR_L_DF.xlsx'))
+                        FXR_R_DF.to_excel(os.path.join(working_path, 'results', 'FXR_R_DF.xlsx'))
 
 print(Results_DF.head(  ))                       
-
-Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
-FXR_L_DF.to_excel(os.path.join(working_path, 'results', 'FXR_L_DF.xlsx'))
-FXR_R_DF.to_excel(os.path.join(working_path, 'results', 'FXR_R_DF.xlsx'))
-
-
 print("[INFO] Done!!!")

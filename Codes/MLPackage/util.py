@@ -54,21 +54,16 @@ def model(distModel1, distModel2, model_type = "average", score = None ):
             Model_imposter = np.expand_dims(Model_imposter, -1)
                     
         elif model_type == "median":
-            # temp = np.ma.masked_where(distModel1 == 0, distModel1)
-            # Model_client = np.ma.median(temp, axis = 0).filled(0)
-            Model_client = np.median(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
+            Model_client = np.median(distModel1, axis = 0)
             Model_client = np.expand_dims(Model_client,-1)
-            # print(Model_client.shape)
             
 
             Model_imposter = np.median(distModel2, axis = 0)
             Model_imposter = np.expand_dims(Model_imposter, -1)
-            # print(Model_imposter.shape)
-            # sys.exit()
+
     if score != None:
         if model_type == "average":
             Model_client = np.mean(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
-            # Model_client = (np.sum(distModel1, axis = 0))/(distModel1.shape[1]-1)
             Model_client = np.expand_dims(Model_client,-1)
             
             Model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
@@ -83,17 +78,12 @@ def model(distModel1, distModel2, model_type = "average", score = None ):
             Model_imposter = np.expand_dims(Model_imposter, -1)
                     
         elif model_type == "median":
-            # temp = np.ma.masked_where(distModel1 == 1, distModel1)
-            # Model_client = np.ma.median(temp, axis = 1).filled(0)
-            Model_client = np.median(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
-            Model_client = np.expand_dims(Model_client,-1)
-            # print(Model_client.shape)
-            
+            Model_client = np.median(distModel1, axis = 0)
+            Model_client = np.expand_dims(Model_client,-1)            
 
             Model_imposter = np.median(distModel2, axis = 0)
             Model_imposter = np.expand_dims(Model_imposter, -1)
-            # print(Model_imposter.shape)
-            # sys.exit()       
+    
 
     return Model_client, Model_imposter
 
@@ -157,6 +147,7 @@ def ROC_plot_v2(FPR, FNR,THRESHOLDs, path):
     plt.legend(loc="upper right")
     plt.xlabel('Threshold')
     plt.savefig(path2)
+    plt.close('all')
 
 
 def performance(model1, model2, path):
