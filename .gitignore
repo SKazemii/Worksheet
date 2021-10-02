@@ -132,7 +132,6 @@ dmypy.json
 *.npz
 *.npy
 
-*.png
 file.txt
 *.h5
 *.mat
