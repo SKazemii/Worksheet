@@ -142,9 +142,9 @@ for persentage in persentages:
                             if (subject % 86) == 0:
                                 continue
                             
-                            if (subject % 10) == 0:
+                            if (subject % 30) == 0:
                                 print("[INFO] --------------- Subject Number: ", subject)
-                                break
+                                # break
                             
                             for idx, direction in enumerate(["left_0", "right_1"]):
                                 DF_side = DF_features_PCA[DF_features_PCA["left(0)/right(1)"] == idx]

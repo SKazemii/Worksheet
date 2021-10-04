@@ -57,8 +57,11 @@ feature_names = ["All", "MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "
 Results_DF_all = Results_DF[   Results_DF["Features_Set"] == "All"   ]
 
 npy = np.empty((4,4))
-for mode in Modes:
-    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Mode"] == mode   ]
+for idx, temp in enumerate(Modes):
+    a = ["Correlation", "Euclidean Distance"]
+    
+
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Mode"] == temp   ]
 
     npy[0,0] = Results_DF_all_mode["Mean_Accuracy_Left"].mean()  
     npy[0,1] = Results_DF_all_mode["Mean_Accuracy_Right"].mean()  
@@ -90,7 +93,7 @@ for mode in Modes:
     cols = ["FRR_L_" + str(i) for i in range(100)]
     FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", mode + "_L")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
     perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
 
 
@@ -102,18 +105,20 @@ for mode in Modes:
     cols = ["FRR_R_" + str(i) for i in range(100)]
     FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", mode + "_R")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
     perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
 
 
 
-    with open(os.path.join("Manuscripts", "src", "tables", mode + ".tex"), "w") as tf:
-        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
 
     
-for temp in model_types:
+for idx, temp in enumerate(model_types):
+    a = ["Minimum", "Median", "Average"]
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Model_Type"] == temp   ]
 
+   
     npy[0,0] = Results_DF_all_mode["Mean_Accuracy_Left"].mean()  
     npy[0,1] = Results_DF_all_mode["Mean_Accuracy_Right"].mean()  
     npy[0,2] = Results_DF_all_mode["Mean_EER_Left"].mean()  
@@ -144,7 +149,7 @@ for temp in model_types:
     cols = ["FRR_L_" + str(i) for i in range(100)]
     FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", temp + "_L")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
     perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
 
 
@@ -156,16 +161,20 @@ for temp in model_types:
     cols = ["FRR_R_" + str(i) for i in range(100)]
     FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", temp + "_R")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
     perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
 
 
 
-    with open(os.path.join("Manuscripts", "src", "tables", temp + ".tex"), "w") as tf:
-        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
 
 
-for temp in normilizings:
+    
+for idx, temp in enumerate(normilizings):
+    a = ["Z-score algorithm", "MinMax algorithm", "None "]
+
+
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Normalizition"] == temp   ]
 
     npy[0,0] = Results_DF_all_mode["Mean_Accuracy_Left"].mean()  
@@ -198,7 +207,7 @@ for temp in normilizings:
     cols = ["FRR_L_" + str(i) for i in range(100)]
     FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", temp + "_L")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
     perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
 
 
@@ -210,16 +219,18 @@ for temp in normilizings:
     cols = ["FRR_R_" + str(i) for i in range(100)]
     FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", temp + "_R")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
     perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
 
 
 
-    with open(os.path.join("Manuscripts", "src", "tables", temp + ".tex"), "w") as tf:
-        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
 
 
-for temp in test_ratios:
+for idx, temp in enumerate(test_ratios):
+    a = ["20%", "35%", "50% "]
+  
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Test_Size"] == temp   ]
 
     npy[0,0] = Results_DF_all_mode["Mean_Accuracy_Left"].mean()  
@@ -252,7 +263,7 @@ for temp in test_ratios:
     cols = ["FRR_L_" + str(i) for i in range(100)]
     FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", str(temp) + "_L")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
     perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
 
 
@@ -264,16 +275,18 @@ for temp in test_ratios:
     cols = ["FRR_R_" + str(i) for i in range(100)]
     FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", str(temp) + "_R")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
     perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
 
 
 
-    with open(os.path.join("Manuscripts", "src", "tables", str(temp) + ".tex"), "w") as tf:
-        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
 
 
-for temp in persentages:
+for idx, temp in enumerate(persentages):
+    a = ["All Data", "Keeping 95%"]
+  
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["PCA"] == temp   ]
 
     npy[0,0] = Results_DF_all_mode["Mean_Accuracy_Left"].mean()  
@@ -306,7 +319,7 @@ for temp in persentages:
     cols = ["FRR_L_" + str(i) for i in range(100)]
     FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", str(temp) + "_L")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
     perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
 
 
@@ -318,16 +331,17 @@ for temp in persentages:
     cols = ["FRR_R_" + str(i) for i in range(100)]
     FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", str(temp) + "_R")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
     perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
 
 
 
-    with open(os.path.join("Manuscripts", "src", "tables", str(temp) + ".tex"), "w") as tf:
-        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
 
 
-for temp in feature_names:
+for idx, temp in enumerate(feature_names):
+    a = ["All features", "Only MDIST features", "Only RDIST features", "Only TOTEX features", "Only MVELO features", "Only RANGE features", "Only AREAXX features", "Only MFREQ features", "Only FDPD features", "Only FDCX features"]    
     Results_DF_temp = Results_DF[   Results_DF["Features_Set"] == temp   ]
 
     npy[0,0] =  Results_DF_temp["Mean_Accuracy_Left"].mean()  
@@ -360,7 +374,7 @@ for temp in feature_names:
     cols = ["FRR_L_" + str(i) for i in range(100)]
     FRR_L =  Results_DF_temp.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", temp + "_L")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
     perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
 
 
@@ -372,11 +386,11 @@ for temp in feature_names:
     cols = ["FRR_R_" + str(i) for i in range(100)]
     FRR_R =  Results_DF_temp.loc[:, cols].mean().values
 
-    PATH = os.path.join("Manuscripts", "src", "figures", temp + "_R")
+    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
     perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
 
 
 
-    with open(os.path.join("Manuscripts", "src", "tables", temp + ".tex"), "w") as tf:
-        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
 
