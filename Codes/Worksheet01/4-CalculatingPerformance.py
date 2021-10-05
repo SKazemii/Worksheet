@@ -18,36 +18,28 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from MLPackage import util as perf
 
 test_ratios = [0.2, 0.35, 0.5]
-persentages = [1.0]#, 0.95]
-modes = ["corr"]#, "dist"]
+persentages = [1.0, 0.95]
+modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
 THRESHOLDs = np.linspace(0, 1, 100)
 score = "A"#"B"
-normilizings = ["None"]#, "z-score", "minmax"]
+normilizings = ["None", "z-score", "minmax"]
 
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
-
-
-cols = ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)]
-FXR_L_DF = pd.DataFrame(np.empty((1080, 200)), columns=cols)
-
-cols = ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
-FXR_R_DF = pd.DataFrame(np.empty((1080, 200)), columns=cols)
 
 
 cols = ["Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA",
 "Mean_Accuracy_Left", "Mean_EER_Left", "Mean_Accuracy_Right", "Mean_EER_Right",
 "Min_Accuracy_Left", "Min_EER_Left", "Min_Accuracy_Right", "Min_EER_Right",
 "Max_Accuracy_Left", "Max_EER_Left", "Max_Accuracy_Right", "Max_EER_Right",
-"Median_Accuracy_Left", "Median_EER_Left", "Median_Accuracy_Right", "Median_EER_Right"]
+"Median_Accuracy_Left", "Median_EER_Left", "Median_Accuracy_Right", "Median_EER_Right"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
 
 Results_DF = pd.DataFrame(columns=cols)
 working_path = os.getcwd()
 
 
 print(sys.platform)
-print(working_path)
 
 feature_path = os.path.join(working_path, 'Datasets', 'pfeatures.npy')
 pfeatures = np.load(feature_path)
@@ -81,7 +73,6 @@ for persentage in persentages:
 
 
         print(DF_features_all.head())
-        # sys.exit()
         DF_features_all = DF_features_all.fillna(0)
 
         subjects = (DF_features_all["subject ID"].unique())
@@ -99,12 +90,10 @@ for persentage in persentages:
                 feat_name = "All"
             else:
                 DF_features = DF_features_all.copy()
-                # print(features_name[int(x/3)])
                 DF_features.drop(DF_features.columns[[range(x+3,features.shape[1]-2)]], axis = 1, inplace = True)
                 DF_features.drop(DF_features.columns[[range(0,x)]], axis = 1, inplace = True)
                 feat_name = feature_names[int(x/3)]
-            # print(DF_features.head())
-            # sys.exit()
+
 
             if persentage != 1.0:
                 DF_features_PCA = perf.PCA_func(DF_features, persentage = persentage )
@@ -133,18 +122,16 @@ for persentage in persentages:
 
                         Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
 
-                        # os.system("mkdir " + folder_path )
 
                         print("[INFO] Working Directory:  ", folder)
 
-                        # sys.exit()
                         for subject in subjects:
                             if (subject % 86) == 0:
                                 continue
                             
                             if (subject % 30) == 0:
                                 print("[INFO] --------------- Subject Number: ", subject)
-                                break
+                                # break
                             
                             for idx, direction in enumerate(["left_0", "right_1"]):
                                 DF_side = DF_features_PCA[DF_features_PCA["left(0)/right(1)"] == idx]
@@ -165,12 +152,7 @@ for persentage in persentages:
                                 distModel1, distModel2 = perf.compute_model(DF_positive_samples_train.iloc[:, :-2].values, DF_negative_samples_train.iloc[:, :-2].values, mode = mode, score = score)
                                 Model_client, Model_imposter = perf.model(distModel1, distModel2, model_type = model_type, score = score )
                                 
-                                # np.save(os.path.join(path, "distModel1.npy"), distModel1)
-                                # np.save(os.path.join(path, "distModel2.npy"), distModel2)
 
-                                
-
-                                
 
                                 FRR_temp = list()
                                 FAR_temp = list()
@@ -202,15 +184,7 @@ for persentage in persentages:
 
 
 
-                                # print(distModel1)
-                                # print(Model_client)
-                                # print(FRR_temp)
-                                # print(THRESHOLDs)
 
-                                # sys.exit()
-
-
-                                # perf.ROC_plot_v2(FAR_temp, FRR_temp, THRESHOLDs, path + model_type)
                                 EER_temp = (perf.compute_eer(FAR_temp, FRR_temp))
 
 
@@ -227,7 +201,6 @@ for persentage in persentages:
                                 y_pred = np.zeros((Model_test.shape))
                                 y_pred[Model_test > THRESHOLDs[t_idx]] = 1
                                 acc = (accuracy_score(label_test, y_pred)*100)
-                                # print(THRESHOLDs[t_idx])
 
 
                                 if direction == "left_0":
@@ -243,24 +216,7 @@ for persentage in persentages:
                                     FRR_R.append(FRR_temp)
                                     ACC_R.append([subject, idx, acc, DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
-                        # plt.close()
 
-                        # os.chdir(folder_path)
-                        # os.system("mkdir " + "NPY")
-
-
-                        # far = (np.mean(FAR_L, axis=0))
-                        # frr = (np.mean(FRR_L, axis=0))
-                        
-                        # # perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/L_" + folder)
-
-
-                        # far = (np.mean(FAR_R, axis=0))
-                        # frr = (np.mean(FRR_R, axis=0))
-                        # perf.ROC_plot_v2(far, frr, THRESHOLDs, "./NPY/R_" + folder)
-
-
-                        # os.path.join(folder_path, 'EER_R.npy')
                         np.save(os.path.join(folder_path,   'EER_R.npy'), EER_R)
                         np.save(os.path.join(folder_path,   'FAR_R.npy'), FAR_R)
                         np.save(os.path.join(folder_path,   'FRR_R.npy'), FRR_R)
@@ -296,20 +252,20 @@ for persentage in persentages:
                         np.median( np.array(ACC_L)[:,2] ),
                         np.median( np.array(EER_L)[:,0] ),
                         np.median( np.array(ACC_R)[:,2] ),
-                        np.median( np.array(EER_R)[:,0] )]]
-                        z = pd.DataFrame(A, columns = cols)
+                        np.median( np.array(EER_R)[:,0] )] +
+                        np.concatenate((np.mean(np.array(FAR_L), axis=0), np.mean(np.array(FRR_L), axis=0)), axis=0).tolist()+
+                        np.concatenate((np.mean(np.array(FAR_R), axis=0), np.mean(np.array(FRR_R), axis=0)), axis=0).tolist()]
+
+
+
+                        z = pd.DataFrame(A, columns = cols )
 
                         Results_DF = Results_DF.append(z)
-
-                        
-                        FXR_L_DF.loc[index] = np.concatenate((np.mean(np.array(FAR_L), axis=0), np.mean(np.array(FRR_L), axis=0)), axis=0)
-                        FXR_R_DF.loc[index] = np.concatenate((np.mean(np.array(FAR_R), axis=0), np.mean(np.array(FRR_R), axis=0)), axis=0)
 
                         index = index + 1
 
                         Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
-                        FXR_L_DF.to_excel(os.path.join(working_path, 'results', 'FXR_L_DF.xlsx'))
-                        FXR_R_DF.to_excel(os.path.join(working_path, 'results', 'FXR_R_DF.xlsx'))
+
 
 print(Results_DF.head(  ))                       
 print("[INFO] Done!!!")

@@ -35,15 +35,34 @@ Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
 Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
 
 
+if False:
+    Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF.xlsx'), index_col = 0)
+    FXR_L_DF = pd.read_excel(os.path.join(data_dir, "excels",'FXR_L_DF.xlsx'), index_col = 0)
+    FXR_R_DF = pd.read_excel(os.path.join(data_dir, "excels",'FXR_R_DF.xlsx'), index_col = 0)
 
-Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DFs.xlsx'), index_col = 0)
-FXR_L_DF = pd.read_excel(os.path.join(data_dir, 'FXR_L_DFs.xlsx'), index_col = 0)
-FXR_R_DF = pd.read_excel(os.path.join(data_dir, 'FXR_R_DFs.xlsx'), index_col = 0)
+    Results_DF = pd.concat([Results_DF.reset_index(), FXR_L_DF, FXR_R_DF], axis=1)
 
 
 
-Results_DF = pd.concat([Results_DF.reset_index(), FXR_L_DF, FXR_R_DF], axis=1)
+    Results_DF2 = pd.read_excel(os.path.join(data_dir, "excels",'Results_DF2.xlsx'), index_col = 0)
+    FXR_L_DF2 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_L_DF2.xlsx'), index_col = 0)
+    FXR_R_DF2 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_R_DF2.xlsx'), index_col = 0)
 
+    Results_DF2 = pd.concat([Results_DF2.reset_index(), FXR_L_DF2, FXR_R_DF2], axis=1)
+
+
+
+    Results_DF1 = pd.read_excel(os.path.join(data_dir, "excels",'Results_DF1.xlsx'), index_col = 0)
+    FXR_L_DF1 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_L_DF1.xlsx'), index_col = 0)
+    FXR_R_DF1 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_R_DF1.xlsx'), index_col = 0)
+
+    Results_DF1 = pd.concat([Results_DF1.reset_index(), FXR_L_DF1, FXR_R_DF1], axis=1)
+
+    Results_DF = pd.concat([Results_DF.reset_index(), Results_DF1, Results_DF2], axis=0)
+
+    Results_DF.to_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'))
+
+Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
 
 
 test_ratios = [0.2, 0.35, 0.5]
@@ -119,9 +138,9 @@ for idx, temp in enumerate(Modes):
 
     plt.subplot(1,2,1)
     auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+    label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
     plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
     plt.xlim([0.0, 1.0])
@@ -134,8 +153,7 @@ for idx, temp in enumerate(Modes):
 
     plt.subplot(1,2,2)
     auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
-    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
 
 
@@ -214,7 +232,7 @@ for idx, temp in enumerate(model_types):
 
     auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
     plt.subplot(1,2,1)
-    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
     
     plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
     plt.xlim([0.0, 1.0])
@@ -229,7 +247,7 @@ for idx, temp in enumerate(model_types):
     plt.subplot(1,2,2)
     auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
 
-    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
     plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.0])
@@ -305,9 +323,8 @@ for idx, temp in enumerate(normilizings):
 
     plt.subplot(1,2,1)
     auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
     plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
     plt.xlim([0.0, 1.0])
@@ -320,9 +337,8 @@ for idx, temp in enumerate(normilizings):
 
     plt.subplot(1,2,2)
     auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
 
 
@@ -400,9 +416,8 @@ for idx, temp in enumerate(test_ratios):
 
     plt.subplot(1,2,1)
     auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
     plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
     plt.xlim([0.0, 1.0])
@@ -415,9 +430,8 @@ for idx, temp in enumerate(test_ratios):
 
     plt.subplot(1,2,2)
     auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
 
 
@@ -494,9 +508,8 @@ for idx, temp in enumerate(persentages):
 
     plt.subplot(1,2,1)
     auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
     plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
     plt.xlim([0.0, 1.0])
@@ -510,9 +523,8 @@ for idx, temp in enumerate(persentages):
     plt.subplot(1,2,2)
 
     auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
 
 
@@ -597,9 +609,8 @@ for idx, temp in enumerate(feature_names):
 
     plt.subplot(1,2,1)
     auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
     plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
     plt.xlim([0.0, 1.0])
@@ -612,8 +623,8 @@ for idx, temp in enumerate(feature_names):
 
     plt.subplot(1,2,2)
     auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
-    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
-    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    label = a[idx] #+ ' AUC = ' + str(round(auc, 2))
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=a[idx], clip_on=False)
 
 
 
