@@ -18,12 +18,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from MLPackage import util as perf
 
 test_ratios = [0.2, 0.35, 0.5]
-persentages = [1.0, 0.95]
-modes = ["corr", "dist"]
+persentages = [1.0]#, 0.95]
+modes = ["corr"]#, "dist"]
 model_types = ["min", "median", "average"]
 THRESHOLDs = np.linspace(0, 1, 100)
 score = "A"#"B"
-normilizings = ["z-score", "minmax", "None"]
+normilizings = ["None"]#, "z-score", "minmax"]
 
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
@@ -127,7 +127,7 @@ for persentage in persentages:
                         ACC_L = list(); ACC_R = list()
 
 
-                        folder = mode + "_" + model_type + "_" + str(persentage) + "_" + str(test_ratio) + "_" + normilizing + "_" + feat_name
+                        folder = str(persentage) + "_" + normilizing + "_" + feat_name  + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
 
                         folder_path = os.path.join(working_path, 'results', folder)
 
@@ -144,19 +144,11 @@ for persentage in persentages:
                             
                             if (subject % 30) == 0:
                                 print("[INFO] --------------- Subject Number: ", subject)
-                                # break
+                                break
                             
                             for idx, direction in enumerate(["left_0", "right_1"]):
                                 DF_side = DF_features_PCA[DF_features_PCA["left(0)/right(1)"] == idx]
 
-                                # path = os.path.join(folder_path, "subject_" + str(int(subject)), direction)
-                                # path = "/Users/saeedkazemi/Documents/Python/Worksheet/results/" + folder + "/subject_" + str(int(subject)) + "/" + direction + "/"
-                                # if not os.path.exists(path):
-                                #     os.chdir(folder_path)
-
-                                #     os.system("mkdir " + "subject_" + str(int(subject)))
-                                #     os.system("mkdir " + os.path.join("subject_" + str(int(subject)), direction))
-                                    # os.system("touch subject_" + str(int(subject)) + "/" + direction + "/file.txt")
 
                             
                                 DF_positive_samples = DF_side[DF_side["subject ID"] == subject]

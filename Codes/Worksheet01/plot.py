@@ -22,6 +22,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from MLPackage import util as perf
 
 
+plt.rcParams["font.size"] = 13
+plt.tight_layout()
 
 print("[INFO] Setting directories")
 project_dir = os.getcwd()
@@ -34,9 +36,9 @@ Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
 
 
 
-Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
-FXR_L_DF = pd.read_excel(os.path.join(data_dir, 'FXR_L_DF.xlsx'), index_col = 0)
-FXR_R_DF = pd.read_excel(os.path.join(data_dir, 'FXR_R_DF.xlsx'), index_col = 0)
+Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DFs.xlsx'), index_col = 0)
+FXR_L_DF = pd.read_excel(os.path.join(data_dir, 'FXR_L_DFs.xlsx'), index_col = 0)
+FXR_R_DF = pd.read_excel(os.path.join(data_dir, 'FXR_R_DFs.xlsx'), index_col = 0)
 
 
 
@@ -52,11 +54,20 @@ THRESHOLDs = np.linspace(0, 1, 100)
 normilizings = ["z-score", "minmax", "None"]
 feature_names = ["All", "MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
+color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink']
+
+
+
 
 
 Results_DF_all = Results_DF[   Results_DF["Features_Set"] == "All"   ]
-
+auc=[]
+plt.figure(figsize=(14,8))
 npy = np.empty((4,4))
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
 for idx, temp in enumerate(Modes):
     a = ["Correlation", "Euclidean Distance"]
     
@@ -85,35 +96,76 @@ for idx, temp in enumerate(Modes):
 
 
     X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
-
-
-    cols = ["FAR_L_" + str(i) for i in range(100)] 
-    FAR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_L_" + str(i) for i in range(100)]
-    FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
-    perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
-
-
-
-
-    cols = ["FAR_R_" + str(i) for i in range(100)] 
-    FAR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_R_" + str(i) for i in range(100)]
-    FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
-    perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
-
-
-
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
 
     
+    cols = ["FAR_L_" + str(i) for i in range(100)] 
+    FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_L_" + str(i) for i in range(100)]
+    FRR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FAR_R_" + str(i) for i in range(100)] 
+    FAR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_R_" + str(i) for i in range(100)]
+    FRR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+
+
+
+
+
+    plt.subplot(1,2,1)
+    auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, left side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+    plt.subplot(1,2,2)
+    auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, Right side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+PATH = os.path.join("Manuscripts", "src", "figures", "Correlation")
+plt.tight_layout()
+plt.savefig(PATH + "_ROC.png")
+plt.close('all')
+
+
+
+
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+plt.figure(figsize=(14,8))
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
 for idx, temp in enumerate(model_types):
     a = ["Minimum", "Median", "Average"]
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Model_Type"] == temp   ]
@@ -142,35 +194,69 @@ for idx, temp in enumerate(model_types):
 
     X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
-
-    cols = ["FAR_L_" + str(i) for i in range(100)] 
-    FAR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_L_" + str(i) for i in range(100)]
-    FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
-    perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
-
-
-
-
-    cols = ["FAR_R_" + str(i) for i in range(100)] 
-    FAR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_R_" + str(i) for i in range(100)]
-    FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
-    perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
-
-
-
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
 
+    cols = ["FAR_L_" + str(i) for i in range(100)] 
+    FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
 
+    cols = ["FRR_L_" + str(i) for i in range(100)]
+    FRR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FAR_R_" + str(i) for i in range(100)] 
+    FAR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_R_" + str(i) for i in range(100)]
+    FRR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+
+
+
+    auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+    plt.subplot(1,2,1)
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
     
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, left side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+
+    plt.subplot(1,2,2)
+    auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, Right side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+   
+
+
+
+
+PATH = os.path.join("Manuscripts", "src", "figures", "Median")
+plt.tight_layout()
+plt.savefig(PATH + "_ROC.png")
+plt.close('all')
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+plt.figure(figsize=(14,8))
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()   
 for idx, temp in enumerate(normilizings):
     a = ["Z-score algorithm", "MinMax algorithm", "None "]
 
@@ -200,36 +286,73 @@ for idx, temp in enumerate(normilizings):
 
     X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
-
-    cols = ["FAR_L_" + str(i) for i in range(100)] 
-    FAR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_L_" + str(i) for i in range(100)]
-    FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
-    perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
-
-
-
-
-    cols = ["FAR_R_" + str(i) for i in range(100)] 
-    FAR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_R_" + str(i) for i in range(100)]
-    FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
-    perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
-
-
-
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
+    
+    cols = ["FAR_L_" + str(i) for i in range(100)] 
+    FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_L_" + str(i) for i in range(100)]
+    FRR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FAR_R_" + str(i) for i in range(100)] 
+    FAR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_R_" + str(i) for i in range(100)]
+    FRR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
 
 
+
+    plt.subplot(1,2,1)
+    auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, left side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+    plt.subplot(1,2,2)
+    auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, Right side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+PATH = os.path.join("Manuscripts", "src", "figures", "MinMax")
+plt.tight_layout()
+plt.savefig(PATH + "_ROC.png")
+plt.close('all')
+
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+
+plt.figure(figsize=(14,8))
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
 for idx, temp in enumerate(test_ratios):
-    a = ["20%", "35%", "50% "]
+    a = ["20 percent", "35 percent", "50 percent"]
   
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Test_Size"] == temp   ]
 
@@ -256,36 +379,76 @@ for idx, temp in enumerate(test_ratios):
 
     X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
-
-    cols = ["FAR_L_" + str(i) for i in range(100)] 
-    FAR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_L_" + str(i) for i in range(100)]
-    FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
-    perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
-
-
-
-
-    cols = ["FAR_R_" + str(i) for i in range(100)] 
-    FAR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_R_" + str(i) for i in range(100)]
-    FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
-    perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
-
-
-
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
 
 
+    cols = ["FAR_L_" + str(i) for i in range(100)] 
+    FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_L_" + str(i) for i in range(100)]
+    FRR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FAR_R_" + str(i) for i in range(100)] 
+    FAR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_R_" + str(i) for i in range(100)]
+    FRR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+
+
+
+    plt.subplot(1,2,1)
+    auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, left side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+    plt.subplot(1,2,2)
+    auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, Right side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+
+PATH = os.path.join("Manuscripts", "src", "figures", "testsize")
+plt.tight_layout()
+plt.savefig(PATH + "_ROC.png")
+plt.close('all')
+
+
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
+plt.figure(figsize=(14,8))
+
 for idx, temp in enumerate(persentages):
-    a = ["All Data", "Keeping 95%"]
+    a = ["All Data", "Keeping 95 percent of variance"]
   
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["PCA"] == temp   ]
 
@@ -312,37 +475,83 @@ for idx, temp in enumerate(persentages):
 
     X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
-
-    cols = ["FAR_L_" + str(i) for i in range(100)] 
-    FAR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_L_" + str(i) for i in range(100)]
-    FRR_L = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
-    perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
-
-
-
-
-    cols = ["FAR_R_" + str(i) for i in range(100)] 
-    FAR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    cols = ["FRR_R_" + str(i) for i in range(100)]
-    FRR_R = Results_DF_all_mode.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
-    perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
-
-
-
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
 
 
+    cols = ["FAR_L_" + str(i) for i in range(100)] 
+    FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_L_" + str(i) for i in range(100)]
+    FRR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FAR_R_" + str(i) for i in range(100)] 
+    FAR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+    cols = ["FRR_R_" + str(i) for i in range(100)]
+    FRR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+
+    plt.subplot(1,2,1)
+    auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, left side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+    plt.subplot(1,2,2)
+
+    auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, Right side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+
+PATH = os.path.join("Manuscripts", "src", "figures", "PCA")
+plt.tight_layout()
+plt.savefig(PATH + "_ROC.png")
+plt.close('all')
+
+
+
+
+
+
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+
+plt.figure(figsize=(14,8))
+# plt.figure(figsize=(30,15))
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
 for idx, temp in enumerate(feature_names):
     a = ["All features", "Only MDIST features", "Only RDIST features", "Only TOTEX features", "Only MVELO features", "Only RANGE features", "Only AREAXX features", "Only MFREQ features", "Only FDPD features", "Only FDCX features"]    
     Results_DF_temp = Results_DF[   Results_DF["Features_Set"] == temp   ]
+    # print(Results_DF_temp.head())
 
     npy[0,0] =  Results_DF_temp["Mean_Accuracy_Left"].mean()  
     npy[0,1] =  Results_DF_temp["Mean_Accuracy_Right"].mean()  
@@ -368,29 +577,56 @@ for idx, temp in enumerate(feature_names):
     X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
 
-    cols = ["FAR_L_" + str(i) for i in range(100)] 
-    FAR_L =  Results_DF_temp.loc[:, cols].mean().values
-
-    cols = ["FRR_L_" + str(i) for i in range(100)]
-    FRR_L =  Results_DF_temp.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_L")
-    perf.ROC_plot_v2(FAR_L, FRR_L, THRESHOLDs, PATH)
-
-
-
-
-    cols = ["FAR_R_" + str(i) for i in range(100)] 
-    FAR_R =  Results_DF_temp.loc[:, cols].mean().values
-
-    cols = ["FRR_R_" + str(i) for i in range(100)]
-    FRR_R =  Results_DF_temp.loc[:, cols].mean().values
-
-    PATH = os.path.join("Manuscripts", "src", "figures", a[idx] + "_R")
-    perf.ROC_plot_v2(FAR_R, FRR_R, THRESHOLDs, PATH)
-
 
 
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
 
+    cols = ["FAR_L_" + str(i) for i in range(100)] 
+    FAR_L.append(Results_DF_temp.loc[:, cols].mean().values)
+
+    cols = ["FRR_L_" + str(i) for i in range(100)]
+    FRR_L.append(Results_DF_temp.loc[:, cols].mean().values)
+
+    cols = ["FAR_R_" + str(i) for i in range(100)] 
+    FAR_R.append(Results_DF_temp.loc[:, cols].mean().values)
+
+    cols = ["FRR_R_" + str(i) for i in range(100)]
+    FRR_R.append(Results_DF_temp.loc[:, cols].mean().values)
+
+
+    plt.subplot(1,2,1)
+    auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+
+    plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, left side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+    plt.subplot(1,2,2)
+    auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+    label='ROC curve of ' + a[idx] #+ ' AUC = ' + str(round(auc, 2))
+    plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=label, clip_on=False)
+
+
+
+    plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Acceptance Rate')
+    plt.ylabel('False Rejection Rate')
+    plt.title('ROC curve, Right side')
+    plt.gca().set_aspect('equal')
+    plt.legend(loc="best")
+
+PATH = os.path.join("Manuscripts", "src", "figures", "feat")
+plt.tight_layout()
+plt.savefig(PATH + "_ROC.png")
+plt.close('all')

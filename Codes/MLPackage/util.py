@@ -123,31 +123,32 @@ def ROC_plot(TPR, FPR, path):
 
 def ROC_plot_v2(FPR, FNR,THRESHOLDs, path):
     """plot ROC curve"""
-    plt.figure()
+    # fig = plt.figure()
+    color = ['darkorange', 'orange']
     auc = 1/(1 + np.trapz( FPR,FNR))
-    plt.plot(FPR, FNR, linestyle='--', marker='o', color='darkorange', lw = 2, label='ROC curve', clip_on=False)
+    plt.plot(FPR, FNR, linestyle='--', marker='o', color=color[path], lw = 2, label='ROC curve', clip_on=False)
     plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.0])
     plt.xlabel('False Acceptance Rate')
     plt.ylabel('False Rejection Rate')
     plt.title('ROC curve, AUC = %.2f'%auc)
-    plt.legend(loc="lower right")
-    path1 = path + "_ROC.png"
+    plt.legend(loc="best")
+    # path1 = path + "_ROC.png"
 
-    plt.savefig(path1)
+    # plt.savefig(path1)
 
-    plt.figure()
-    plt.plot(THRESHOLDs, FPR, linestyle='--', marker='o', color='darkorange', lw = 2, label='FAR curve', clip_on=False)
-    plt.plot(THRESHOLDs, FNR, linestyle='--', marker='o', color='navy', lw = 2, label='FRR curve', clip_on=False)
+    # plt.figure()
+    # plt.plot(THRESHOLDs, FPR, linestyle='--', marker='o', color='darkorange', lw = 2, label='FAR curve', clip_on=False)
+    # plt.plot(THRESHOLDs, FNR, linestyle='--', marker='o', color='navy', lw = 2, label='FRR curve', clip_on=False)
 
-    EER,_ = compute_eer(FPR, FNR)
-    path2 = path + "_ACC.png"
-    plt.title('FPR and FNR curve, EER = %.2f'%EER)
-    plt.legend(loc="upper right")
-    plt.xlabel('Threshold')
-    plt.savefig(path2)
-    plt.close('all')
+    # EER,_ = compute_eer(FPR, FNR)
+    # path2 = path + "_ACC.png"
+    # plt.title('FPR and FNR curve, EER = %.2f'%EER)
+    # plt.legend(loc="upper right")
+    # plt.xlabel('Threshold')
+    # plt.savefig(path2)
+    # plt.close('all')
 
 
 def performance(model1, model2, path):
