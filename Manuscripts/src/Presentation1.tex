@@ -1,0 +1,220 @@
+\documentclass{beamer}
+\usetheme{Boadilla}
+\usepackage{booktabs}
+\usefonttheme{serif}
+\subtitle{Using Beamer}
+\usepackage{pgffor}
+
+\title{ \textbf{Stepscan Project}}
+\subtitle{Results of Worksheet 1-3}
+\date{\today}
+\author{Saeed Kazemi}
+\institute{ University of New Brunswick}
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Outline}
+\tableofcontents
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\foreach \n in {Score Matrix}{
+\section{\n}
+\def \variable {Correlation}
+\foreach \t in {Euclidean Distance, Correlation}{
+
+\begin{frame}
+\frametitle{\t}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\tiny The accuracy and ERR of \t.}
+\label{tab:parameters condition}
+\input{tables/\t.tex}
+\end{table}
+\end{frame}
+}
+
+\begin{frame}
+\centering
+\frametitle{The ROC curve}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\end{frame}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\foreach \n in {Model type}{
+\section{\n}
+\def \variable {Minimum}
+\foreach \t in {Minimum, Median, Average}{
+
+\begin{frame}
+\frametitle{\t}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\tiny The accuracy and ERR of \t.}
+\label{tab:parameters condition}
+\input{tables/\t.tex}
+\end{table}
+\end{frame}
+}
+
+\begin{frame}
+\centering
+\frametitle{The ROC curve}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\end{frame}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\foreach \n in {PCA}{
+\section{\n}
+\def \variable {Minimum} %PCA
+\foreach \t in {All Data, Keeping 95 percent of variance}{
+
+\begin{frame}
+\frametitle{\t}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\tiny The accuracy and ERR of \t.}
+\label{tab:parameters condition}
+\input{tables/\t.tex}
+\end{table}
+\end{frame}
+}
+
+\begin{frame}
+\centering
+\frametitle{The ROC curve}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\foreach \n in {Test size}{
+\section{\n}
+\def \variable {Minimum}%testsize
+\foreach \t in {20 percent, 35 percent, 50 percent}{
+
+\begin{frame}
+\frametitle{\t \ \n}
+\tiny
+\begin{table}
+\centering
+\caption{\tiny The accuracy and ERR of \t \  \n.}
+\input{tables/\t.tex}
+\end{table}
+\end{frame}
+}
+
+\begin{frame}
+\centering
+\frametitle{The ROC curve}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\end{frame}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\foreach \n in {Normalization algorithm}{
+\section{\n}
+\def \variable {Minimum}%MinMax
+\foreach \t in {Z-score algorithm, MinMax algorithm, None}{
+
+\begin{frame}
+\frametitle{\t}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\tiny The accuracy and ERR of \t.}
+\label{tab:parameters condition}
+\input{tables/\t.tex}
+\end{table}
+\end{frame}
+}
+
+\begin{frame}
+\centering
+\frametitle{The ROC curve}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\foreach \n in {COP features}{
+\section{\n}
+\def \variable {Minimum}%feat
+\foreach \t in {All features, Only MDIST features, Only RDIST features, Only TOTEX features, Only MVELO features, Only RANGE features, Only AREAXX features, Only MFREQ features, Only FDPD features, Only FDCX features}{  
+
+\begin{frame}
+\frametitle{\t}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\tiny The accuracy and ERR of \t.}
+\label{tab:parameters condition}
+\input{tables/\t.tex}
+\end{table}
+\end{frame}
+}
+
+\begin{frame}
+\centering
+\frametitle{The ROC curve}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Summary}
+
+\begin{enumerate}[(I)]
+\item Point A
+\item Point B
+\begin{enumerate}[(i)]
+\item part 1
+\item part 2
+\end{enumerate}
+\item Point C
+\item Point D
+\end{enumerate}
+    
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
