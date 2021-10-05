@@ -10,6 +10,7 @@
 \date{\today}
 \author{Saeed Kazemi}
 \institute{ University of New Brunswick}
+\usepackage{caption}
 
 \begin{document}
 
@@ -42,7 +43,7 @@
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\tiny The accuracy and ERR of \t.}
+\caption{\small The accuracy and ERR of \t.}
 \label{tab:parameters condition}
 \input{tables/\t.tex}
 \end{table}
@@ -52,7 +53,7 @@
 \begin{frame}
 \centering
 \frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
 \end{frame}
 }
 
@@ -61,16 +62,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \foreach \n in {Model type}{
 \section{\n}
-\def \variable {Minimum}
+\def \variable {Median}
 \foreach \t in {Minimum, Median, Average}{
 
 \begin{frame}
-\frametitle{\t}
+\frametitle{\t \ Model}
 \tiny
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\tiny The accuracy and ERR of \t.}
+\caption{\small The accuracy and ERR of \t \ model.}
 \label{tab:parameters condition}
 \input{tables/\t.tex}
 \end{table}
@@ -80,7 +81,7 @@
 \begin{frame}
 \centering
 \frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
 \end{frame}
 }
 
@@ -89,7 +90,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \foreach \n in {PCA}{
 \section{\n}
-\def \variable {Minimum} %PCA
+\def \variable {PCA} %PCA
 \foreach \t in {All Data, Keeping 95 percent of variance}{
 
 \begin{frame}
@@ -98,7 +99,7 @@
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\tiny The accuracy and ERR of \t.}
+\caption{\small The accuracy and ERR of \t.}
 \label{tab:parameters condition}
 \input{tables/\t.tex}
 \end{table}
@@ -108,7 +109,7 @@
 \begin{frame}
 \centering
 \frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
 \end{frame}
 }
 
@@ -116,7 +117,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \foreach \n in {Test size}{
 \section{\n}
-\def \variable {Minimum}%testsize
+\def \variable {testsize}%testsize
 \foreach \t in {20 percent, 35 percent, 50 percent}{
 
 \begin{frame}
@@ -124,7 +125,7 @@
 \tiny
 \begin{table}
 \centering
-\caption{\tiny The accuracy and ERR of \t \  \n.}
+\caption{\small The accuracy and ERR of \t \  \n.}
 \input{tables/\t.tex}
 \end{table}
 \end{frame}
@@ -133,7 +134,7 @@
 \begin{frame}
 \centering
 \frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
 \end{frame}
 }
 
@@ -142,7 +143,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \foreach \n in {Normalization algorithm}{
 \section{\n}
-\def \variable {Minimum}%MinMax
+\def \variable {MinMax}%MinMax
 \foreach \t in {Z-score algorithm, MinMax algorithm, None}{
 
 \begin{frame}
@@ -151,7 +152,7 @@
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\tiny The accuracy and ERR of \t.}
+\caption{\small The accuracy and ERR of \t.}
 \label{tab:parameters condition}
 \input{tables/\t.tex}
 \end{table}
@@ -161,7 +162,7 @@
 \begin{frame}
 \centering
 \frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
 \end{frame}
 }
 
@@ -169,7 +170,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \foreach \n in {COP features}{
 \section{\n}
-\def \variable {Minimum}%feat
+\def \variable {feat}%feat
 \foreach \t in {All features, Only MDIST features, Only RDIST features, Only TOTEX features, Only MVELO features, Only RANGE features, Only AREAXX features, Only MFREQ features, Only FDPD features, Only FDCX features}{  
 
 \begin{frame}
@@ -188,7 +189,7 @@
 \begin{frame}
 \centering
 \frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_L_ROC.png}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
 \end{frame}
 }
 
