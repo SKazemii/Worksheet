@@ -293,7 +293,7 @@ FRR_L = list()
 FAR_R = list()
 FRR_R = list()   
 for idx, temp in enumerate(normilizings):
-    a = ["Z-score algorithm", "MinMax algorithm", "None "]
+    a = ["Z-score algorithm", "MinMax algorithm", "None"]
 
 
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Normalizition"] == temp   ]
