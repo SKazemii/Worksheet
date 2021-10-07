@@ -70,12 +70,12 @@ Results_DF_temp = Results_DF_temp[   Results_DF_temp["Mean_EER_Left"] != 0   ]
 X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Left', 'Mean_EER_Left'], ascending = [False, True]).iloc[:10,:8]
 # print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
-        tf.write(X.round(decimals=2).to_latex())
+    tf.write(X.round(decimals=2).to_latex())
 
 X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Left', 'Mean_EER_Left'], ascending = [True, False]).iloc[:10,:8]
 # print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w") as tf:
-        tf.write(X.round(decimals=2).to_latex())
+    tf.write(X.round(decimals=2).to_latex())
 
 
 
@@ -85,13 +85,12 @@ with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w")
 X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Right', 'Mean_EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Mean_Accuracy_Left', 'Mean_EER_Left'])
 print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "top10_right.tex"), "w") as tf:
-        tf.write(X.round(decimals=2).to_latex())      
+    tf.write(X.round(decimals=2).to_latex())      
 
 X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Right', 'Mean_EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Mean_Accuracy_Left', 'Mean_EER_Left'])
 print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "worse10_right.tex"), "w") as tf:
-        tf.write(X.round(decimals=2).to_latex())          
-sys.exit()
+    tf.write(X.round(decimals=2).to_latex())          
 
 
 
