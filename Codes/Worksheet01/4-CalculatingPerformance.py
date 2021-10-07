@@ -28,7 +28,6 @@ normilizings = ["None", "z-score", "minmax"]
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
 
-
 cols = ["Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA",
 "Mean_Accuracy_Left", "Mean_EER_Left", "Mean_Accuracy_Right", "Mean_EER_Right",
 "Min_Accuracy_Left", "Min_EER_Left", "Min_Accuracy_Right", "Min_EER_Right",
@@ -103,6 +102,10 @@ for persentage in persentages:
 
 
             for mode in modes:
+
+                if mode == "corr" and feat_name != "All" and persentage != 1.0:
+                    break
+                
                 for model_type in model_types:
                     for test_ratio in test_ratios:
 
@@ -263,7 +266,7 @@ for persentage in persentages:
                         Results_DF = Results_DF.append(z)
 
                         index = index + 1
-                        print("[INFO] ------ Progress {:} ott of 1080".format(index))
+                        print("[INFO] ------ stage {:} of 1080".format(index))
 
                         Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
 

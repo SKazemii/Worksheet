@@ -29,7 +29,7 @@ print("[INFO] Setting directories")
 project_dir = os.getcwd()
 fig_dir = os.path.join(project_dir, "Manuscripts", "src", "figures")
 tbl_dir = os.path.join(project_dir, "Manuscripts", "src", "tables")
-data_dir = os.path.join(project_dir, "results")
+data_dir = os.path.join(project_dir, "results_All")
 
 Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
 Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
@@ -44,10 +44,13 @@ if False:
     Results_DF = pd.concat([Results_DF.reset_index(), Results_DF1], axis=0)
 
     Results_DF.to_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'))
+    
 else:
     # Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
     Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'), index_col = 0)
 # sys.exit()
+
+
 test_ratios = [0.2, 0.35, 0.5]
 persentages = [1.0, 0.95]
 Modes = ["corr", "dist"]
@@ -61,8 +64,43 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
+Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
+Results_DF_temp = Results_DF_temp[   Results_DF_temp["Mean_EER_Left"] != 0   ]
+
+X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Left', 'Mean_EER_Left'], ascending = [False, True]).iloc[:10,:8]
+# print(X.head())
+with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
+
+X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Left', 'Mean_EER_Left'], ascending = [True, False]).iloc[:10,:8]
+# print(X.head())
+with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
+
+
+
+
+
+
+X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Right', 'Mean_EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Mean_Accuracy_Left', 'Mean_EER_Left'])
+print(X.head())
+with open(os.path.join("Manuscripts", "src", "tables", "top10_right.tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())      
+
+X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Right', 'Mean_EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Mean_Accuracy_Left', 'Mean_EER_Left'])
+print(X.head())
+with open(os.path.join("Manuscripts", "src", "tables", "worse10_right.tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())          
+sys.exit()
+
+
 
 Results_DF_all = Results_DF[   Results_DF["Features_Set"] == "All"   ]
+
+
+
+
+
 auc=[]
 plt.figure(figsize=(14,8))
 npy = np.empty((4,4))
@@ -153,9 +191,6 @@ PATH = os.path.join("Manuscripts", "src", "figures", "Correlation")
 plt.tight_layout()
 plt.savefig(PATH + "_ROC.png")
 plt.close('all')
-
-
-
 
 
 #########################################################################################################
@@ -546,6 +581,8 @@ FRR_R = list()
 for idx, temp in enumerate(feature_names):
     a = ["All features", "Only MDIST features", "Only RDIST features", "Only TOTEX features", "Only MVELO features", "Only RANGE features", "Only AREAXX features", "Only MFREQ features", "Only FDPD features", "Only FDCX features"]    
     Results_DF_temp = Results_DF[   Results_DF["Features_Set"] == temp   ]
+    Results_DF_temp = Results_DF_temp[   Results_DF_temp["PCA"] == 1   ]
+
     # print(Results_DF_temp.head())
 
     npy[0,0] =  Results_DF_temp["Mean_Accuracy_Left"].mean()  
@@ -624,3 +661,8 @@ PATH = os.path.join("Manuscripts", "src", "figures", "feat")
 plt.tight_layout()
 plt.savefig(PATH + "_ROC.png")
 plt.close('all')
+
+
+
+
+

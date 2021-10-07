@@ -1,145 +1,183 @@
-from re import A
 import numpy as np
+from numpy.core.fromnumeric import mean
+from numpy.lib.function_base import median
 import pandas as pd
+from pandas.core.frame import DataFrame
 from scipy import ndimage
 import matplotlib.pyplot as plt
 import sys, os
+from pathlib import Path as Pathlb
+
+
 from scipy.spatial import distance
 
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+from sklearn import preprocessing
+
+from sklearn.metrics import accuracy_score
+
+from itertools import combinations, product
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from MLPackage import util as perf
-from MLPackage import Features as fe
-####################################################
-# COPTS = np.load("./Codes/Worksheet01/ToonCodes/COP.npy")
-# f3D = np.load("./Codes/Worksheet01/ToonCodes/3D.npy")
-# np.seterr('raise')
-
-# print(fe.computeFDCE(COPTS))
-data = np.load("./Datasets/datalist.npy")
-metadata = np.load("./Datasets/metadatalist.npy")
-print("[INFO] data shape: ", data.shape)
-print("[INFO] metadata shape: ",metadata.shape)
-first = list()
-for j in range(metadata.shape[0]):
-    # print(metadata[j,0:2])
-    if metadata[j,0] == 4 and metadata[j,1] == 0:
-        first.append(data[j])
-
-print(len(first))
-print(first[2].shape)
-# np.save("./Datasets/first.npy", first)
 
 
+plt.rcParams["font.size"] = 13
+plt.tight_layout()
 
-feature_matrix = list()
-for j in range(len(first)):
-    COPTS = fe.computeCOPTimeSeries(first[j])
-    # COATS = fe.computeCOATimeSeries(data[j], Binarize = "simple", Threshold = 1)
+print("[INFO] Setting directories")
+project_dir = os.getcwd()
+fig_dir = os.path.join(project_dir, "Manuscripts", "src", "figures")
+tbl_dir = os.path.join(project_dir, "Manuscripts", "src", "tables")
+data_dir = os.path.join(project_dir, "results")
 
-    pMDIST = fe.computeFDCE(COPTS)
-    print(pMDIST)
+Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
+Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
+
+
+if False:
+    # if True:
+    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
+
+    Results_DF1 = pd.read_excel(os.path.join(data_dir, 'Results_DF1.xlsx'), index_col = 0)
+
+    Results_DF = pd.concat([Results_DF.reset_index(), Results_DF1], axis=0)
+
+    Results_DF.to_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'))
+else:
+    # Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
+    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'), index_col = 0)
+# sys.exit()
+test_ratios = [0.2]
+persentages = [0.95]
+Modes = ["corr"]
+model_types = ["min"]
+THRESHOLDs = np.linspace(0, 1, 100)
+normilizings = ["z-score"]
+feature_names = ["MDIST"]
+
+color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink']
+
+
+
+
+
+# Results_DF_all = Results_DF[   Results_DF["Features_Set"] == "MDIST"   ]
+auc=[]
+plt.figure(figsize=(14,8))
+npy = np.empty((4,4))
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
+Results_DF_all_mode = Results_DF[   Results_DF["Mode"] == "corr"   ]
+Results_DF_all_mode = Results_DF_all_mode[   Results_DF_all_mode["Features_Set"] == "MDIST"   ]
+Results_DF_all_mode = Results_DF_all_mode[   Results_DF_all_mode["Normalizition"] == "z-score"   ]
+Results_DF_all_mode = Results_DF_all_mode[   Results_DF_all_mode["Model_Type"] == "min"   ]
+Results_DF_all_mode = Results_DF_all_mode[   Results_DF_all_mode["Test_Size"] == 0.2   ]
+Results_DF_all_mode = Results_DF_all_mode[   Results_DF_all_mode["PCA"] == 0.95   ]
+
+print(Results_DF_all_mode.head())
+
+cols = ["FAR_L_" + str(i) for i in range(100)] 
+FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+cols = ["FRR_L_" + str(i) for i in range(100)]
+FRR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+cols = ["FAR_R_" + str(i) for i in range(100)] 
+FAR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+cols = ["FRR_R_" + str(i) for i in range(100)]
+FRR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
+
+print(FRR_L)
+print(FRR_R)
+plt.subplot(1,2,1)
+auc = (1 + np.trapz( FRR_L, FAR_L))
+label="jj" #+ ' AUC = ' + str(round(auc, 2))
+
+plt.plot(FAR_L, FRR_L, linestyle='--', marker='o', color=color[0], lw = 2, label="jj", clip_on=False)
+
+plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.0])
+plt.xlabel('False Acceptance Rate')
+plt.ylabel('False Rejection Rate')
+plt.title('ROC curve, left side')
+plt.gca().set_aspect('equal')
+plt.legend(loc="best")
+
+plt.subplot(1,2,2)
+
+auc = (1 + np.trapz( FRR_R, FAR_R))
+plt.plot(FAR_R, FRR_R, linestyle='--', marker='o', color=color[0], lw = 2, label="a[idx]", clip_on=False)
+
+
+
+plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.0])
+plt.xlabel('False Acceptance Rate')
+plt.ylabel('False Rejection Rate')
+plt.title('ROC curve, Right side')
+plt.gca().set_aspect('equal')
+plt.legend(loc="best")
+plt.show()
 sys.exit()
 
-feature_matrix.append(pMDIST)
-# afeatures.append(np.concatenate((aMDIST, aRDIST, aTOTEX, aMVELO, aRANGE, [aAREACC], [aAREACE], aMFREQ, aFDPD, [aFDCC], [aFDCE], metadata[j,0:2]), axis = 0) )
+for idx, temp in enumerate(Modes):
+    a = ["Correlation", "Euclidean Distance"]
+    
+
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Mode"] == temp   ]
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Features_Set"] == "MDIST"   ]
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Normalizition"] == "z-score"   ]
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Model_Type"] == "min"   ]
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Test_Size"] == 0.2   ]
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["PCA"] == 0.95   ]
+
+    print(Results_DF_all_mode.head())
+    npy[0,0] = Results_DF_all_mode["Mean_Accuracy_Left"].mean()  
+    npy[0,1] = Results_DF_all_mode["Mean_Accuracy_Right"].mean()  
+    npy[0,2] = Results_DF_all_mode["Mean_EER_Left"].mean()  
+    npy[0,3] = Results_DF_all_mode["Mean_EER_Right"].mean()
+
+    npy[1,0] = Results_DF_all_mode["Mean_Accuracy_Left"].min()  
+    npy[1,1] = Results_DF_all_mode["Mean_Accuracy_Right"].min()  
+    npy[1,2] = Results_DF_all_mode["Mean_EER_Left"].min()  
+    npy[1,3] = Results_DF_all_mode["Mean_EER_Right"].min()  
+
+    npy[2,0] = Results_DF_all_mode["Mean_Accuracy_Left"].max()  
+    npy[2,1] = Results_DF_all_mode["Mean_Accuracy_Right"].max()  
+    npy[2,2] = Results_DF_all_mode["Mean_EER_Left"].max()  
+    npy[2,3] = Results_DF_all_mode["Mean_EER_Right"].max()    
+
+    npy[3,0] = Results_DF_all_mode["Mean_Accuracy_Left"].median()  
+    npy[3,1] = Results_DF_all_mode["Mean_Accuracy_Right"].median()  
+    npy[3,2] = Results_DF_all_mode["Mean_EER_Left"].median()  
+    npy[3,3] = Results_DF_all_mode["Mean_EER_Right"].median()
+
+
+    X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
+    with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
+        tf.write(X.round(decimals=2).to_latex())
+
+    
     
 
 
-np.save("./Datasets/feature_matrix.npy", feature_matrix)
-# np.save("./Datasets/afeatures.npy", afeatures)
-print(len(feature_matrix))
 
 
 
 
+   
 
-
-dist_model = np.zeros((16,16))
-for i in range(16):
-    for j in range(16):
-        # print(positive_samples.shape)
-        # print(positive_samples.iloc[i, :])
-        # print(positive_samples.iloc[i, :].values)
-        dist_model[i, j] = distance.euclidean(
-            feature_matrix[i], feature_matrix[j]
-        )
-
-print(dist_model.shape)
-np.save("./Datasets/dist_model.npy", dist_model)
+PATH = os.path.join("Manuscripts", "src", "figures", "Correlation")
+plt.tight_layout()
+plt.savefig(PATH + "_ROC.png")
+plt.close('all')
 
 
 
-Model_client = np.min(np.ma.masked_where(dist_model==0,dist_model), axis = 0)
-Model_client = np.expand_dims(Model_client,-1)
-print(Model_client.shape)
-print(Model_client)
 
-
-FRR_temp = []
-THRESHOLDs = np.linspace(0, 2, 50)
-for tx in THRESHOLDs:
-    E1 = np.zeros((Model_client.shape))
-    E1[Model_client > tx] = 1
-    FRR_temp.append(np.sum(E1)/dist_model.shape[1])
-
-print(FRR_temp)   
-print(THRESHOLDs.shape)   
-plt.plot(THRESHOLDs,FRR_temp) 
-plt.show()
-print("[INFO] Done!!!")
-
-####################################################
-# EER = np.load("./Datasets/EER.npy")
-# FPR = np.load("./Datasets/FPR.npy")
-# FNR = np.load("./Datasets/FNR.npy")
-
-# far = (np.mean(FPR, axis=0))
-# print(np.mean(EER))
-# frr = (np.mean(FNR, axis=0))
-# THRESHOLDs = np.linspace(0, 300, 10)
-
-# perf.ROC_plot_v2(far, frr, THRESHOLDs, "./")
-# plt.show()
-
-
-
-# %computeCFREQ
-# %compute95FREQ
-# %computeFREQD
-# %computeMEDFREQ
-# %computePOWER
-####################################################
-
-# a = np.load("./Codes/Worksheet01/ToonCodes/a.npy")
-
-# a = (data[0:20,0:3])
-# positive_model = np.zeros((a.shape[0], a.shape[0]))
-
-# for i in range(a.shape[0]):
-#     for j in range(a.shape[0]):
-#         # print(positive_samples.shape)
-#         # print(positive_samples.iloc[i, :])
-#         # print(positive_samples.iloc[i, :].values)
-#         positive_model[i, j] = distance.euclidean(
-#             a[i, :], a[j, :]
-#         )
-# Model = np.min(np.ma.masked_where(positive_model==0,positive_model), axis = 0)
-# Model = np.expand_dims(Model, -1)
-
-# for tx in THRESHOLDs:
-#     E1 = np.zeros((Model.shape))
-#     E1[Model > tx] = 1
-#     FRR_temp.append(np.sum(E1)/distModel1.shape[1])
-# # for j in range(data.shape[0]):
-# COPTS = fe.computeCOPTimeSeries(img)
-# print(COPTS.shape)
-# MDIST = fe.computeMDIST(COPTS)
-# print(positive_model) 
-
-
-
-# np.save("./Codes/Worksheet01/ToonCodes/positive_model.npy", positive_model)
