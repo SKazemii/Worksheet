@@ -36,35 +36,18 @@ Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
 
 
 if False:
-    Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF.xlsx'), index_col = 0)
-    FXR_L_DF = pd.read_excel(os.path.join(data_dir, "excels",'FXR_L_DF.xlsx'), index_col = 0)
-    FXR_R_DF = pd.read_excel(os.path.join(data_dir, "excels",'FXR_R_DF.xlsx'), index_col = 0)
+    # if True:
+    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
 
-    Results_DF = pd.concat([Results_DF.reset_index(), FXR_L_DF, FXR_R_DF], axis=1)
+    Results_DF1 = pd.read_excel(os.path.join(data_dir, 'Results_DF1.xlsx'), index_col = 0)
 
+    Results_DF = pd.concat([Results_DF.reset_index(), Results_DF1], axis=0)
 
-
-    Results_DF2 = pd.read_excel(os.path.join(data_dir, "excels",'Results_DF2.xlsx'), index_col = 0)
-    FXR_L_DF2 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_L_DF2.xlsx'), index_col = 0)
-    FXR_R_DF2 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_R_DF2.xlsx'), index_col = 0)
-
-    Results_DF2 = pd.concat([Results_DF2.reset_index(), FXR_L_DF2, FXR_R_DF2], axis=1)
-
-
-
-    Results_DF1 = pd.read_excel(os.path.join(data_dir, "excels",'Results_DF1.xlsx'), index_col = 0)
-    FXR_L_DF1 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_L_DF1.xlsx'), index_col = 0)
-    FXR_R_DF1 = pd.read_excel(os.path.join(data_dir, "excels",'FXR_R_DF1.xlsx'), index_col = 0)
-
-    Results_DF1 = pd.concat([Results_DF1.reset_index(), FXR_L_DF1, FXR_R_DF1], axis=1)
-
-    Results_DF = pd.concat([Results_DF.reset_index(), Results_DF1, Results_DF2], axis=0)
-
-    Results_DF.to_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'))
-
-Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
-
-
+    Results_DF.to_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'))
+else:
+    # Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
+    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'), index_col = 0)
+# sys.exit()
 test_ratios = [0.2, 0.35, 0.5]
 persentages = [1.0, 0.95]
 Modes = ["corr", "dist"]

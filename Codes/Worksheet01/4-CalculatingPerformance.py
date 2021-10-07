@@ -263,9 +263,11 @@ for persentage in persentages:
                         Results_DF = Results_DF.append(z)
 
                         index = index + 1
+                        print("[INFO] ------ Progress {:} ott of 1080".format(index))
 
                         Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
 
 
 print(Results_DF.head(  ))                       
 print("[INFO] Done!!!")
+

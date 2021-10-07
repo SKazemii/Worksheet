@@ -3,146 +3,80 @@ import pandas as pd
 from numpy.core.fromnumeric import argsort
 from numpy.lib.function_base import piecewise
 from itertools import combinations
-import sys
+import matplotlib.pyplot as plt
+
+import sys, os
+
+
+import klib
+pd.options.mode.chained_assignment = None
 
 import scipy.stats as scipy
 
 
-def max_rel_calc(features, labels, n, measure = "d_prime"):
+def max_rel_calc(features, labels):
     fshape = features.shape
-    positive_samples = features[labels == 1, :]
-    negative_samples = features[labels == 0, :]
+    features_names = features.columns.values
+
+    positive_samples = features.loc[labels[labels == 1].index, :]
+    negative_samples = features.loc[labels[labels == 0].index, :]
 
     D = list()
     F = list()
     for feature in range(fshape[1]):
-        mean_feature_pos = np.mean(positive_samples[:,feature])
-        mean_feature_neg = np.mean(negative_samples[:,feature])
 
-        std_feature_pos = np.std(positive_samples[:,feature])
-        std_feature_neg = np.std(negative_samples[:,feature])
+        mean_feature_pos = positive_samples.iloc[:,feature].mean()
+        mean_feature_neg = negative_samples.iloc[:,feature].mean()
+
+        std_feature_pos = positive_samples.iloc[:,feature].std()
+        std_feature_neg = negative_samples.iloc[:,feature].std()
 
         nominator = np.sqrt(2)*np.abs(mean_feature_pos-mean_feature_neg)
         denominator = np.sqrt((std_feature_pos**2)+(std_feature_neg**2))
 
         D.append(nominator/denominator)
-        F.append((mean_feature_pos-mean_feature_neg)/(std_feature_pos+std_feature_pos))
-    if measure == "d_prime":
-        relevent_features = argsort(D)[::-1][:n]
-    elif measure == "F_ratio":
-        relevent_features = argsort(F)[::-1][:n]
-    # print(D)
-    # print(relevent_features)
-    return features[:,relevent_features], relevent_features, D, F
-    # print(argsort(D)[::-1][:n])
-    # print(D)
-    # return D,F
+        F.append(abs((mean_feature_pos-mean_feature_neg)/(std_feature_pos+std_feature_pos)))
+        D_rank = argsort(D)[::-1][:]
+        F_rank = argsort(F)[::-1][:]
+
+
+    DF = pd.DataFrame(columns = ['feature_name', 'D-prim', 'F-rati', 'D-prime', 'F-ratio'])
+    DF.loc[:,'feature_name'] = features_names
+    DF.loc[:,'D-prim'] = D
+    DF.loc[:,'F-rati'] = F
+    DF.loc[:,'D-prime'] = features_names[D_rank]
+    DF.loc[:,'F-ratio'] = features_names[F_rank]
+
+    return DF
+
+
+def mRMR(features, labels):
+    DF = max_rel_calc(features, labels)
+    features_names = features.columns.values
+
+    # print((features.corr().abs().sum()-1)/features.shape[1]**2)
+ 
+    R = ((features.corr().abs().sum()-1)/features.shape[1]).values
+    D1 = DF['D-prim'] - R
+    Q1 = DF['D-prim'] / R
+
+    D1 = argsort(D1)[::-1][:]
+    Q1 = argsort(Q1)[::-1][:]
+    R1 = argsort(R)[::-1][:]
+
+    DF['mRMR-Dif'] = features_names[D1]
+    DF['mRMR-Q'] = features_names[Q1]
+    DF['Redundancy'] = features_names[R1]
 
 
 
-
-def min_red_calc(features):
-    redundancy_matrix = np.empty( [features.shape[1], features.shape[1]] )
-    # print(redundancy_matrix.shape)
-    # print(redundancy_matrix)
-    
-    sl = 0 
-    while (sl < features.shape[1]):
-        input_correl = 0
-        zl = 0 
-        while (zl < features.shape[1]):
-            if(sl == zl):
-                input_correl = 1
-            else:
-                correl = scipy.pearsonr(features[:,sl], features[:,zl])
-                input_correl = correl[0]
-                # print(correl)
-                # sys.exit()
-
-
-            redundancy_matrix[sl][zl] = input_correl
-            zl = zl +1
-        sl = sl + 1
-
-    DF_rm = pd.DataFrame(redundancy_matrix)
-    print(DF_rm)
-    a = list()
-    maximum = 1000
-    for set in range(2,features.shape[1]-1):
-        comb = combinations(range(features.shape[1]),set)
-        for i in list(comb):
-            # print(np.sum(redundancy_matrix[i,i]))
-            sumation = DF_rm.loc[i,i].abs().sum().sum()
-            a.append({sumation:i})
-            if sumation < maximum:
-                print(i)
-                maximum = sumation
-                best_set = i
-            # print(DF_rm.loc[i,i].sum().sum())
-    
-    print(best_set)
-    print(maximum)
-
-
-    # sys.exit()
-    return features[:,best_set], best_set, maximum
-
-
-def mRMR(features, labels, n, measure = "d_prime"):
-    _, _, D, _ = max_rel_calc(features, labels, n, measure)
-
-    redundancy_matrix = np.empty( [features.shape[1], features.shape[1]] )
-    # print(redundancy_matrix.shape)
-    # print(redundancy_matrix)
-    
-    sl = 0 
-    while (sl < features.shape[1]):
-        input_correl = 0
-        zl = 0 
-        while (zl < features.shape[1]):
-            if(sl == zl):
-                input_correl = 1
-            else:
-                correl = scipy.pearsonr(features[:,sl], features[:,zl])
-                input_correl = correl[0]
-                # print(correl)
-                # sys.exit()
-
-
-            redundancy_matrix[sl][zl] = input_correl
-            zl = zl + 1
-        sl = sl + 1
-
-    DF_rm = pd.DataFrame(redundancy_matrix)
-
-
-    minimum = 0
-    for set in range(2,features.shape[1]-1):
-        comb = combinations(range(features.shape[1]),set)
-        for i in list(comb):
-            # print(np.sum(redundancy_matrix[i,i]))
-            sumation = DF_rm.loc[i,i].abs().sum().sum()
-            # print(i)
-            d = (np.sum([D[j] for j in i]))
-            MIQ = d / sumation
-            if MIQ > minimum:
-                # print(i)
-                minimum = MIQ
-                best_set = i
-            # print(DF_rm.loc[i,i].sum().sum())
-    
-    print(best_set)
-    print(minimum)
-
-    return features[:,best_set], best_set, minimum
+    return DF.iloc[:, 3:]
 
 
 
 
 def main():
-    pfeatures = np.load("./Datasets/pfeatures.npy")
-
-    features = pfeatures
+    features = np.load("./Datasets/pfeatures.npy")
 
     print("[INFO] feature shape: ", features.shape)
     columnsName = ["feature_" + str(i) for i in range(features.shape[1]-2)] + [ "subject_ID", "left(0)/right(1)"]
@@ -154,44 +88,33 @@ def main():
     DF_side = DF_features[DF_features["left(0)/right(1)"] == 0]
     DF_side.loc[DF_side.subject_ID == 4.0, "left(0)/right(1)"] = 1
     DF_side.loc[DF_side.subject_ID != 4.0, "left(0)/right(1)"] = 0
-    # DF_side = DF_side[DF_side["left(0)/right(1)"] == 0]
 
-    # print(min_red_calc(pfeatures[:,0:5]))
-    pfeatures = DF_side.iloc[:,0:5].values
-    labels = DF_side.iloc[:,-1].values
-    # print(pfeatures)
-    # print(labels)
 
-    mRMR(pfeatures, labels, n=10, measure = "d_prime")
+    DF = mRMR(DF_side.iloc[:,:-2], DF_side.iloc[:,-1])
+
+    with open(os.path.join("Manuscripts", "src", "tables", "top10best_feature_selection.tex"), "w") as tf:
+        tf.write(DF.iloc[:10,:].to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", "top10worst_feature_selection.tex"), "w") as tf:
+        tf.write(DF.iloc[-10:,:].to_latex())
+    
+    
+    plt.figure(figsize=(14,8), dpi=500)
+    klib.corr_plot(DF_side.iloc[:,:-2], annot=False)
+    PATH = os.path.join("Manuscripts", "src", "figures", "corr_plot.png")
+    plt.tight_layout()
+    plt.savefig(PATH)
+    plt.close('all')
+    plt.show()
+
+
     print("[INFO] Done!!!")
 
-    import pymrmr
-    df = pd.read_csv('some_df.csv')
+    # import pymrmr
+    # df = pd.read_csv('some_df.csv')
     # Pass a dataframe with a predetermined configuration. 
     # Check http://home.penglab.com/proj/mRMR/ for the dataset requirements
-    pymrmr.mRMR(df, 'MIQ', 10)
-    sys.exit()
+    # pymrmr.mRMR(df, 'MIQ', 10)
     
-
-    sys.exit()
-    pfeatures = np.load("./Datasets/pfeatures.npy")
-
-    print(pfeatures.shape)
-    columnsName = ["feature_" + str(i) for i in range(5)] 
-
-    comb = combinations(columnsName,2)
-    for i in list(comb):
-        print (i)
-    features = np.array(pfeatures[:,0:5])
-    labels = np.array(pfeatures[:,-1])
-    relevent_features = max_rel_calc(features,labels, n=10)
-    print(relevent_features)
-    print(relevent_features.shape)
-    # print(F)
-    
-    print("[INFO] Done!!!")
-
-
 
 if __name__ == "__main__":
     main()
