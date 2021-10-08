@@ -103,7 +103,7 @@ Results_DF_all = Results_DF[   Results_DF["Features_Set"] == "All"   ]
 
 auc=[]
 plt.figure(figsize=(14,8))
-npy = np.empty((4,4))
+npy = np.empty((5,4))
 FAR_L = list()
 FRR_L = list()
 FAR_R = list()
@@ -134,8 +134,12 @@ for idx, temp in enumerate(Modes):
     npy[3,2] = Results_DF_all_mode["Mean_EER_Left"].median()  
     npy[3,3] = Results_DF_all_mode["Mean_EER_Right"].median()
 
+    npy[4,0] = Results_DF_all_mode["Mean_Accuracy_Left"].std()  
+    npy[4,1] = Results_DF_all_mode["Mean_Accuracy_Right"].std()  
+    npy[4,2] = Results_DF_all_mode["Mean_EER_Left"].std()  
+    npy[4,3] = Results_DF_all_mode["Mean_EER_Right"].std()
 
-    X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
+    X = pd.DataFrame(npy, index=["mean", "min", "max", "median", "std"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
 
@@ -227,8 +231,12 @@ for idx, temp in enumerate(model_types):
     npy[3,2] = Results_DF_all_mode["Mean_EER_Left"].median()  
     npy[3,3] = Results_DF_all_mode["Mean_EER_Right"].median()
 
+    npy[4,0] = Results_DF_all_mode["Mean_Accuracy_Left"].std()  
+    npy[4,1] = Results_DF_all_mode["Mean_Accuracy_Right"].std()  
+    npy[4,2] = Results_DF_all_mode["Mean_EER_Left"].std()  
+    npy[4,3] = Results_DF_all_mode["Mean_EER_Right"].std()
 
-    X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
+    X = pd.DataFrame(npy, index=["mean", "min", "max", "median", "std"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
@@ -319,8 +327,13 @@ for idx, temp in enumerate(normilizings):
     npy[3,2] = Results_DF_all_mode["Mean_EER_Left"].median()  
     npy[3,3] = Results_DF_all_mode["Mean_EER_Right"].median()
 
+    npy[4,0] = Results_DF_all_mode["Mean_Accuracy_Left"].std()  
+    npy[4,1] = Results_DF_all_mode["Mean_Accuracy_Right"].std()  
+    npy[4,2] = Results_DF_all_mode["Mean_EER_Left"].std()  
+    npy[4,3] = Results_DF_all_mode["Mean_EER_Right"].std()
 
-    X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
+
+    X = pd.DataFrame(npy, index=["mean", "min", "max", "median", "std"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
@@ -410,8 +423,13 @@ for idx, temp in enumerate(test_ratios):
     npy[3,2] = Results_DF_all_mode["Mean_EER_Left"].median()  
     npy[3,3] = Results_DF_all_mode["Mean_EER_Right"].median()
 
+    npy[4,0] = Results_DF_all_mode["Mean_Accuracy_Left"].std()  
+    npy[4,1] = Results_DF_all_mode["Mean_Accuracy_Right"].std()  
+    npy[4,2] = Results_DF_all_mode["Mean_EER_Left"].std()  
+    npy[4,3] = Results_DF_all_mode["Mean_EER_Right"].std()
 
-    X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
+
+    X = pd.DataFrame(npy, index=["mean", "min", "max", "median", "std"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
@@ -504,8 +522,13 @@ for idx, temp in enumerate(persentages):
     npy[3,2] = Results_DF_all_mode["Mean_EER_Left"].median()  
     npy[3,3] = Results_DF_all_mode["Mean_EER_Right"].median()
 
+    npy[4,0] = Results_DF_all_mode["Mean_Accuracy_Left"].std()  
+    npy[4,1] = Results_DF_all_mode["Mean_Accuracy_Right"].std()  
+    npy[4,2] = Results_DF_all_mode["Mean_EER_Left"].std()  
+    npy[4,3] = Results_DF_all_mode["Mean_EER_Right"].std()
 
-    X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
+
+    X = pd.DataFrame(npy, index=["mean", "min", "max", "median", "std"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
     with open(os.path.join("Manuscripts", "src", "tables", a[idx] + ".tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
@@ -605,8 +628,13 @@ for idx, temp in enumerate(feature_names):
     npy[3,2] =  Results_DF_temp["Mean_EER_Left"].median()  
     npy[3,3] =  Results_DF_temp["Mean_EER_Right"].median()
 
+    npy[4,0] = Results_DF_all_mode["Mean_Accuracy_Left"].std()  
+    npy[4,1] = Results_DF_all_mode["Mean_Accuracy_Right"].std()  
+    npy[4,2] = Results_DF_all_mode["Mean_EER_Left"].std()  
+    npy[4,3] = Results_DF_all_mode["Mean_EER_Right"].std()
 
-    X = pd.DataFrame(npy, index=["mean", "min", "max", "median"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
+
+    X = pd.DataFrame(npy, index=["mean", "min", "max", "median", "std"] , columns=["Accuracy Left", "Accuracy Right", "EER Left", "EER Right"])
 
 
 
