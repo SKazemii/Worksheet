@@ -79,7 +79,14 @@ def main():
     features = np.load("./Datasets/pfeatures.npy")
 
     print("[INFO] feature shape: ", features.shape)
+
+
+
+
+
+    f_names = ['MDIST_RD', 'MDIST_AP', 'MDIST_ML', 'RDIST_RD', 'RDIST_AP', 'RDIST_ML', 'TOTEX_RD', 'TOTEX_AP', 'TOTEX_ML', 'MVELO_RD', 'MVELO_AP', 'MVELO_ML', 'RANGE_RD', 'RANGE_AP', 'RANGE_ML','AREA_CC', 'AREA_CE', 'AREA_SW', 'MFREQ_RD', 'MFREQ_AP', 'MFREQ_ML', 'FDPD_RD', 'FDPD_AP', 'FDPD_ML', 'FDCC', 'FDCE']
     columnsName = ["feature_" + str(i) for i in range(features.shape[1]-2)] + [ "subject_ID", "left(0)/right(1)"]
+    columnsName = f_names + [ "subject_ID", "left(0)/right(1)"]
 
     DF_features = pd.DataFrame(
         features,
@@ -105,6 +112,8 @@ def main():
     plt.savefig(PATH)
     plt.close('all')
     plt.show()
+
+
 
 
     print("[INFO] Done!!!")
