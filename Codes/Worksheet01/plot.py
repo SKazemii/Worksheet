@@ -72,16 +72,12 @@ Results_DF_temp.columns = ["Mode", "Model_Type", "TestSize", "Norm", "Features_S
 
 
 X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [False, True]).iloc[:10,:8]
-
-print(Results_DF_temp.reset_index(drop=True).head())
-
 with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))
+    tf.write(X.round(decimals=2).to_latex())
 
 X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [True, False]).iloc[:10,:8]
-# print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))
+    tf.write(X.round(decimals=2).to_latex())
 
 
 
@@ -89,15 +85,13 @@ with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w")
 
 
 X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
-print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "top10_right.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))      
+    tf.write(X.round(decimals=2).to_latex())      
+
 
 X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
-print(X.head())
-
 with open(os.path.join("Manuscripts", "src", "tables", "worse10_right.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))          
+    tf.write(X.round(decimals=2).to_latex())          
 
 
 
