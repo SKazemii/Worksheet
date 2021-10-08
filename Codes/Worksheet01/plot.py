@@ -66,31 +66,38 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
 Results_DF_temp = Results_DF_temp[   Results_DF_temp["Mean_EER_Left"] != 0   ]
+Results_DF_temp.columns = ["Mode", "Model_Type", "TestSize", "Norm", "Features_Set", "PCA", "Acc_Left", "EER_Left", "Acc_Right", "EER_Right","Min_Accuracy_Left", "Min_EER_Left", "Min_Accuracy_Right", "Min_EER_Right",
+"Max_Accuracy_Left", "Max_EER_Left", "Max_Accuracy_Right", "Max_EER_Right",
+"Median_Accuracy_Left", "Median_EER_Left", "Median_Accuracy_Right", "Median_EER_Right"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
 
-X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Left', 'Mean_EER_Left'], ascending = [False, True]).iloc[:10,:8]
-# print(X.head())
+
+X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [False, True]).iloc[:10,:8]
+
+print(Results_DF_temp.reset_index(drop=True).head())
+
 with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())
+    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))
 
-X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Left', 'Mean_EER_Left'], ascending = [True, False]).iloc[:10,:8]
+X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [True, False]).iloc[:10,:8]
 # print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())
+    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))
 
 
 
 
 
 
-X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Right', 'Mean_EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Mean_Accuracy_Left', 'Mean_EER_Left'])
+X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
 print(X.head())
 with open(os.path.join("Manuscripts", "src", "tables", "top10_right.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())      
+    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))      
 
-X = Results_DF_temp.sort_values(by=['Mean_Accuracy_Right', 'Mean_EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Mean_Accuracy_Left', 'Mean_EER_Left'])
+X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
 print(X.head())
+
 with open(os.path.join("Manuscripts", "src", "tables", "worse10_right.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())          
+    tf.write(X.round(decimals=2).to_latex(index=False, multirow = True))          
 
 
 
