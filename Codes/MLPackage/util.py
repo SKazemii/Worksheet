@@ -36,56 +36,56 @@ def PCA_func(DF_features, persentage ):
 
 
 def model(distModel1, distModel2, model_type = "average", score = None ):
-    if score == None:
+    if score is None:
         if model_type == "average":
-            # Model_client = (np.sum(distModel1, axis = 0))/(distModel1.shape[1]-1)
-            Model_client = np.mean(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
-            Model_client = np.expand_dims(Model_client,-1)
+            # model_client = (np.sum(distModel1, axis = 0))/(distModel1.shape[1]-1)
+            model_client = np.mean(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
+            model_client = np.expand_dims(model_client,-1)
             
-            Model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
-            Model_imposter = np.expand_dims(Model_imposter, -1)
+            model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
+            model_imposter = np.expand_dims(model_imposter, -1)
                 
         elif model_type == "min":
 
-            Model_client = np.min(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
-            Model_client = np.expand_dims(Model_client,-1)
+            model_client = np.min(np.ma.masked_where(distModel1==0,distModel1), axis = 0)
+            model_client = np.expand_dims(model_client,-1)
             
-            Model_imposter = np.min(np.ma.masked_where(distModel2==0,distModel2), axis = 0)
-            Model_imposter = np.expand_dims(Model_imposter, -1)
+            model_imposter = np.min(np.ma.masked_where(distModel2==0,distModel2), axis = 0)
+            model_imposter = np.expand_dims(model_imposter, -1)
                     
         elif model_type == "median":
-            Model_client = np.median(distModel1, axis = 0)
-            Model_client = np.expand_dims(Model_client,-1)
+            model_client = np.median(distModel1, axis = 0)
+            model_client = np.expand_dims(model_client,-1)
             
 
-            Model_imposter = np.median(distModel2, axis = 0)
-            Model_imposter = np.expand_dims(Model_imposter, -1)
+            model_imposter = np.median(distModel2, axis = 0)
+            model_imposter = np.expand_dims(model_imposter, -1)
 
-    if score != None:
+    if score is not None:
         if model_type == "average":
-            Model_client = np.mean(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
-            Model_client = np.expand_dims(Model_client,-1)
+            model_client = np.mean(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
+            model_client = np.expand_dims(model_client,-1)
             
-            Model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
-            Model_imposter = np.expand_dims(Model_imposter, -1)
+            model_imposter = (np.sum(distModel2, axis = 0))/(distModel1.shape[1])
+            model_imposter = np.expand_dims(model_imposter, -1)
                 
         elif model_type == "min":
 
-            Model_client = np.max(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
-            Model_client = np.expand_dims(Model_client,-1)
+            model_client = np.max(np.ma.masked_where(distModel1==1,distModel1), axis = 0)
+            model_client = np.expand_dims(model_client,-1)
             
-            Model_imposter = np.max(np.ma.masked_where(distModel2==1,distModel2), axis = 0)
-            Model_imposter = np.expand_dims(Model_imposter, -1)
+            model_imposter = np.max(np.ma.masked_where(distModel2==1,distModel2), axis = 0)
+            model_imposter = np.expand_dims(model_imposter, -1)
                     
         elif model_type == "median":
-            Model_client = np.median(distModel1, axis = 0)
-            Model_client = np.expand_dims(Model_client,-1)            
+            model_client = np.median(distModel1, axis = 0)
+            model_client = np.expand_dims(model_client,-1)            
 
-            Model_imposter = np.median(distModel2, axis = 0)
-            Model_imposter = np.expand_dims(Model_imposter, -1)
+            model_imposter = np.median(distModel2, axis = 0)
+            model_imposter = np.expand_dims(model_imposter, -1)
     
 
-    return Model_client, Model_imposter
+    return model_client, model_imposter
 
 
 def compute_score(distance, mode = "A"):
@@ -99,13 +99,17 @@ def compute_score(distance, mode = "A"):
 
 def compute_eer(fpr, fnr):
     """ Returns equal error rate (EER) and the corresponding threshold. """
-    abs_diffs = np.abs(np.subtract(fpr, fnr))    
-    min_index = np.argmin(abs_diffs)
+    abs_diffs = np.abs(np.subtract(fpr, fnr)) 
+    mmin = min(abs_diffs)   
+    idxs = np.where(abs_diffs == mmin)
+
+    min_index = np.max(idxs)#np.argmin(abs_diffs)
     eer = np.mean((fpr[min_index], fnr[min_index]))
+
     return eer, min_index
 
 
-def ROC_plot(TPR, FPR, path):
+def ROC_plot(TPR, FPR):
     """plot ROC curve"""
     plt.figure()
     auc = 1 * np.trapz(TPR, FPR)
@@ -118,7 +122,7 @@ def ROC_plot(TPR, FPR, path):
     plt.ylabel('True Positive Rate')
     plt.title('ROC curve, AUC = %.2f'%auc)
     plt.legend(loc="lower right")
-    plt.savefig(path + 'AUC.png')
+    # plt.savefig(path + 'AUC.png')
 
 
 def ROC_plot_v2(FPR, FNR,THRESHOLDs, path):
