@@ -1,6 +1,7 @@
 \documentclass{beamer}
 \usetheme{Boadilla}
 \usepackage{booktabs}
+\usepackage{adjustbox}
 \usefonttheme{serif}
 \subtitle{Using Beamer}
 \usepackage{pgffor}
@@ -103,86 +104,61 @@
 \end{frame}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\foreach \n in {Test size}{
-\section{Test size}
-\foreach \t in {20 percent, 35 percent, 50 percent}{
 
-\begin{frame}
-\frametitle{\t \ \n}
-\tiny
-\begin{table}
-\centering
-\caption{\small The accuracy and ERR of \t \  \n.}
-\input{tables/\t.tex}
-\end{table}
-\end{frame}
-}
-
-\begin{frame}
-\centering
-\frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
-\end{frame}
-}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\foreach \n in {Normalization algorithm}{
-\section{\n}
+\section{Normalization algorithm}
 \def \variable {MinMax}%MinMax
-\foreach \t in {Z-score algorithm, MinMax algorithm, None}{
 
 \begin{frame}
-\frametitle{\t}
+\frametitle{Z-score algorithm vs MinMax algorithm vs None}
 \tiny
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of \t.}
+\caption{\small The accuracy and ERR of different normalization algorithm.}
 \label{tab:parameters condition}
-\input{tables/\t.tex}
+\input{tables/MinMax.tex}
 \end{table}
 \end{frame}
-}
+
 
 \begin{frame}
 \centering
-\frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
+\frametitle{Z-score algorithm vs MinMax algorithm vs None (ROC curve)}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/MinMax.png}
 \end{frame}
-}
+
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\foreach \n in {COP features}{
-\section{\n}
-\def \variable {feat}%feat
-\foreach \t in {All features, Only MDIST features, Only RDIST features, Only TOTEX features, Only MVELO features, Only RANGE features, Only AREAXX features, Only MFREQ features, Only FDPD features, Only FDCX features}{  
+\section{COP features}
+
 
 \begin{frame}
-\frametitle{\t}
+\frametitle{comparing COP features}
 \tiny
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\tiny The accuracy and ERR of \t.}
+\caption{\tiny The accuracy and ERR of COP features.}
 \label{tab:parameters condition}
-\input{tables/\t.tex}
+\input{tables/feat.tex}
 \end{table}
 \end{frame}
-}
+
 
 \begin{frame}
 \centering
-\frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
+\frametitle{comparing COP features (ROC curve)}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/feat.png}
 \end{frame}
-}
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,11 +169,9 @@
 \frametitle{The top-10 best features for the left foot.}
 \tiny
 \begin{table}
-\begin{adjustbox}
 \centering
 \caption{\small The top-10 best features for the left foot.}
 \input{tables/top10_left.tex}
-\end{adjustbox}
 \end{table}
 \end{frame}
 
@@ -207,11 +181,9 @@
 \frametitle{The top-10 best features for the right foot.}
 \tiny
 \begin{table}
-\begin{adjustbox}
 \centering
 \caption{\small The top-10 best features for the right foot.}
 \input{tables/top10_right.tex}
-\end{adjustbox}
 \end{table}
 \end{frame}
 
@@ -221,11 +193,9 @@
 \frametitle{The top-10 worst features for the left foot.}
 \tiny
 \begin{table}
-\begin{adjustbox}
 \centering
 \caption{\small The top-10 worst features for the left foot.}
 \input{Manuscripts/src/tables/worse10_left}
-\end{adjustbox}
 \end{table}
 \end{frame}
 
@@ -235,43 +205,39 @@
 \frametitle{The top-10 worst features for the right foot.}
 \tiny
 \begin{table}
-\begin{adjustbox}
 \centering
 \caption{\small The top-10 worst features for the right foot.}
 \input{Manuscripts/src/tables/worse10_right}
-\end{adjustbox}
 \end{table}
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Feature Selection Results}
-\begin{frame}[shrink=10]
-\frametitle{The top-10 best features based on feature selection algorithm.}
-\tiny
-\begin{table}
-\begin{adjustbox}
-\centering
-\caption{\small The top-10 best features based on feature selection algorithm.}
-\input{Manuscripts/src/tables/top10best_feature_selection}
-\end{adjustbox}
-\end{table}
-\end{frame}
+%\section{Feature Selection Results}
+%\begin{frame}[shrink=10]
+%\frametitle{The top-10 best features based on feature selection algorithm.}
+%\tiny
+%\begin{table}
+%\centering
+%\caption{\small The top-10 best features based on feature selection algorithm.}
+%\input{Manuscripts/src/tables/top10best_feature_selection}
+%\end{table}
+%\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}[shrink=10]
-\frametitle{The top-10 worst features based on feature selection algorithm.}
-\tiny
-\begin{table}
-\begin{adjustbox}
-\centering
-\caption{\small The top-10 worst features based on feature selection algorithm.}
-\input{Manuscripts/src/tables/top10worst_feature_selection}
-\end{adjustbox}
-\end{table}
-\end{frame}
+%\begin{frame}[shrink=10]
+%\frametitle{The top-10 worst features based on feature selection algorithm.}
+%\tiny
+%\begin{table}
+%\begin{adjustbox}
+%\centering
+%\caption{\small The top-10 worst features based on feature selection algorithm.}
+%\input{Manuscripts/src/tables/top10worst_feature_selection}
+%\end{adjustbox}
+%\end{table}
+%\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
