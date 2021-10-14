@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from MLPackage import util as perf
 
-test_ratios = [0.2, 0.35, 0.5]
+test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 persentages = [1.0]#[0.95, 1.0]
 modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
@@ -34,7 +34,6 @@ THRESHOLDs = np.linspace(0, 1, 100)
 score = "A"#"B"
 normilizings = ["z-score"]#["None", "z-score", "minmax"]
 
-classifier = "knn"#"matching"
 
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
@@ -326,15 +325,37 @@ for persentage in persentages:
                         Results_DF = Results_DF.append(z)
 
                         index = index + 1
-                        print("[INFO] ------ stage {:} of 1080".format(index))
+                        
 
                         Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
                         toc=timeit.default_timer()
-                        print("[INFO] Process time: ", toc - tic) #elapsed time in seconds
-                        sys.exit()
-toc=timeit.default_timer()
-print("[INFO] Process time: ", toc - tic) #elapsed time in seconds
+                        print("[INFO] ------ stage {:} of 1080.  Process time = {:.2f}  seconds".format(index,toc - tic)) 
+                        # sys.exit()
+
+
 
 print(Results_DF.head(  ))                       
 print("[INFO] Done!!!")
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# \foreach \n in {Test size}{
+# \section{Test size}
+# \foreach \t in {20 percent, 35 percent, 50 percent}{
+
+# \begin{frame}
+# \frametitle{\t \ \n}
+# \tiny
+# \begin{table}
+# \centering
+# \caption{\small The accuracy and ERR of \t \  \n.}
+# \input{tables/\t.tex}
+# \end{table}
+# \end{frame}
+# }
+
+# \begin{frame}
+# \centering
+# \frametitle{The ROC curve}
+# \includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
+# \end{frame}
