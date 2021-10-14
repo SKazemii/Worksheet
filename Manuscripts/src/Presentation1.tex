@@ -32,92 +32,81 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\foreach \n in {Score Matrix}{
-\section{\n}
-\def \variable {Correlation}
-\foreach \t in {Euclidean Distance, Correlation}{
+\section{Score Matrix}
 
 \begin{frame}
-\frametitle{\t}
+\frametitle{Euclidean distance vs Correlation}
 \tiny
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of \t.}
+\caption{\small The accuracy and ERR of Euclidean distance and Correlation.}
 \label{tab:parameters condition}
-\input{tables/\t.tex}
+\input{tables/Correlation.tex}
 \end{table}
 \end{frame}
-}
+
 
 \begin{frame}
 \centering
-\frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
+\frametitle{Euclidean distance vs Correlation (ROC curve)}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/Correlation.png}
 \end{frame}
-}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\foreach \n in {Model type}{
-\section{\n}
-\def \variable {Median}
-\foreach \t in {Minimum, Median, Average}{
+\section{Criteria}
 
 \begin{frame}
-\frametitle{\t \ Model}
+\frametitle{Minimum vs Median vs Average}
 \tiny
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of \t \ model.}
+\caption{\small The accuracy and ERR of Minimum, Median and Average.}
 \label{tab:parameters condition}
-\input{tables/\t.tex}
+\input{tables/Minimum.tex}
 \end{table}
 \end{frame}
-}
+
 
 \begin{frame}
 \centering
-\frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
+\frametitle{Minimum vs Median vs Average (ROC curve)}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/Minimum.png}
 \end{frame}
-}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\foreach \n in {PCA}{
-\section{\n}
-\def \variable {PCA} %PCA
-\foreach \t in {All Data, Keeping 95 percent of variance}{
+\section{PCA}
 
 \begin{frame}
-\frametitle{\t}
+\frametitle{All PCs vs Keeping 95 percent of variance}
 \tiny
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of \t.}
+\caption{\small The accuracy and ERR of All PCs and Keeping 95 percent of variance.}
 \label{tab:parameters condition}
-\input{tables/\t.tex}
+\input{tables/PCA.tex}
 \end{table}
 \end{frame}
-}
+
 
 \begin{frame}
 \centering
-\frametitle{The ROC curve}
-\includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
+\frametitle{All PCs vs Keeping 95 percent of variance (ROC curve)}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/PCA.png}
 \end{frame}
-}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \foreach \n in {Test size}{
-\section{\n}
-\def \variable {testsize}%testsize
+\section{Test size}
 \foreach \t in {20 percent, 35 percent, 50 percent}{
 
 \begin{frame}
@@ -257,7 +246,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Feature Selection}
+\section{Feature Selection Results}
 \begin{frame}[shrink=10]
 \frametitle{The top-10 best features based on feature selection algorithm.}
 \tiny
@@ -295,22 +284,16 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Summary}
+%\section{Summary}
 
-\begin{frame}{Summary}
+%\begin{frame}{Summary}
 
-\begin{enumerate}[(I)]
-\item Point A
-\item Point B
-\begin{enumerate}[(i)]
-\item part 1
-\item part 2
-\end{enumerate}
-\item Point C
-\item Point D
-\end{enumerate}
+%\begin{itemize}
+%    \item gg
+%\end{itemize}
+
     
-\end{frame}
+%\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
