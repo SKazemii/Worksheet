@@ -27,22 +27,29 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from MLPackage import util as perf
 
 test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [1.0]#[0.95, 1.0]
-modes = ["corr"]
+persentages = [0.95, 1.0]
+modes = ["corr"]#, "dist"]
 model_types = ["min", "median", "average"]
 THRESHOLDs = np.linspace(0, 1, 100)
 score = "A"#"B"
-normilizings = ["z-score"]#["None", "z-score", "minmax"]
+normilizings = ["z-score", "minmax"]
 
 
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
 
-cols = ["Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA",
-"Mean_Accuracy_Left", "Mean_EER_Left", "Mean_Accuracy_Right", "Mean_EER_Right",
-"Min_Accuracy_Left", "Min_EER_Left", "Min_Accuracy_Right", "Min_EER_Right",
-"Max_Accuracy_Left", "Max_EER_Left", "Max_Accuracy_Right", "Max_EER_Right",
-"Median_Accuracy_Left", "Median_EER_Left", "Median_Accuracy_Right", "Median_EER_Right"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+cols = ["Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number of PCs",
+        "Mean_sample_test_Left", "Mean_Accuracy_Left", "Mean_f1-score_Left", "Mean_EER_Left", 
+        "Mean_sample_test_Right","Mean_Accuracy_Right", "Mean_f1-score_Right", "Mean_EER_Right",
+
+        "std_sample_test_Left", "std_Accuracy_Left", "std_f1-score_Left", "std_EER_Left", 
+        "std_sample_test_Right","std_Accuracy_Right", "std_f1-score_Right", "std_EER_Right",
+
+        "Min_sample_test_Left", "Min_Accuracy_Left", "Min_f1-score_Left", "Min_EER_Left", 
+        "Min_sample_test_Right","Min_Accuracy_Right", "Min_f1-score_Right", "Min_EER_Right",
+
+        "Max_sample_test_Left", "Max_Accuracy_Left", "Max_f1-score_Left", "Max_EER_Left", 
+        "Max_sample_test_Right", "Max_Accuracy_Right", "Max_f1-score_Right", "Max_EER_Right"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
 
 Results_DF = pd.DataFrame(columns=cols)
 working_path = os.getcwd()
@@ -59,23 +66,16 @@ pfeatures = np.load(feature_path)
 features = pfeatures
 
 index =0
-tic=timeit.default_timer()
+
 for persentage in persentages:
     for normilizing in normilizings:
-        if normilizing == "minmax":
-            scaling = preprocessing.MinMaxScaler()
-            Scaled_data = scaling.fit_transform(features[:, :-2])
-        elif normilizing == "z-score":
-            scaling = preprocessing.StandardScaler()
-            Scaled_data = scaling.fit_transform(features[:, :-2])
-        elif normilizing == "None":
-            Scaled_data = features[:, :-2]
+
 
         print("[INFO] feature shape: ", features.shape)
         columnsName = ["feature_" + str(i) for i in range(features.shape[1]-2)] + [ "subject ID", "left(0)/right(1)"]
 
         DF_features_all = pd.DataFrame(
-            np.concatenate((Scaled_data,features[:, -2:]), axis = 1),
+            features,
             columns = columnsName 
         )
 
@@ -98,7 +98,7 @@ for persentage in persentages:
                 DF_features = DF_features_all.copy()
                 feat_name = "All"
             else:
-                break
+                continue
                 DF_features = DF_features_all.copy()
                 DF_features.drop(DF_features.columns[[range(x+3,features.shape[1]-2)]], axis = 1, inplace = True)
                 DF_features.drop(DF_features.columns[[range(0,x)]], axis = 1, inplace = True)
@@ -112,12 +112,11 @@ for persentage in persentages:
             for mode in modes:
 
                 if mode == "corr" and feat_name != "All" and persentage != 1.0:
-                    break
+                    continue
                 
                 for model_type in model_types:
                     for test_ratio in test_ratios:
-
-                        
+                        tic=timeit.default_timer()
 
                         EER_L = list(); FAR_L = list(); FRR_L = list()
                         EER_R = list(); FAR_R = list(); FRR_R = list()
@@ -140,9 +139,9 @@ for persentage in persentages:
                             if (subject % 86) == 0:
                                 continue
                             
-                            if (subject % 20) == 0:
+                            if (subject % 10) == 0:
                                 print("[INFO] --------------- Subject Number: ", subject)
-                                # break
+                                break
                             
                             for idx, direction in enumerate(["left_0", "right_1"]):
 
@@ -164,37 +163,56 @@ for persentage in persentages:
                                                                                       replace = False, 
                                                                                       random_state = 2)
                                 DF_negative_samples_train = DF_negative_samples.drop(DF_negative_samples_test.index)
+                                
+                                
+                                df_train = pd.concat([DF_positive_samples_train, DF_negative_samples_train])
+                                df_test = pd.concat([DF_positive_samples_test, DF_negative_samples_test])
 
-                                if persentage != 1.0:
-                                    df_train = pd.concat([DF_positive_samples_train, DF_negative_samples_train])
-                                    df_test = pd.concat([DF_positive_samples_test, DF_negative_samples_test])
-
-                                    scaling = StandardScaler()
+                                if normilizing == "minmax":
+                                    scaling = preprocessing.MinMaxScaler()
                                     Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
                                     Scaled_test = scaling.transform(df_test.iloc[:, :-2])
 
-                                    principal = PCA()
-                                    PCA_out_train = principal.fit_transform(Scaled_train)
-                                    PCA_out_test = principal.transform(Scaled_test)
 
-                                    variance_ratio = np.cumsum(principal.explained_variance_ratio_)
-                                    high_var_PC = np.zeros(variance_ratio.shape)
-                                    high_var_PC[variance_ratio <= persentage] = 1
-
-                                    loadings = principal.components_
-                                    num_pc = int(np.sum(high_var_PC))
+                                elif normilizing == "z-score":
+                                    scaling = preprocessing.StandardScaler()
+                                    Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
+                                    Scaled_test = scaling.transform(df_test.iloc[:, :-2])
 
 
-                                    columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
-                                    DF_features_PCA_train = (pd.DataFrame(np.concatenate((PCA_out_train[:,:num_pc],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName))
-                                    DF_features_PCA_test = (pd.DataFrame(np.concatenate((PCA_out_test[:,:num_pc],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName))
+                                elif normilizing == "None":
+                                    Scaled_train = df_train
+                                    Scaled_test = df_test 
+                                
+                                
 
-                                    DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
-                                    DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
+                                # if persentage != 1.0:
                                     
-                                    
-                                    DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
-                                    DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
+                                #     if normilizing == "None":
+                                #         continue
+
+                                principal = PCA()
+                                PCA_out_train = principal.fit_transform(Scaled_train)
+                                PCA_out_test = principal.transform(Scaled_test)
+
+                                variance_ratio = np.cumsum(principal.explained_variance_ratio_)
+                                high_var_PC = np.zeros(variance_ratio.shape)
+                                high_var_PC[variance_ratio <= persentage] = 1
+
+                                loadings = principal.components_
+                                num_pc = int(np.sum(high_var_PC))
+
+
+                                columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
+                                DF_features_PCA_train = (pd.DataFrame(np.concatenate((PCA_out_train[:,:num_pc],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName))
+                                DF_features_PCA_test = (pd.DataFrame(np.concatenate((PCA_out_test[:,:num_pc],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName))
+
+                                DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
+                                DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
+                                
+                                
+                                DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
+                                DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
 
 
@@ -293,28 +311,50 @@ for persentage in persentages:
                         np.save(os.path.join(folder_path,   'ACC_R.npy'), ACC_R)
 
 
-
+                        toc=timeit.default_timer()
+                        print("[INFO] ------ stage {:} of 1080.  Process time = {:.2f}  seconds".format(index,toc - tic)) 
                         
-                        A = [[mode, model_type, test_ratio, normilizing, feat_name, persentage, 
-                        np.mean( np.array(ACC_L)[:,2] ), 
-                        np.mean( np.array(EER_L)[:,0] ),
-                        np.mean( np.array(ACC_R)[:,2] ),
-                        np.mean( np.array(EER_R)[:,0] ),
+                        
 
+                        A = [[mode, model_type, test_ratio, normilizing, feat_name, persentage, (toc - tic), num_pc,
+
+                        np.mean( np.array(ACC_L)[:,4] ), 
+                        np.mean( np.array(ACC_L)[:,2] ), 
+                        np.mean( np.array(ACC_L)[:,3] ), 
+                        np.mean( np.array(EER_L)[:,0] ),
+                        np.mean( np.array(ACC_R)[:,4] ), 
+                        np.mean( np.array(ACC_R)[:,2] ),
+                        np.mean( np.array(ACC_R)[:,3] ), 
+                        np.mean( np.array(EER_R)[:,0] ),
+                        
+                        np.std( np.array(ACC_L)[:,4] ), 
+                        np.std( np.array(ACC_L)[:,2] ),
+                        np.std( np.array(ACC_L)[:,3] ), 
+                        np.std( np.array(EER_L)[:,0] ),
+                        np.std( np.array(ACC_R)[:,4] ), 
+                        np.std( np.array(ACC_R)[:,2] ),
+                        np.std( np.array(ACC_R)[:,3] ), 
+                        np.std( np.array(EER_R)[:,0] ),
+
+                        np.min( np.array(ACC_L)[:,4] ), 
                         np.min( np.array(ACC_L)[:,2] ),
+                        np.min( np.array(ACC_L)[:,3] ), 
                         np.min( np.array(EER_L)[:,0] ),
+                        np.min( np.array(ACC_R)[:,4] ), 
                         np.min( np.array(ACC_R)[:,2] ),
+                        np.min( np.array(ACC_R)[:,3] ), 
                         np.min( np.array(EER_R)[:,0] ),
 
-                        np.max( np.array(ACC_L)[:,2] ),
-                        np.max( np.array(EER_L)[:,0] ),
-                        np.max( np.array(ACC_R)[:,2] ),
-                        np.max( np.array(EER_R)[:,0] ),
 
-                        np.median( np.array(ACC_L)[:,2] ),
-                        np.median( np.array(EER_L)[:,0] ),
-                        np.median( np.array(ACC_R)[:,2] ),
-                        np.median( np.array(EER_R)[:,0] )] +
+                        np.max( np.array(ACC_L)[:,4] ), 
+                        np.max( np.array(ACC_L)[:,2] ),
+                        np.max( np.array(ACC_L)[:,3] ), 
+                        np.max( np.array(EER_L)[:,0] ),
+                        np.max( np.array(ACC_R)[:,4] ), 
+                        np.max( np.array(ACC_R)[:,2] ),
+                        np.max( np.array(ACC_R)[:,3] ), 
+                        np.max( np.array(EER_R)[:,0] )] +
+
                         np.concatenate((np.mean(np.array(FAR_L), axis=0), np.mean(np.array(FRR_L), axis=0)), axis=0).tolist()+
                         np.concatenate((np.mean(np.array(FAR_R), axis=0), np.mean(np.array(FRR_R), axis=0)), axis=0).tolist()]
 
@@ -328,8 +368,6 @@ for persentage in persentages:
                         
 
                         Results_DF.to_excel(os.path.join(working_path, 'results', 'Results_DF.xlsx'))
-                        toc=timeit.default_timer()
-                        print("[INFO] ------ stage {:} of 1080.  Process time = {:.2f}  seconds".format(index,toc - tic)) 
                         # sys.exit()
 
 

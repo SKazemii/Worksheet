@@ -30,6 +30,7 @@ project_dir = os.getcwd()
 fig_dir = os.path.join(project_dir, "Manuscripts", "src", "figures")
 tbl_dir = os.path.join(project_dir, "Manuscripts", "src", "tables")
 data_dir = os.path.join(project_dir, "Archive", "results_All")
+data_dir = os.path.join(project_dir, "results")
 
 Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
 Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
@@ -47,11 +48,11 @@ if False:
     
 else:
     # Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
-    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'), index_col = 0)
+    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
 # sys.exit()
 
 
-test_ratios = [0.2, 0.35, 0.5]
+test_ratios = [0.1, 0.2, 0.25]#, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
 persentages = [1.0, 0.95]
 Modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
@@ -59,39 +60,53 @@ THRESHOLDs = np.linspace(0, 1, 100)
 normilizings = ["z-score", "minmax", "None"]
 feature_names = ["All", "MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
-color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink']
+color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
+
+
+
+
+
 
 
 
 
 Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
 Results_DF_temp = Results_DF_temp[   Results_DF_temp["Mean_EER_Left"] != 0   ]
-Results_DF_temp.columns = ["Mode", "Model_Type", "TestSize", "Norm", "Features_Set", "PCA", "Acc_Left", "EER_Left", "Acc_Right", "EER_Right","Min_Accuracy_Left", "Min_EER_Left", "Min_Accuracy_Right", "Min_EER_Right",
-"Max_Accuracy_Left", "Max_EER_Left", "Max_Accuracy_Right", "Max_EER_Right",
-"Median_Accuracy_Left", "Median_EER_Left", "Median_Accuracy_Right", "Median_EER_Right"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+Results_DF_temp.columns = ["Mode", "Model_Type", "TestSize", "Norm", "Features_Set", "PCA", "Time", "Number of PCs",
+        "Mean_sample_test_Left", "Acc_Left", "f1_Left", "EER_Left", 
+        "Mean_sample_test_Right","Acc_Right", "f1_Right", "EER_Right",
+
+        "std_sample_test_Left", "std_Accuracy_Left", "std_f1-score_Left", "std_EER_Left", 
+        "std_sample_test_Right","std_Accuracy_Right", "std_f1-score_Right", "std_EER_Right",
+
+        "Min_sample_test_Left", "Min_Accuracy_Left", "Min_f1-score_Left", "Min_EER_Left", 
+        "Min_sample_test_Right","Min_Accuracy_Right", "Min_f1-score_Right", "Min_EER_Right",
+
+        "Max_sample_test_Left", "Max_Accuracy_Left", "Max_f1-score_Left", "Max_EER_Left", 
+        "Max_sample_test_Right", "Max_Accuracy_Right", "Max_f1-score_Right", "Max_EER_Right",] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+
+print(Results_DF)
+# X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [False, True]).iloc[:10,:8]
+# with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
+#     tf.write(X.round(decimals=2).to_latex())
+
+# X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [True, False]).iloc[:10,:8]
+# with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w") as tf:
+#     tf.write(X.round(decimals=2).to_latex())
 
 
-X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [False, True]).iloc[:10,:8]
-with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())
-
-X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [True, False]).iloc[:10,:8]
-with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())
 
 
 
 
+# X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
+# with open(os.path.join("Manuscripts", "src", "tables", "top10_right.tex"), "w") as tf:
+#     tf.write(X.round(decimals=2).to_latex())      
 
 
-X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
-with open(os.path.join("Manuscripts", "src", "tables", "top10_right.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())      
-
-
-X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
-with open(os.path.join("Manuscripts", "src", "tables", "worse10_right.tex"), "w") as tf:
-    tf.write(X.round(decimals=2).to_latex())          
+# X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
+# with open(os.path.join("Manuscripts", "src", "tables", "worse10_right.tex"), "w") as tf:
+#     tf.write(X.round(decimals=2).to_latex())          
 
 
 
@@ -118,6 +133,9 @@ for idx, temp in enumerate(Modes):
     Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
     Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Right"].mean(),      Results_DF_all_mode["Mean_EER_Right"].std(), Results_DF_all_mode["Mean_EER_Right"].min(), Results_DF_all_mode["Mean_EER_Right"].max())    
        
+    # plt.boxplot(Results_DF_all_mode["Mean_Accuracy_Left"])
+    # plt.show()
+
     cols = ["FAR_L_" + str(i) for i in range(100)] 
     FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
 
@@ -328,24 +346,40 @@ with open(os.path.join("Manuscripts", "src", "tables", "MinMax1.tex"), "w") as t
 #########################################################################################################
 #########################################################################################################
 #########################################################################################################
+a = ["10 percent", "20 percent", "25 percent", "30 percent", "40 percent", "50 percent", "60 percent","70 percent", "75 percent", "80 percent" , "90 percent"]
 
 plt.figure(figsize=(14,8))
-X = pd.DataFrame(index=["20 percent", "35 percent", "50 percent"] , columns=["Accuracy Left", "Accuracy Right"])
-Y = pd.DataFrame(index=["20 percent", "35 percent", "50 percent"] , columns=[ "EER Left", "EER Right"])
+X = pd.DataFrame(index=a , columns=["Accuracy Left", "Accuracy Right"])
+Y = pd.DataFrame(index=a , columns=[ "EER Left", "EER Right"])
+Z = pd.DataFrame(index=a , columns=[ "Left", "Right"])
 
 FAR_L = list()
 FRR_L = list()
 FAR_R = list()
 FRR_R = list()
 for idx, temp in enumerate(test_ratios):
-    a = ["20 percent", "35 percent", "50 percent"]
+    a = ["10 percent", "20 percent", "25 percent", "30 percent", "40 percent", "50 percent", "60 percent","70 percent", "75 percent", "80 percent" , "90 percent"]
   
-    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Test_Size"] == temp   ]
+    Results_DF_all_mode = Results_DF_all[   Results_DF_all["Test_Size"] == temp   ].reset_index()
 
     X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
     X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
     Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
     Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Right"].mean(),      Results_DF_all_mode["Mean_EER_Right"].std(), Results_DF_all_mode["Mean_EER_Right"].min(), Results_DF_all_mode["Mean_EER_Right"].max())    
+
+    print(        Results_DF_all_mode.at[0, "Mean_sample_test_Left"])
+    Z.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:2.2f}, {:2.2f})".format(
+        Results_DF_all_mode.at[0, "Mean_sample_test_Left"], 
+        Results_DF_all_mode.at[0, "std_sample_test_Left"],
+        Results_DF_all_mode.at[0, "Min_sample_test_Left"],
+        Results_DF_all_mode.at[0, "Max_sample_test_Left"])
+
+    Z.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:2.2f}, {:2.2f})".format(
+        Results_DF_all_mode.at[0, "Mean_sample_test_Right"], 
+        Results_DF_all_mode.at[0, "std_sample_test_Right"],
+        Results_DF_all_mode.at[0, "Min_sample_test_Right"],
+        Results_DF_all_mode.at[0, "Max_sample_test_Right"])
+
 
 
     cols = ["FAR_L_" + str(i) for i in range(100)] 
@@ -402,7 +436,8 @@ with open(os.path.join("Manuscripts", "src", "tables", "testsize.tex"), "w") as 
     tf.write(X.round(decimals=2).to_latex())
 with open(os.path.join("Manuscripts", "src", "tables", "testsize1.tex"), "w") as tf:
     tf.write(Y.round(decimals=2).to_latex())
-
+with open(os.path.join("Manuscripts", "src", "tables", "testsize2.tex"), "w") as tf:
+    tf.write(Z.round(decimals=2).to_latex())
 
 #########################################################################################################
 #########################################################################################################
