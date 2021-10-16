@@ -20,7 +20,6 @@ from sklearn.metrics import (
 )
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -65,32 +64,27 @@ pfeatures = np.load(feature_path)
 # features = np.concatenate((pfeatures[:, :-2],afeatures), axis = -1)
 features = pfeatures
 
+print("[INFO] feature shape: ", features.shape)
+columnsName = ["feature_" + str(i) for i in range(features.shape[1]-2)] + [ "subject ID", "left(0)/right(1)"]
+
+DF_features_all = pd.DataFrame( features, columns = columnsName )
+
+
+
+print(DF_features_all.head())
+DF_features_all = DF_features_all.fillna(0)
+
+subjects = (DF_features_all["subject ID"].unique())
+
+
+labels = DF_features_all["subject ID"].values
+labels = (np.expand_dims(labels, axis = -1))
+
+
 index =0
 
 for persentage in persentages:
     for normilizing in normilizings:
-
-
-        print("[INFO] feature shape: ", features.shape)
-        columnsName = ["feature_" + str(i) for i in range(features.shape[1]-2)] + [ "subject ID", "left(0)/right(1)"]
-
-        DF_features_all = pd.DataFrame(
-            features,
-            columns = columnsName 
-        )
-
-
-
-        print(DF_features_all.head())
-        DF_features_all = DF_features_all.fillna(0)
-
-        subjects = (DF_features_all["subject ID"].unique())
-
-
-        labels = DF_features_all["subject ID"].values
-        labels = (np.expand_dims(labels, axis = -1))
-
-        ###############################
         # pMDIST, pRDIST, pTOTEX, pMVELO, pRANGE, [pAREACC], [pAREACE], pMFREQ, pFDPD, [pFDCC], [pFDCE], [pAREASW]
         for x in range(-3,features.shape[1]-2,3):
         # for x in range(-3,5,3):
@@ -98,15 +92,11 @@ for persentage in persentages:
                 DF_features = DF_features_all.copy()
                 feat_name = "All"
             else:
-                continue
+                # continue
                 DF_features = DF_features_all.copy()
                 DF_features.drop(DF_features.columns[[range(x+3,features.shape[1]-2)]], axis = 1, inplace = True)
                 DF_features.drop(DF_features.columns[[range(0,x)]], axis = 1, inplace = True)
                 feat_name = feature_names[int(x/3)]
-
-
-            
-
 
 
             for mode in modes:
@@ -116,6 +106,7 @@ for persentage in persentages:
                 
                 for model_type in model_types:
                     for test_ratio in test_ratios:
+                        
                         tic=timeit.default_timer()
 
                         EER_L = list(); FAR_L = list(); FRR_L = list()
@@ -141,7 +132,7 @@ for persentage in persentages:
                             
                             if (subject % 10) == 0:
                                 print("[INFO] --------------- Subject Number: ", subject)
-                                break
+                                # break
                             
                             for idx, direction in enumerate(["left_0", "right_1"]):
 
