@@ -40,10 +40,10 @@ def main():
     # model_types = perf.model_types
     # normilizings = perf.normilizings
 
-    test_ratios = [0.1, 0.2, 0.25]#, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+    test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
     persentages = [0.95]#, 1.0]
-    modes = ["corr"]#, "dist"]
-    model_types = ["min"]#, "median", "average"]
+    modes = ["corr", "dist"]
+    model_types = ["min", "median", "average"]
     normilizings = ["z-score"]#, "minmax"]
 
 
@@ -62,7 +62,7 @@ def main():
 
 
 
-    feature_path = os.path.join(working_path, 'Datasets', features_excel[5])
+    feature_path = os.path.join(working_path, 'Datasets', features_excel[0])
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
     # print(DF_features_all)
     # print(DF_features_all.shape[1])
@@ -74,16 +74,6 @@ def main():
     print("[INFO] feature shape: ", DF_features_all.shape)
 
 
-
-
-    
-
- 
-
-
-    index = 0
-    
-    
     
     for persentage in persentages:
         for normilizing in normilizings:
@@ -93,7 +83,7 @@ def main():
                         if mode == "corr" and x != -3 and persentage != 1.0:
                             continue
 
-                        tic=timeit.default_timer()
+                        
                         pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
                         for test_ratio in test_ratios:
                             folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
@@ -103,17 +93,16 @@ def main():
 
                         pool.close()
                         pool.join()
-                        toc=timeit.default_timer()
-
-
-    # print(Results_DF.head(  ))                       
-    print("[INFO] Done ({:2.2f} process time)!!!\n\n\n".format(toc-tic))
 
 
 
 if __name__ == '__main__': 
     print("\n\n\n[INFO] starting !!!")
+    tic = timeit.default_timer()
     main()
+    toc = timeit.default_timer()
+    print("[INFO] Done ({:2.2f} process time)!!!\n\n\n".format(toc-tic))
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

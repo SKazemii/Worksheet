@@ -57,8 +57,6 @@ def fcn(DF_features_all, foldername):
         DF_features.drop(DF_features.columns[[range(0,x)]], axis = 1, inplace = True)
         feat_name = feature_names[int(x/3)]
 
-    # z = pd.DataFrame([[i for i in range(440)]], columns = cols )
-    # return z
 
     tic=timeit.default_timer()
     folder = str(persentage) + "_" + normilizing + "_" + feat_name + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
@@ -68,8 +66,7 @@ def fcn(DF_features_all, foldername):
     EER_L = list(); FAR_L = list(); FRR_L = list()
     EER_R = list(); FAR_R = list(); FRR_R = list()
 
-    EER_L_1 = list(); FAR_L_1 = list(); FRR_L_1 = list()
-    EER_R_1 = list(); FAR_R_1 = list(); FRR_R_1 = list()
+
     ACC_L = list(); ACC_R = list()
     
 
@@ -82,7 +79,7 @@ def fcn(DF_features_all, foldername):
         
         if (subject % 10) == 0:
             print("[INFO] --------------- Subject Number: ", subject)
-            break
+            # break
         
         for idx, direction in enumerate(["left_0", "right_1"]):
 

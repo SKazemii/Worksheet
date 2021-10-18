@@ -48,16 +48,16 @@ if False:
     
 else:
     # Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
-    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
+    Results_DF = pd.read_excel(os.path.join(project_dir, 'Results_DF.xlsx'), index_col = 0)
 # sys.exit()
 
 
-test_ratios = [0.1, 0.2, 0.25]#, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [1.0, 0.95]
+test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+persentages = [0.95]
 Modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
 THRESHOLDs = np.linspace(0, 1, 100)
-normilizings = ["z-score", "minmax", "None"]
+normilizings = ["z-score"]#, "minmax", "None"]
 feature_names = ["All", "MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
 
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
