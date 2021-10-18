@@ -24,27 +24,20 @@ from MLPackage import util as perf
 
 
 working_path = perf.working_path
-# Results_DF = pd.DataFrame(columns=perf.cols)
-folder_path = os.path.join(working_path, 'results', 'Results_DF.xlsx')
-# Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
+excel_path = os.path.join(working_path, 'results', 'Results_DF.xlsx')
 
 
 
 def collect_results(result):
-    global Results_DF
-    global folder_path
-  
-    if os.path.isfile(folder_path):
-        print('old file')
-        Results_DF = pd.read_excel(folder_path, index_col = 0)
+    global excel_path
+    if os.path.isfile(excel_path):
+        Results_DF = pd.read_excel(excel_path, index_col = 0)
     else:
-        print('new file')
         Results_DF = pd.DataFrame(columns=perf.cols)
-        Results_DF.to_excel(folder_path)
-
+        Results_DF.to_excel(excel_path)
 
     Results_DF = Results_DF.append(result)
-    Results_DF.to_excel(folder_path)
+    Results_DF.to_excel(excel_path)
 
 def main():
 
@@ -64,7 +57,6 @@ def main():
 
     feature_path = os.path.join(working_path, 'Datasets', perf.features_excel + ".xlsx")
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
-    print(DF_features_all.head())
 
 
     print("[INFO] OS: ", sys.platform)
@@ -83,10 +75,8 @@ def main():
                                 pool.apply_async(perf.fcn, args=(DF_features_all, folder), callback=collect_results)
                                 # collect_results(perf.fcn(DF_features_all,folder))
 
-
                     pool.close()
                     pool.join()
-                    sys.exit()
 
     else:
         for persentage in persentages:

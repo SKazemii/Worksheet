@@ -14,12 +14,12 @@ from pathlib import Path as Pathlb
 
 THRESHOLDs = np.linspace(0, 1, 100)
 test_ratios = [0.2]
-persentages = [0.95, 1.0]
+persentages = [0.95]
 modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
 normilizings = ["z-score", "minmax"]
-verbose = True
-features_excel = "COAs_simple" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
+verbose = False
+features_excel = "COPs" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
 
 
 working_path = os.getcwd()
@@ -80,9 +80,9 @@ def fcn(DF_features_all, foldername):
         if (subject % 86) == 0:
             continue
         
-        if (subject % 5) == 0 and verbose is True:
+        if (subject % 30) == 0 and verbose is True:
             print("[INFO] --------------- Subject Number: ", subject)
-            break
+            # break
         
         for idx, direction in enumerate(["left_0", "right_1"]):
 
