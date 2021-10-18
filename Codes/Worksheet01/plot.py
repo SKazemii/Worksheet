@@ -16,6 +16,7 @@ from sklearn import preprocessing
 from sklearn.metrics import accuracy_score
 
 from itertools import combinations, product
+from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -30,35 +31,24 @@ project_dir = os.getcwd()
 fig_dir = os.path.join(project_dir, "Manuscripts", "src", "figures")
 tbl_dir = os.path.join(project_dir, "Manuscripts", "src", "tables")
 data_dir = os.path.join(project_dir, "Archive", "results_All")
-data_dir = os.path.join(project_dir, "results")
+data_dir = os.path.join(project_dir, "results COXTS")
 
 Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
 Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
 
 
-if False:
-    # if True:
-    Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
 
-    Results_DF1 = pd.read_excel(os.path.join(data_dir, 'Results_DF1.xlsx'), index_col = 0)
+Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
 
-    Results_DF = pd.concat([Results_DF.reset_index(), Results_DF1], axis=0)
-
-    Results_DF.to_excel(os.path.join(data_dir, 'Results_DF_all.xlsx'))
-    
-else:
-    # Results_DF = pd.read_excel(os.path.join(data_dir, "excels", 'Results_DF_all.xlsx'), index_col = 0)
-    Results_DF = pd.read_excel(os.path.join(project_dir, 'Results_DF.xlsx'), index_col = 0)
-# sys.exit()
-
+print(Results_DF)
 
 test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [0.95]
+persentages = [1.0]
 Modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
-THRESHOLDs = np.linspace(0, 1, 100)
+THRESHOLDs = perf.THRESHOLDs
 normilizings = ["z-score"]#, "minmax", "None"]
-feature_names = ["All", "MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
+feature_names = perf.feature_names
 
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
@@ -72,20 +62,9 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
 Results_DF_temp = Results_DF_temp[   Results_DF_temp["Mean_EER_Left"] != 0   ]
-Results_DF_temp.columns = ["Mode", "Model_Type", "TestSize", "Norm", "Features_Set", "PCA", "Time", "Number of PCs",
-        "Mean_sample_test_Left", "Acc_Left", "f1_Left", "EER_Left", 
-        "Mean_sample_test_Right","Acc_Right", "f1_Right", "EER_Right",
+Results_DF_temp.columns = perf.cols
 
-        "std_sample_test_Left", "std_Accuracy_Left", "std_f1-score_Left", "std_EER_Left", 
-        "std_sample_test_Right","std_Accuracy_Right", "std_f1-score_Right", "std_EER_Right",
 
-        "Min_sample_test_Left", "Min_Accuracy_Left", "Min_f1-score_Left", "Min_EER_Left", 
-        "Min_sample_test_Right","Min_Accuracy_Right", "Min_f1-score_Right", "Min_EER_Right",
-
-        "Max_sample_test_Left", "Max_Accuracy_Left", "Max_f1-score_Left", "Max_EER_Left", 
-        "Max_sample_test_Right", "Max_Accuracy_Right", "Max_f1-score_Right", "Max_EER_Right",] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
-
-print(Results_DF)
 # X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [False, True]).iloc[:10,:8]
 # with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
 #     tf.write(X.round(decimals=2).to_latex())
@@ -122,11 +101,37 @@ FAR_L = list()
 FRR_L = list()
 FAR_R = list()
 FRR_R = list()
+data = list()
 X = pd.DataFrame(index=["Correlation", "Euclidean distance"] , columns=["Accuracy Left", "Accuracy Right"])
 Y = pd.DataFrame(index=["Correlation", "Euclidean distance"] , columns=[ "EER Left", "EER Right"])
 for idx, temp in enumerate(Modes):
     a = ["Correlation", "Euclidean distance"]
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Mode"] == temp   ]
+
+    data.append(Results_DF_all_mode["Mean_Accuracy_Left"].values)
+
+stat, p = shapiro(data[0])
+
+print('stat=%.3f, p=%.3f' % (stat, p))
+if p > 0.05:
+    print('Probably Gaussian')
+else:
+    print('Probably not Gaussian')
+    stat, p = mannwhitneyu(data[0], data[1])
+    print('stat=%.3f, p=%.3f' % (stat, p))
+    if p > 0.05:
+        print('Probably the same distribution')
+    else:
+        print('Probably different distributions')
+
+
+
+plt.hist(data[0], color='red')
+plt.hist(data[1], color='navy')
+plt.show()
+sys.exit()
+
+for idx, temp in enumerate(Modes):
 
     X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
     X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())

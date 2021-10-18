@@ -14,7 +14,7 @@ from pathlib import Path as Pathlb
 
 THRESHOLDs = np.linspace(0, 1, 100)
 test_ratios = [0.2]
-persentages = [0.95]
+persentages = [1.0]
 modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
 normilizings = ["z-score", "minmax"]
@@ -74,7 +74,7 @@ def fcn(DF_features_all, foldername):
     
 
 
-    print("[INFO] start:  ", folder)
+    print("[INFO] start:   +++   ", folder)
 
     for subject in subjects:
         if (subject % 86) == 0:
@@ -160,9 +160,6 @@ def fcn(DF_features_all, foldername):
             FRR_temp = list()
             FAR_temp = list()
 
-            FRR_temp_1 = list()
-            FAR_temp_1 = list()
-
             if score is not None:
                 for tx in THRESHOLDs:
                     E1 = np.zeros((Model_client.shape))
@@ -242,7 +239,7 @@ def fcn(DF_features_all, foldername):
 
 
     toc=timeit.default_timer()
-    print("[INFO] End: {},  Process time: {:.2f}  seconds".format(folder, toc - tic)) 
+    print("[INFO] End:     ---    {}, \t\t Process time: {:.2f}  seconds".format(folder, toc - tic)) 
 
 
 
@@ -292,50 +289,6 @@ def fcn(DF_features_all, foldername):
 
     z = pd.DataFrame(A, columns = cols )
     return z
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def PCA_func(DF_features, persentage ):
-    # Scale data befor applying PCA
-    scaling = StandardScaler()
-    Scaled_data = scaling.fit_transform(DF_features.iloc[:, :-2])
-
-    principal = PCA()
-    PCA_out = principal.fit_transform(Scaled_data)
-
-    variance_ratio = (np.cumsum(principal.explained_variance_ratio_))
-    high_var_PC = np.zeros(variance_ratio.shape)
-    high_var_PC[variance_ratio <= persentage] = 1
-
-    loadings = principal.components_
-    num_pc = int(np.sum(high_var_PC))
-
-
-    columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
-    DF_features_PCA = (pd.DataFrame(np.concatenate((PCA_out[:,:num_pc],DF_features.iloc[:, -2:].values), axis = 1), columns = columnsName))
-
-    return DF_features_PCA
 
 
 
@@ -461,141 +414,141 @@ def ROC_plot_v2(FPR, FNR,THRESHOLDs, path):
     # plt.close('all')
 
 
-def performance(model1, model2, path):
+# def performance(model1, model2, path):
 
-    # THRESHOLDs = np.linspace(0, 2*np.max(model1), 10)
-    THRESHOLDs = np.linspace(0, 300, 1000)
-    FN = list();   TP = list();  TN = list();  FP = list()
-    ACC = list(); FDR = list(); FNR = list(); FPR = list()
-    NPV = list(); PPV = list(); TNR = list(); TPR = list()
+#     # THRESHOLDs = np.linspace(0, 2*np.max(model1), 10)
+#     THRESHOLDs = np.linspace(0, 300, 1000)
+#     FN = list();   TP = list();  TN = list();  FP = list()
+#     ACC = list(); FDR = list(); FNR = list(); FPR = list()
+#     NPV = list(); PPV = list(); TNR = list(); TPR = list()
 
-    for idx, thresh in enumerate(THRESHOLDs):
-        TPM = np.zeros((model1.shape))
-        TPM[model1 < thresh] = 1
-        TP.append(TPM.sum()/16)
+#     for idx, thresh in enumerate(THRESHOLDs):
+#         TPM = np.zeros((model1.shape))
+#         TPM[model1 < thresh] = 1
+#         TP.append(TPM.sum()/16)
         
 
-        FNM = np.zeros((model1.shape))
-        FNM[model1 >= thresh] = 1
-        FN.append(FNM.sum()/16)
+#         FNM = np.zeros((model1.shape))
+#         FNM[model1 >= thresh] = 1
+#         FN.append(FNM.sum()/16)
 
-        FPM = np.zeros((model2.shape))
-        FPM[model2 < thresh] = 1
-        FP.append(FPM.sum()/16)
+#         FPM = np.zeros((model2.shape))
+#         FPM[model2 < thresh] = 1
+#         FP.append(FPM.sum()/16)
 
-        TNM = np.zeros((model2.shape))
-        TNM[model2 >= thresh] = 1
-        TN.append(TNM.sum()/16)
+#         TNM = np.zeros((model2.shape))
+#         TNM[model2 >= thresh] = 1
+#         TN.append(TNM.sum()/16)
 
-        # Sensitivity, hit rate, recall, or true positive rate
-        # reflects the classifier’s ability to detect members of the positive class (pathological state)
-        TPR.append(TP[idx] / (TP[idx]  + FN[idx] ))
-        # Specificity or true negative rate
-        # reflects the classifier’s ability to detect members of the negative class (normal state)
-        TNR.append(TN[idx]  / (TN[idx]  + FP[idx] ))
-        # Precision or positive predictive value
-        # PPV.append(TP[idx]  / (TP[idx]  + FP[idx] ))
-        # Negative predictive value
-        # NPV.append(TN[idx]  / (TN[idx]  + FN[idx] ))
-        # Fall out or false positive rate
-        # reflects the frequency with which the classifier makes a mistake by classifying normal state as pathological
-        FPR.append(FP[idx]  / (FP[idx]  + TN[idx] ))
-        # False negative rate
-        # reflects the frequency with which the classifier makes a mistake by classifying pathological state as normal
-        FNR.append(FN[idx]  / (TP[idx]  + FN[idx] ))
-        # False discovery rate
-        # FDR.append(FP[idx]  / (TP[idx]  + FP[idx] ))
-        # Overall accuracy
-        ACC.append((TP[idx]  + TN[idx] ) / (TP[idx]  + FP[idx]  + FN[idx]  + TN[idx] ))
+#         # Sensitivity, hit rate, recall, or true positive rate
+#         # reflects the classifier’s ability to detect members of the positive class (pathological state)
+#         TPR.append(TP[idx] / (TP[idx]  + FN[idx] ))
+#         # Specificity or true negative rate
+#         # reflects the classifier’s ability to detect members of the negative class (normal state)
+#         TNR.append(TN[idx]  / (TN[idx]  + FP[idx] ))
+#         # Precision or positive predictive value
+#         # PPV.append(TP[idx]  / (TP[idx]  + FP[idx] ))
+#         # Negative predictive value
+#         # NPV.append(TN[idx]  / (TN[idx]  + FN[idx] ))
+#         # Fall out or false positive rate
+#         # reflects the frequency with which the classifier makes a mistake by classifying normal state as pathological
+#         FPR.append(FP[idx]  / (FP[idx]  + TN[idx] ))
+#         # False negative rate
+#         # reflects the frequency with which the classifier makes a mistake by classifying pathological state as normal
+#         FNR.append(FN[idx]  / (TP[idx]  + FN[idx] ))
+#         # False discovery rate
+#         # FDR.append(FP[idx]  / (TP[idx]  + FP[idx] ))
+#         # Overall accuracy
+#         ACC.append((TP[idx]  + TN[idx] ) / (TP[idx]  + FP[idx]  + FN[idx]  + TN[idx] ))
 
-    EER, minindex = compute_eer(FPR, FNR)
+#     EER, minindex = compute_eer(FPR, FNR)
 
 
 
-    if False:
-        # print("\n#################################################################################################")
-        # print("#################################################################################################\n")
-        # print("THRESHOLDs:                                                                          {}".format(THRESHOLDs))
-        # print("EER:                                                                                 {}".format(EER))
-        # print("False Positive (FP):                                                                 {}".format(FP))
-        # print("False Negative (FN):                                                                 {}".format(FN))
-        # print("True Positive (TP):                                                                  {}".format(TP))
-        # print("True Negative (TN):                                                                  {}".format(TN))
-        # print("True Positive Rate (TPR)(Recall):                                                    {}".format(TPR))
-        # print("True Negative Rate (TNR)(Specificity):                                               {}".format(TNR))
-        # print("Positive Predictive Value (PPV)(Precision):                                          {}".format(PPV))
-        # print("Negative Predictive Value (NPV):                                                     {}".format(NPV))
-        # print(
-        #      "False Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      {}".format(
-        #         FPR
-        #     )
-        # )
-        # print(
-        #      "False Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  {}".format(
-        #         FNR
-        #     )
-        # )
-        # print("False Discovery Rate (FDR):                                                          {}".format(FDR))
-        # print("Overall accuracy (ACC):                                                              {}".format(ACC))
-        pass
-    if False:
-        print("\n#################################################################################################")
-        print("\n#################################################################################################")
-        print("#################################################################################################\n")
-        print("THRESHOLDs:                                                                          {}".format(THRESHOLDs[minindex]))
-        print("EER:                                                                                 {}".format(EER))
-        print("False Positive (FP):                                                                 {}".format(FP[minindex]))
-        print("False Negative (FN):                                                                 {}".format(FN[minindex]))
-        print("True Positive (TP):                                                                  {}".format(TP[minindex]))
-        print("True Negative (TN):                                                                  {}".format(TN[minindex]))
-        print("True Positive Rate (TPR)(Recall):                                                    {}".format(TPR[minindex]))
-        print("True Negative Rate (TNR)(Specificity):                                               {}".format(TNR[minindex]))
-        print("Positive Predictive Value (PPV)(Precision):                                          {}".format(PPV[minindex]))
-        print("Negative Predictive Value (NPV):                                                     {}".format(NPV[minindex]))
-        print(
-            "False Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      {}".format(
-                FPR[minindex]
-            )
-        )
-        print(
-            "False Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  {}".format(
-                FNR[minindex]
-            )
-        )
-        print("False Discovery Rate (FDR):                                                          {}".format(FDR[minindex]))
-        print("Overall accuracy (ACC):                                                              {}".format(ACC[minindex]))
-        print("\n#################################################################################################")
+#     if False:
+#         # print("\n#################################################################################################")
+#         # print("#################################################################################################\n")
+#         # print("THRESHOLDs:                                                                          {}".format(THRESHOLDs))
+#         # print("EER:                                                                                 {}".format(EER))
+#         # print("False Positive (FP):                                                                 {}".format(FP))
+#         # print("False Negative (FN):                                                                 {}".format(FN))
+#         # print("True Positive (TP):                                                                  {}".format(TP))
+#         # print("True Negative (TN):                                                                  {}".format(TN))
+#         # print("True Positive Rate (TPR)(Recall):                                                    {}".format(TPR))
+#         # print("True Negative Rate (TNR)(Specificity):                                               {}".format(TNR))
+#         # print("Positive Predictive Value (PPV)(Precision):                                          {}".format(PPV))
+#         # print("Negative Predictive Value (NPV):                                                     {}".format(NPV))
+#         # print(
+#         #      "False Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      {}".format(
+#         #         FPR
+#         #     )
+#         # )
+#         # print(
+#         #      "False Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  {}".format(
+#         #         FNR
+#         #     )
+#         # )
+#         # print("False Discovery Rate (FDR):                                                          {}".format(FDR))
+#         # print("Overall accuracy (ACC):                                                              {}".format(ACC))
+#         pass
+#     if False:
+#         print("\n#################################################################################################")
+#         print("\n#################################################################################################")
+#         print("#################################################################################################\n")
+#         print("THRESHOLDs:                                                                          {}".format(THRESHOLDs[minindex]))
+#         print("EER:                                                                                 {}".format(EER))
+#         print("False Positive (FP):                                                                 {}".format(FP[minindex]))
+#         print("False Negative (FN):                                                                 {}".format(FN[minindex]))
+#         print("True Positive (TP):                                                                  {}".format(TP[minindex]))
+#         print("True Negative (TN):                                                                  {}".format(TN[minindex]))
+#         print("True Positive Rate (TPR)(Recall):                                                    {}".format(TPR[minindex]))
+#         print("True Negative Rate (TNR)(Specificity):                                               {}".format(TNR[minindex]))
+#         print("Positive Predictive Value (PPV)(Precision):                                          {}".format(PPV[minindex]))
+#         print("Negative Predictive Value (NPV):                                                     {}".format(NPV[minindex]))
+#         print(
+#             "False Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      {}".format(
+#                 FPR[minindex]
+#             )
+#         )
+#         print(
+#             "False Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  {}".format(
+#                 FNR[minindex]
+#             )
+#         )
+#         print("False Discovery Rate (FDR):                                                          {}".format(FDR[minindex]))
+#         print("Overall accuracy (ACC):                                                              {}".format(ACC[minindex]))
+#         print("\n#################################################################################################")
 
-    with open(os.path.join(path, "file.txt"), "a") as f:
-        f.write("\n#################################################################################################")
-        f.write("\n#################################################################################################")
-        f.write("\n#################################################################################################\n")
-        f.write("\nTHRESHOLDs:                                                                          {}".format(THRESHOLDs[minindex]))
-        f.write("\nEER:                                                                                 {}".format(EER))
-        f.write("\nFalse Positive (FP):                                                                 {}".format(FP[minindex]))
-        f.write("\nFalse Negative (FN):                                                                 {}".format(FN[minindex]))
-        f.write("\nTrue Positive (TP):                                                                  {}".format(TP[minindex]))
-        f.write("\nTrue Negative (TN):                                                                  {}".format(TN[minindex]))
-        f.write("\nTrue Positive Rate (TPR)(Recall):                                                    {}".format(TPR[minindex]))
-        f.write("\nTrue Negative Rate (TNR)(Specificity):                                               {}".format(TNR[minindex]))
-        # f.write("\nPositive Predictive Value (PPV)(Precision):                                          {}".format(PPV[minindex]))
-        # f.write("\nNegative Predictive Value (NPV):                                                     {}".format(NPV[minindex]))
-        f.write(
-            "\nFalse Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      {}".format(
-                FPR[minindex]
-            )
-        )
-        f.write(
-            "\nFalse Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  {}".format(
-                FNR[minindex]
-            )
-        )
-        # f.write("\nFalse Discovery Rate (FDR):                                                          {}".format(FDR[minindex]))
-        f.write("\nOverall accuracy (ACC):                                                              {}".format(ACC[minindex]))
-        f.write("\n#################################################################################################")
-    ROC_plot(TPR, FPR, path)
-    ROC_plot_v2(FPR, FNR, THRESHOLDs, path)
-    return EER, FPR, FNR
+#     with open(os.path.join(path, "file.txt"), "a") as f:
+#         f.write("\n#################################################################################################")
+#         f.write("\n#################################################################################################")
+#         f.write("\n#################################################################################################\n")
+#         f.write("\nTHRESHOLDs:                                                                          {}".format(THRESHOLDs[minindex]))
+#         f.write("\nEER:                                                                                 {}".format(EER))
+#         f.write("\nFalse Positive (FP):                                                                 {}".format(FP[minindex]))
+#         f.write("\nFalse Negative (FN):                                                                 {}".format(FN[minindex]))
+#         f.write("\nTrue Positive (TP):                                                                  {}".format(TP[minindex]))
+#         f.write("\nTrue Negative (TN):                                                                  {}".format(TN[minindex]))
+#         f.write("\nTrue Positive Rate (TPR)(Recall):                                                    {}".format(TPR[minindex]))
+#         f.write("\nTrue Negative Rate (TNR)(Specificity):                                               {}".format(TNR[minindex]))
+#         # f.write("\nPositive Predictive Value (PPV)(Precision):                                          {}".format(PPV[minindex]))
+#         # f.write("\nNegative Predictive Value (NPV):                                                     {}".format(NPV[minindex]))
+#         f.write(
+#             "\nFalse Positive Rate (FPR)(False Match Rate (FMR))(False Acceptance Rate (FAR)):      {}".format(
+#                 FPR[minindex]
+#             )
+#         )
+#         f.write(
+#             "\nFalse Negative Rate (FNR)(False Non-Match Rate (FNMR))(False Rejection Rate (FRR)):  {}".format(
+#                 FNR[minindex]
+#             )
+#         )
+#         # f.write("\nFalse Discovery Rate (FDR):                                                          {}".format(FDR[minindex]))
+#         f.write("\nOverall accuracy (ACC):                                                              {}".format(ACC[minindex]))
+#         f.write("\n#################################################################################################")
+#     ROC_plot(TPR, FPR, path)
+#     ROC_plot_v2(FPR, FNR, THRESHOLDs, path)
+#     return EER, FPR, FNR
 
 
 def compute_model(positive_samples, negative_samples, mode = "dist", score = None):

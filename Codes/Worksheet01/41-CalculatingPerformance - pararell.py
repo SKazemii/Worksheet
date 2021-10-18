@@ -105,27 +105,3 @@ if __name__ == '__main__':
     main()
     toc = timeit.default_timer()
     print("[INFO] Done ({:2.2f} process time)!!!\n\n\n".format(toc-tic))
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# \foreach \n in {Test size}{
-# \section{Test size}
-# \foreach \t in {20 percent, 35 percent, 50 percent}{
-
-# \begin{frame}
-# \frametitle{\t \ \n}
-# \tiny
-# \begin{table}
-# \centering
-# \caption{\small The accuracy and ERR of \t \  \n.}
-# \input{tables/\t.tex}
-# \end{table}
-# \end{frame}
-# }
-
-# \begin{frame}
-# \centering
-# \frametitle{The ROC curve}
-# \includegraphics[scale=0.3]{Manuscripts/src/figures/\variable_ROC.png}
-# \end{frame}
