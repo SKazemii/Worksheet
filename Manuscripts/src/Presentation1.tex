@@ -33,6 +33,53 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{test Size}
+
+\begin{frame}
+\frametitle{different test size}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The accuracy of Euclidean distance and Correlation.}
+\label{tab:parameters condition}
+\input{tables/testsize.tex}
+\end{table}
+\end{frame}
+\begin{frame}
+\frametitle{different test size}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The  ERR of Euclidean distance and Correlation.}
+\label{tab:parameters condition}
+\input{tables/testsize1.tex}
+\end{table}
+\end{frame}
+\begin{frame}
+\frametitle{different test size}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The  ERR of Euclidean distance and Correlation.}
+\label{tab:parameters condition}
+\input{tables/testsize2.tex}
+\end{table}
+\end{frame}
+
+
+\begin{frame}
+\centering
+\frametitle{Euclidean distance vs Correlation (ROC curve)}
+\includegraphics[scale=0.3]{Manuscripts/src/figures/testsize.png}
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Score Matrix}
 
 \begin{frame}
@@ -41,9 +88,16 @@
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of Euclidean distance and Correlation.}
+\caption{\small The accuracy of Euclidean distance and Correlation.}
 \label{tab:parameters condition}
 \input{tables/Correlation.tex}
+\end{table}
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The  ERR of Euclidean distance and Correlation.}
+\label{tab:parameters condition}
+\input{tables/Correlation1.tex}
 \end{table}
 \end{frame}
 
@@ -53,8 +107,6 @@
 \frametitle{Euclidean distance vs Correlation (ROC curve)}
 \includegraphics[scale=0.3]{Manuscripts/src/figures/Correlation.png}
 \end{frame}
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,9 +118,16 @@
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of Minimum, Median and Average.}
+\caption{\small The accuracy of Minimum, Median and Average.}
 \label{tab:parameters condition}
 \input{tables/Minimum.tex}
+\end{table}
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The ERR of Minimum, Median and Average.}
+\label{tab:parameters condition}
+\input{tables/Minimum1.tex}
 \end{table}
 \end{frame}
 
@@ -90,9 +149,16 @@
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of All PCs and Keeping 95 percent of variance.}
+\caption{\small The accuracy of All PCs and Keeping 95 percent of variance.}
 \label{tab:parameters condition}
 \input{tables/PCA.tex}
+\end{table}
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The ERR of All PCs and Keeping 95 percent of variance.}
+\label{tab:parameters condition}
+\input{tables/PCA1.tex}
 \end{table}
 \end{frame}
 
@@ -118,9 +184,16 @@
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\small The accuracy and ERR of different normalization algorithm.}
+\caption{\small The accuracy of different normalization algorithm.}
 \label{tab:parameters condition}
 \input{tables/MinMax.tex}
+\end{table}
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The ERR of different normalization algorithm.}
+\label{tab:parameters condition}
+\input{tables/MinMax1.tex}
 \end{table}
 \end{frame}
 
@@ -140,21 +213,33 @@
 
 
 \begin{frame}
-\frametitle{comparing COP features}
+\frametitle{Comparing COP features}
 \tiny
 \begin{table}
 \centering
 \captionsetup{labelformat=empty}
-\caption{\tiny The accuracy and ERR of COP features.}
+\caption{\small The accuracy of COP features.}
 \label{tab:parameters condition}
 \input{tables/feat.tex}
+\end{table}
+\end{frame}
+
+\begin{frame}
+\frametitle{Comparing COP features}
+\tiny
+\begin{table}
+\centering
+\captionsetup{labelformat=empty}
+\caption{\small The ERR of COP features.}
+\label{tab:parameters condition}
+\input{tables/feat1.tex}
 \end{table}
 \end{frame}
 
 
 \begin{frame}
 \centering
-\frametitle{comparing COP features (ROC curve)}
+\frametitle{Comparing COP features (ROC curve)}
 \includegraphics[scale=0.3]{Manuscripts/src/figures/feat.png}
 \end{frame}
 
@@ -214,30 +299,28 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{Feature Selection Results}
-%\begin{frame}[shrink=10]
-%\frametitle{The top-10 best features based on feature selection algorithm.}
-%\tiny
-%\begin{table}
-%\centering
-%\caption{\small The top-10 best features based on feature selection algorithm.}
-%\input{Manuscripts/src/tables/top10best_feature_selection}
-%\end{table}
-%\end{frame}
+\section{Feature Selection Results}
+\begin{frame}[shrink=10]
+\frametitle{The top-10 best features based on feature selection algorithm.}
+\tiny
+\begin{table}
+\centering
+\caption{\small The top-10 best features based on feature selection algorithm.}
+\input{Manuscripts/src/tables/top10best_feature_selection}
+\end{table}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\begin{frame}[shrink=10]
-%\frametitle{The top-10 worst features based on feature selection algorithm.}
-%\tiny
-%\begin{table}
-%\begin{adjustbox}
-%\centering
-%\caption{\small The top-10 worst features based on feature selection algorithm.}
-%\input{Manuscripts/src/tables/top10worst_feature_selection}
-%\end{adjustbox}
-%\end{table}
-%\end{frame}
+\begin{frame}[shrink=10]
+\frametitle{The top-10 worst features based on feature selection algorithm.}
+\tiny
+\begin{table}
+\centering
+\caption{\small The top-10 worst features based on feature selection algorithm.}
+\input{Manuscripts/src/tables/top10worst_feature_selection}
+\end{table}
+\end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
