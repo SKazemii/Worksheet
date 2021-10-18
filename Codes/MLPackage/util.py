@@ -13,16 +13,19 @@ from sklearn.metrics import accuracy_score, f1_score
 from pathlib import Path as Pathlb
 
 THRESHOLDs = np.linspace(0, 1, 100)
-test_ratios = [0.1]
+test_ratios = [0.2]
 persentages = [0.95, 1.0]
 modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
 normilizings = ["z-score", "minmax"]
+verbose = True
+features_excel = "COAs_simple" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
+
 
 working_path = os.getcwd()
 score = "A"
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
-cols = ["Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number_of_PCs",
+cols = ["Feature_set", "Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number_of_PCs",
         "Mean_sample_test_Left", "Mean_Accuracy_Left", "Mean_f1-score_Left", "Mean_EER_Left", 
         "Mean_sample_test_Right","Mean_Accuracy_Right", "Mean_f1-score_Right", "Mean_EER_Right",
 
@@ -60,7 +63,7 @@ def fcn(DF_features_all, foldername):
 
     tic=timeit.default_timer()
     folder = str(persentage) + "_" + normilizing + "_" + feat_name + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
-    folder_path = os.path.join(working_path, 'results', folder)
+    folder_path = os.path.join(working_path, 'results', features_excel, folder)
     Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
 
     EER_L = list(); FAR_L = list(); FRR_L = list()
@@ -71,15 +74,15 @@ def fcn(DF_features_all, foldername):
     
 
 
-    print("[INFO] Working Directory:  ", folder)
+    print("[INFO] start:  ", folder)
 
     for subject in subjects:
         if (subject % 86) == 0:
             continue
         
-        if (subject % 10) == 0:
+        if (subject % 5) == 0 and verbose is True:
             print("[INFO] --------------- Subject Number: ", subject)
-            # break
+            break
         
         for idx, direction in enumerate(["left_0", "right_1"]):
 
@@ -239,11 +242,11 @@ def fcn(DF_features_all, foldername):
 
 
     toc=timeit.default_timer()
-    print("[INFO] ------  Process time = {:.2f}  seconds".format(toc - tic)) 
+    print("[INFO] End: {},  Process time: {:.2f}  seconds".format(folder, toc - tic)) 
 
 
 
-    A = [[mode, model_type, test_ratio, normilizing, feat_name, persentage, (toc - tic), num_pc,
+    A = [[features_excel, mode, model_type, test_ratio, normilizing, feat_name, persentage, (toc - tic), num_pc,
 
         np.mean( np.array(ACC_L)[:,4] ), 
         np.mean( np.array(ACC_L)[:,2] ), 

@@ -59,13 +59,14 @@ def computeCOATimeSeries(Footprint3D, Binarize = "otsu", Threshold = 1):
         BW, threshold = GS2BW_object.GS2BW(temp)
         
         temp3 = ndimage.measurements.center_of_mass(BW)
+
         aML.append(temp3[1])
         aAP.append(temp3[0])
-        
+
+
     lowpass = Butterworth.Butterworthfilter(mode= "lowpass", fs = 100, cutoff = 5, order = 4)
     aML = lowpass.filter(aML)
     aAP = lowpass.filter(aAP)
-
     aML_f = aML - np.mean(aML)
     aAP_f = aAP - np.mean(aAP)
 
@@ -74,6 +75,7 @@ def computeCOATimeSeries(Footprint3D, Binarize = "otsu", Threshold = 1):
     aRD_f = np.sqrt(a + b)
     
     COATS = np.stack((aRD_f, aAP_f, aML_f), axis = 0)
+    
     return COATS
 
 

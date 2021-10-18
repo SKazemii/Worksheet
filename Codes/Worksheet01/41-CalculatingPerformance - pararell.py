@@ -21,16 +21,30 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from MLPackage import util as perf
 
-# global Results_DF
 
 
+working_path = perf.working_path
+# Results_DF = pd.DataFrame(columns=perf.cols)
+folder_path = os.path.join(working_path, 'results', 'Results_DF.xlsx')
+# Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
 
-Results_DF = pd.DataFrame(columns=perf.cols)
+
 
 def collect_results(result):
     global Results_DF
+    global folder_path
+  
+    if os.path.isfile(folder_path):
+        print('old file')
+        Results_DF = pd.read_excel(folder_path, index_col = 0)
+    else:
+        print('new file')
+        Results_DF = pd.DataFrame(columns=perf.cols)
+        Results_DF.to_excel(folder_path)
+
+
     Results_DF = Results_DF.append(result)
-    Results_DF.to_excel(os.path.join(perf.working_path, 'results', 'Results_DF.xlsx'))
+    Results_DF.to_excel(folder_path)
 
 def main():
 
@@ -47,63 +61,51 @@ def main():
     # normilizings = ["z-score"]#, "minmax"]
 
 
-    working_path = os.getcwd()
-    
 
-
-    features_excel = "COPs" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
-
-
-
-
-    feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
+    feature_path = os.path.join(working_path, 'Datasets', perf.features_excel + ".xlsx")
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
-
-
-    folder_path = os.path.join(working_path, 'results', features_excel)
-    Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
+    print(DF_features_all.head())
 
 
     print("[INFO] OS: ", sys.platform)
     print("[INFO] Core Number: ", multiprocessing.cpu_count())
     print("[INFO] feature shape: ", DF_features_all.shape)
-
-    if features_excel == "COAs_otsu" or features_excel == "COAs_simple" or features_excel == "COPs":
+    
+    if perf.features_excel == "COAs_otsu" or perf.features_excel == "COAs_simple" or perf.features_excel == "COPs":
         for persentage in persentages:
             for normilizing in normilizings:
                 for x in [-3]:
+                    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
                     for mode in modes:  
                         for model_type in model_types:
-                            
-                            pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
                             for test_ratio in test_ratios:
                                 folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
                                 pool.apply_async(perf.fcn, args=(DF_features_all, folder), callback=collect_results)
                                 # collect_results(perf.fcn(DF_features_all,folder))
 
 
-                            pool.close()
-                            pool.join()
+                    pool.close()
+                    pool.join()
+                    sys.exit()
 
     else:
         for persentage in persentages:
             for normilizing in normilizings:
                 for x in range(-3,DF_features_all.shape[1]-2,3):
+                    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
                     for mode in modes:  
                         for model_type in model_types:
                             if mode == "corr" and x != -3 and persentage != 1.0:
                                 continue
 
-                            
-                            pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
                             for test_ratio in test_ratios:
                                 folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
                                 pool.apply_async(perf.fcn, args=(DF_features_all, folder), callback=collect_results)
                                 # collect_results(perf.fcn(DF_features_all,folder))
 
 
-                            pool.close()
-                            pool.join()
+                    pool.close()
+                    pool.join()
 
 
 

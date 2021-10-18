@@ -34,7 +34,7 @@ COAs_otsu = list()
 
 for j in range(data.shape[0]):
     COPTS = fe.computeCOPTimeSeries(data[j])
-    COATS_simple = fe.computeCOATimeSeries(data[j], Binarize = "simple", Threshold = 1)
+    COATS_simple = fe.computeCOATimeSeries(data[j], Binarize = "simple", Threshold = 0)
     COATS_otsu = fe.computeCOATimeSeries(data[j], Binarize = "otsu")
 
     pMDIST = fe.computeMDIST(COPTS) 
