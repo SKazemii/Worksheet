@@ -34,65 +34,76 @@ def collect_results(result):
 
 def main():
 
-    # test_ratios = perf.test_ratios
-    # persentages = perf.persentages
-    # modes = perf.modes
-    # model_types = perf.model_types
-    # normilizings = perf.normilizings
+    test_ratios = perf.test_ratios
+    persentages = perf.persentages
+    modes = perf.modes
+    model_types = perf.model_types
+    normilizings = perf.normilizings
 
-    test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-    persentages = [0.95]#, 1.0]
-    modes = ["corr", "dist"]
-    model_types = ["min", "median", "average"]
-    normilizings = ["z-score"]#, "minmax"]
+    # test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+    # persentages = [0.95]#, 1.0]
+    # modes = ["corr", "dist"]
+    # model_types = ["min", "median", "average"]
+    # normilizings = ["z-score"]#, "minmax"]
 
 
     working_path = os.getcwd()
-    folder_path = os.path.join(working_path, 'results')
-    Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
+    
 
 
-    features_excel = ["afeatures_otsu.xlsx", 
-                    "afeatures_simple", 
-                    "pfeatures.xlsx", 
-                    "COAs_otsu.xlsx", 
-                    "COAs_simple.xlsx", 
-                    "COPs.xlsx"]
+    features_excel = "COPs" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
 
 
 
 
-    feature_path = os.path.join(working_path, 'Datasets', features_excel[0])
+    feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
-    # print(DF_features_all)
-    # print(DF_features_all.shape[1])
-    # sys.exit()  
+
+
+    folder_path = os.path.join(working_path, 'results', features_excel)
+    Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
 
 
     print("[INFO] OS: ", sys.platform)
     print("[INFO] Core Number: ", multiprocessing.cpu_count())
     print("[INFO] feature shape: ", DF_features_all.shape)
 
-
-    
-    for persentage in persentages:
-        for normilizing in normilizings:
-            for x in range(-3,DF_features_all.shape[1]-2,3):
-                for mode in modes:  
-                    for model_type in model_types:
-                        if mode == "corr" and x != -3 and persentage != 1.0:
-                            continue
-
-                        
-                        pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-                        for test_ratio in test_ratios:
-                            folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
-                            pool.apply_async(perf.fcn, args=(DF_features_all, folder), callback=collect_results)
-                            # collect_results(perf.fcn(DF_features_all,folder))
+    if features_excel == "COAs_otsu" or features_excel == "COAs_simple" or features_excel == "COPs":
+        for persentage in persentages:
+            for normilizing in normilizings:
+                for x in [-3]:
+                    for mode in modes:  
+                        for model_type in model_types:
+                            
+                            pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+                            for test_ratio in test_ratios:
+                                folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
+                                pool.apply_async(perf.fcn, args=(DF_features_all, folder), callback=collect_results)
+                                # collect_results(perf.fcn(DF_features_all,folder))
 
 
-                        pool.close()
-                        pool.join()
+                            pool.close()
+                            pool.join()
+
+    else:
+        for persentage in persentages:
+            for normilizing in normilizings:
+                for x in range(-3,DF_features_all.shape[1]-2,3):
+                    for mode in modes:  
+                        for model_type in model_types:
+                            if mode == "corr" and x != -3 and persentage != 1.0:
+                                continue
+
+                            
+                            pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+                            for test_ratio in test_ratios:
+                                folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
+                                pool.apply_async(perf.fcn, args=(DF_features_all, folder), callback=collect_results)
+                                # collect_results(perf.fcn(DF_features_all,folder))
+
+
+                            pool.close()
+                            pool.join()
 
 
 

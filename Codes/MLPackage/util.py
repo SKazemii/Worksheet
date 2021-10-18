@@ -13,7 +13,7 @@ from sklearn.metrics import accuracy_score, f1_score
 from pathlib import Path as Pathlb
 
 THRESHOLDs = np.linspace(0, 1, 100)
-test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+test_ratios = [0.1]
 persentages = [0.95, 1.0]
 modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
