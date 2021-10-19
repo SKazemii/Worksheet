@@ -95,8 +95,8 @@ FRR_L = list()
 FAR_R = list()
 FRR_R = list()
 plt.figure(figsize=(14,8))
-X = pd.DataFrame(index=["COAs_otsu", "COAs_simple", "COPs"] , columns=["Accuracy Left", "Accuracy Right"])
-Y = pd.DataFrame(index=["COAs_otsu", "COAs_simple", "COPs"] , columns=[ "EER Left", "EER Right"])
+X = pd.DataFrame(index=["COAs-otsu", "COAs-simple", "COPs"] , columns=["Accuracy Left", "Accuracy Right"])
+Y = pd.DataFrame(index=["COAs-otsu", "COAs-simple", "COPs"] , columns=[ "EER Left", "EER Right"])
 Results_DF_group = Results_DF.groupby(["Feature_Type"])
 
 for f_type in ["COAs-otsu", "COAs-simple", "COPs"]:   
@@ -113,13 +113,13 @@ for f_type in ["COAs-otsu", "COAs-simple", "COPs"]:
     FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
 
 
-with open(os.path.join("Manuscripts", "src", "tables", "COX-Acc.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "COX-time-series-Acc.tex"), "w") as tf:
     tf.write(X.to_latex())
-with open(os.path.join("Manuscripts", "src", "tables", "COX-EER.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "COX-time-series-EER.tex"), "w") as tf:
     tf.write(Y.to_latex())
 perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, ["COAs_otsu", "COAs_simple", "COPs"])
 plt.tight_layout()
-plt.savefig(os.path.join("Manuscripts", "src", "figures", "COX.png"))
+plt.savefig(os.path.join("Manuscripts", "src", "figures", "COX-time-series.png"))
 plt.close('all')
 
 
@@ -164,7 +164,7 @@ for f_type in ["afeatures-simple", "afeatures-otsu", "pfeatures"]:
 
 
 for f_type in perf.features_types:   
-    for column in ['Mode', 'Model_Type', 'Normalizition', 'PCA']:
+    for column in ['Mode', 'Model-Type', 'Normalizition', 'PCA']:
         plt.figure(figsize=(14,8))
         Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set", column])
         values = Results_DF[column].unique()

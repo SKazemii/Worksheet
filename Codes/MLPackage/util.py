@@ -27,7 +27,7 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 working_path = os.getcwd()
 score = "A"
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
-cols = ["Feature_Type", "Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number_of_PCs",
+cols = ["Feature_Type", "Mode", "Model-Type", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number_of_PCs",
         "Mean_sample_test_L", "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L", 
         "Mean_sample_test_R","Mean_Acc_R", "Mean_f1_R", "Mean_EER_R",
 
