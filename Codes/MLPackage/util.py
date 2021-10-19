@@ -14,12 +14,13 @@ from pathlib import Path as Pathlb
 
 THRESHOLDs = np.linspace(0, 1, 100)
 test_ratios = [0.2]
-persentages = [1.0]
+persentages = [1.0, 0.95]
 modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
 normilizings = ["z-score", "minmax"]
 verbose = False
-features_excel = "COPs" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
+# for _ in range(3):
+# features_excel = "afeatures_simple" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
 
 
 working_path = os.getcwd()
@@ -40,7 +41,7 @@ cols = ["Feature_set", "Mode", "Model_Type", "Test_Size", "Normalizition", "Feat
 
 
 
-def fcn(DF_features_all, foldername):
+def fcn(DF_features_all, foldername, features_excel):
     
     subjects = (DF_features_all["subject ID"].unique())
     

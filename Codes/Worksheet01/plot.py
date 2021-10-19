@@ -110,28 +110,6 @@ for idx, temp in enumerate(Modes):
 
     data.append(Results_DF_all_mode["Mean_Accuracy_Left"].values)
 
-stat, p = shapiro(data[0])
-
-print('stat=%.3f, p=%.3f' % (stat, p))
-if p > 0.05:
-    print('Probably Gaussian')
-else:
-    print('Probably not Gaussian')
-    stat, p = mannwhitneyu(data[0], data[1])
-    print('stat=%.3f, p=%.3f' % (stat, p))
-    if p > 0.05:
-        print('Probably the same distribution')
-    else:
-        print('Probably different distributions')
-
-
-
-plt.hist(data[0], color='red')
-plt.hist(data[1], color='navy')
-plt.show()
-sys.exit()
-
-for idx, temp in enumerate(Modes):
 
     X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
     X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
@@ -152,11 +130,6 @@ for idx, temp in enumerate(Modes):
 
     cols = ["FRR_R_" + str(i) for i in range(100)]
     FRR_R.append(Results_DF_all_mode.loc[:, cols].mean().values)
-
-
-
-
-
 
     plt.subplot(1,2,1)
     auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
@@ -193,6 +166,22 @@ plt.tight_layout()
 plt.savefig(PATH)
 plt.close('all')
 
+stat, p = shapiro(data[1])
+if p > 0.05:
+    print('[INFO] Probably Gaussian,\t\t\t\t stat=%.3f,\t p=%.3f' % (stat, p))
+    stat, p = ttest_ind(data[0], data[1])
+    if p > 0.05:
+        print('[INFO] Probably the same distribution,\t\t stat=%.3f,\t p=%.3f' % (stat, p))
+    else:
+        print('[INFO] Probably different distributions,\t\t stat=%.3f,\t p=%.3f' % (stat, p))
+else:
+    print('[INFO] Probably not Gaussian,\t\t\t\t stat=%.3f,\t p=%.3f' % (stat, p))
+    stat, p = mannwhitneyu(data[0], data[1])
+    if p > 0.05:
+        print('[INFO] Probably the same distribution,\t\t stat=%.3f,\t p=%.3f' % (stat, p))
+    else:
+        print('[INFO] Probably different distributions,\t\t stat=%.3f,\t p=%.3f' % (stat, p))
+
 with open(os.path.join("Manuscripts", "src", "tables", "Correlation.tex"), "w") as tf:
         tf.write(X.round(decimals=2).to_latex())
 with open(os.path.join("Manuscripts", "src", "tables", "Correlation1.tex"), "w") as tf:
@@ -208,9 +197,12 @@ FAR_L = list()
 FRR_L = list()
 FAR_R = list()
 FRR_R = list()
+data = list()
 for idx, temp in enumerate(model_types):
     a = ["Minimum", "Median", "Average"]
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Model_Type"] == temp   ]
+    data.append(Results_DF_all_mode["Mean_Accuracy_Left"].values)
+
     X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
     X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
     Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
