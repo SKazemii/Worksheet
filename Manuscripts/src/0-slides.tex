@@ -34,7 +34,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \iffalse
-
 \section{Score Matrix}
     \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures, COAs-otsu, COAs-simple, COPs}{
     \begin{frame}
@@ -176,9 +175,9 @@
     }
     
     
-\fi  
+
 \section{features}
-    \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures, COXTS}{
+    \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures, COX-time-series}{
     \begin{frame}
     \frametitle{Comparing different extracted features over \n}
     \tiny
@@ -221,7 +220,48 @@
     
     }
     
- 
+\fi
+\section{features selection}
+    \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures}{
+    \begin{frame}
+    \frametitle{Comparing different extracted features over \n based on FS algorithm}
+    \tiny
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The top 10 features over \n}
+    \input{Manuscripts/src/tables/\n-10best-FS}
+    \end{table}
+    
+    
+  
+    
+    \end{frame}
+    
+    \begin{frame}
+    \frametitle{Comparing different extracted features over \n based on FS algorithm}
+    \tiny
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The top 10 features over \n}
+    \label{tab:parameters condition}
+    \input{Manuscripts/src/tables/\n-10worse-FS}
+    \end{table}
+    
+    
+    
+    \end{frame}
+    
+    \begin{frame}
+    \centering
+    \frametitle{Comparing different extracted features over \n}
+    \includegraphics[scale=0.3]{Manuscripts/src/figures/\n.png}
+    \end{frame}
+    
+    }
+
+
 
 \end{document}
 
