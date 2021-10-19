@@ -10,8 +10,8 @@
     "python.defaultInterpreterPath": "c:/Users/skazemi1/AppData/Local/Programs/Python/Python39/python.exe",
     "python.formatting.provider": "black",
     "editor.formatOnSave": false,
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": false,
+    "python.linting.pylintEnabled": false,
     "code-runner.executorMap": {
         "python": "$pythonPath -u $fullFileName"
     },

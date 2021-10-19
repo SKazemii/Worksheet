@@ -1,24 +1,25 @@
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import numpy as np
-from numpy.core.fromnumeric import shape
 import pandas as pd
-from pandas.core.frame import DataFrame
-from scipy import ndimage
+
+# from scipy import ndimage
 import matplotlib.pyplot as plt
 import sys, os, timeit
-from pathlib import Path as Pathlb
+# from pathlib import Path as Pathlb
 
 import multiprocessing
-from scipy.spatial import distance
+# from scipy.spatial import distance
 
-from sklearn import preprocessing
-from sklearn.neighbors import KNeighborsClassifier
+# from sklearn import preprocessing
+# from sklearn.neighbors import KNeighborsClassifier
 
 
-from sklearn.metrics import accuracy_score, f1_score
-from sklearn.decomposition import PCA
+# from sklearn.metrics import accuracy_score, f1_score
+# from sklearn.decomposition import PCA
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from MLPackage import util as perf
 
 
@@ -53,11 +54,9 @@ def main():
     # model_types = ["min", "median", "average"]
     # normilizings = ["z-score"]#, "minmax"]
 
-    for i in range(3):
+    for features_excel in perf.features_types:
 
-        features_excel = ["afeatures_simple", "afeatures_otsu", "pfeatures"]# "COAs_otsu", "COAs_simple", "COPs"
-
-        feature_path = os.path.join(working_path, 'Datasets', features_excel[i] + ".xlsx")
+        feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
         DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
 
@@ -65,7 +64,7 @@ def main():
         print("[INFO] Core Number: ", multiprocessing.cpu_count())
         print("[INFO] feature shape: ", DF_features_all.shape)
         
-        if features_excel[i] == "COAs_otsu" or features_excel[i] == "COAs_simple" or features_excel[i] == "COPs":
+        if features_excel == "COAs_otsu" or features_excel == "COAs_simple" or features_excel == "COPs":
             for persentage in persentages:
                 for normilizing in normilizings:
                     for x in [-3]:
@@ -74,7 +73,7 @@ def main():
                             for model_type in model_types:
                                 for test_ratio in test_ratios:
                                     folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
-                                    pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel[i]), callback=collect_results)
+                                    pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel), callback=collect_results)
                                     # collect_results(perf.fcn(DF_features_all,folder))
 
                         pool.close()
@@ -87,12 +86,12 @@ def main():
                         pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
                         for mode in modes:  
                             for model_type in model_types:
-                                if mode == "corr" and x != -3 and persentage != 1.0:
+                                if x != -3 and persentage != 1.0:
                                     continue
 
                                 for test_ratio in test_ratios:
                                     folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
-                                    pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel[i]), callback=collect_results)
+                                    pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel), callback=collect_results)
                                     # collect_results(perf.fcn(DF_features_all,folder))
 
 

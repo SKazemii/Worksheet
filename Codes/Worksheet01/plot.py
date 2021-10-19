@@ -1,26 +1,26 @@
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import numpy as np
-from numpy.core.fromnumeric import mean
-from numpy.lib.function_base import median
 import pandas as pd
-from pandas.core.frame import DataFrame
-from scipy import ndimage
+
 import matplotlib.pyplot as plt
 import sys, os
 from pathlib import Path as Pathlb
 
 
-from scipy.spatial import distance
+# from scipy.spatial import distance
+# from sklearn import preprocessing
+# from sklearn.metrics import accuracy_score
+# from itertools import combinations, product
 
-from sklearn import preprocessing
 
-from sklearn.metrics import accuracy_score
-
-from itertools import combinations, product
 from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from MLPackage import util as perf
+from MLPackage import FS 
 
 
 plt.rcParams["font.size"] = 13
@@ -30,24 +30,16 @@ print("[INFO] Setting directories")
 project_dir = os.getcwd()
 fig_dir = os.path.join(project_dir, "Manuscripts", "src", "figures")
 tbl_dir = os.path.join(project_dir, "Manuscripts", "src", "tables")
-data_dir = os.path.join(project_dir, "Archive", "results_All")
-data_dir = os.path.join(project_dir, "results COXTS")
+data_dir = os.path.join(project_dir, "results")
 
 Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
 Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
 
 
 
-Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
 
-print(Results_DF)
 
-test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [1.0]
-Modes = ["corr", "dist"]
-model_types = ["min", "median", "average"]
 THRESHOLDs = perf.THRESHOLDs
-normilizings = ["z-score"]#, "minmax", "None"]
 feature_names = perf.feature_names
 
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
@@ -57,36 +49,209 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
+Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
+Results_DF["Mode"] = Results_DF["Mode"].map(lambda x: "Correlation" if x == "corr" else "Euclidean distance")
+Results_DF["Normalizition"] = Results_DF["Normalizition"].map(lambda x: "Z-score algorithm" if x == "z-score" else "Minmax algorithm")
+Results_DF["PCA"] = Results_DF["PCA"].map(lambda x: "All PCs" if x == 1.0 else "keeping 95% variance")
+Results_DF.columns = perf.cols
+
+
 
 
 
 Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
-Results_DF_temp = Results_DF_temp[   Results_DF_temp["Mean_EER_Left"] != 0   ]
-Results_DF_temp.columns = perf.cols
-
-
-# X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [False, True]).iloc[:10,:8]
-# with open(os.path.join("Manuscripts", "src", "tables", "top10_left.tex"), "w") as tf:
-#     tf.write(X.round(decimals=2).to_latex())
-
-# X = Results_DF_temp.sort_values(by=['Acc_Left', 'EER_Left'], ascending = [True, False]).iloc[:10,:8]
-# with open(os.path.join("Manuscripts", "src", "tables", "worse10_left.tex"), "w") as tf:
-#     tf.write(X.round(decimals=2).to_latex())
 
 
 
+X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L'], ascending = [False, True]).iloc[:10,:13].drop(columns =['Time', 'Number_of_PCs', 'Mean_sample_test_L'])
+with open(os.path.join("Manuscripts", "src", "tables", "top10_L.tex"), "w") as tf:
+    tf.write(X.round(decimals=2).to_latex())
+
+X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L'], ascending = [True, False]).iloc[:10,:13].drop(columns =['Time', 'Number_of_PCs', 'Mean_sample_test_L'])
+with open(os.path.join("Manuscripts", "src", "tables", "worse10_L.tex"), "w") as tf:
+    tf.write(X.round(decimals=2).to_latex())
 
 
 
-# X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [False, True]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
-# with open(os.path.join("Manuscripts", "src", "tables", "top10_right.tex"), "w") as tf:
-#     tf.write(X.round(decimals=2).to_latex())      
+X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R'], ascending = [False, True]).iloc[:10,:17].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'Mean_sample_test_R', 'Mean_sample_test_L', 'Mean_Acc_L', 'Mean_EER_L'])
+with open(os.path.join("Manuscripts", "src", "tables", "top10_R.tex"), "w") as tf:
+    tf.write(X.round(decimals=2).to_latex())      
+
+X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R'], ascending = [True, False]).iloc[:10,:17].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'Mean_sample_test_R', 'Mean_sample_test_L', 'Mean_Acc_L', 'Mean_EER_L'])
+with open(os.path.join("Manuscripts", "src", "tables", "worse10_R.tex"), "w") as tf:
+    tf.write(X.round(decimals=2).to_latex())          
 
 
-# X = Results_DF_temp.sort_values(by=['Acc_Right', 'EER_Right'], ascending = [True, False]).iloc[:10,:10].drop(columns =['Acc_Left', 'EER_Left'])
-# with open(os.path.join("Manuscripts", "src", "tables", "worse10_right.tex"), "w") as tf:
-#     tf.write(X.round(decimals=2).to_latex())          
 
+
+
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
+plt.figure(figsize=(14,8))
+X = pd.DataFrame(index=["COAs_otsu", "COAs_simple", "COPs"] , columns=["Accuracy Left", "Accuracy Right"])
+Y = pd.DataFrame(index=["COAs_otsu", "COAs_simple", "COPs"] , columns=[ "EER Left", "EER Right"])
+Results_DF_group = Results_DF.groupby(["Feature_Type"])
+
+for f_type in ["COAs_otsu", "COAs_simple", "COPs"]:   
+    
+    DF = Results_DF_group.get_group((f_type))
+    X.loc[f_type, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
+    X.loc[f_type, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+    Y.loc[f_type, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L"].mean(),       DF["Mean_EER_L"].std(), DF["Mean_EER_L"].min(), DF["Mean_EER_L"].max())
+    Y.loc[f_type, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R"].mean(),      DF["Mean_EER_R"].std(), DF["Mean_EER_R"].min(), DF["Mean_EER_R"].max())    
+
+    FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+    FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+    FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+    FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+
+with open(os.path.join("Manuscripts", "src", "tables", "COX_Acc.tex"), "w") as tf:
+    tf.write(X.to_latex())
+with open(os.path.join("Manuscripts", "src", "tables", "COX_EER.tex"), "w") as tf:
+    tf.write(Y.to_latex())
+perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, ["COAs_otsu", "COAs_simple", "COPs"])
+plt.tight_layout()
+plt.savefig(os.path.join("Manuscripts", "src", "figures", "COX.png"))
+plt.close('all')
+
+
+for f_type in ["afeatures_simple", "afeatures_otsu", "pfeatures"]:   
+    plt.figure(figsize=(14,8))
+
+    Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set"])
+    values = Results_DF["Features_Set"].unique()
+
+    X = pd.DataFrame(index=values , columns=["Accuracy Left", "Accuracy Right"])
+    Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
+    FAR_L = list()
+    FRR_L = list()
+    FAR_R = list()
+    FRR_R = list()
+    for value in values:
+        
+        DF = Results_DF_group.get_group((f_type, value))
+        X.loc[value, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
+        X.loc[value, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+        Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L"].mean(),       DF["Mean_EER_L"].std(), DF["Mean_EER_L"].min(), DF["Mean_EER_L"].max())
+        Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R"].mean(),      DF["Mean_EER_R"].std(), DF["Mean_EER_R"].min(), DF["Mean_EER_R"].max())    
+
+        # print(DF)
+        FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+        FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+        FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+        FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+    perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, values)
+    plt.tight_layout()
+    plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + ".png"))
+    plt.close('all')
+
+
+    with open(os.path.join("Manuscripts", "src", "tables", f_type + "_Acc.tex"), "w") as tf:
+        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", f_type + "_EER.tex"), "w") as tf:
+        tf.write(Y.to_latex())
+
+
+
+
+for f_type in perf.features_types:   
+    for column in ['Mode', 'Model_Type', 'Normalizition', 'PCA']:
+        plt.figure(figsize=(14,8))
+        Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set", column])
+        values = Results_DF[column].unique()
+        X = pd.DataFrame(index=values , columns=["Accuracy Left", "Accuracy Right"])
+        Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
+        FAR_L = list()
+        FRR_L = list()
+        FAR_R = list()
+        FRR_R = list()
+        for value in values:
+            
+            DF = Results_DF_group.get_group((f_type, 'All', value))
+            X.loc[value, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
+            X.loc[value, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+            Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L"].mean(),       DF["Mean_EER_L"].std(), DF["Mean_EER_L"].min(), DF["Mean_EER_L"].max())
+            Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R"].mean(),      DF["Mean_EER_R"].std(), DF["Mean_EER_R"].min(), DF["Mean_EER_R"].max())    
+
+            # print(DF)
+            FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+            FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+            FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+            FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+        perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, values)
+        plt.tight_layout()
+        plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + "_" + column + ".png"))
+        plt.close('all')
+
+
+        with open(os.path.join("Manuscripts", "src", "tables", f_type + "_" + column + "_Acc.tex"), "w") as tf:
+            tf.write(X.to_latex())
+        with open(os.path.join("Manuscripts", "src", "tables", f_type + "_" + column + "_EER.tex"), "w") as tf:
+            tf.write(Y.to_latex())
+
+
+
+
+
+
+
+
+for features_excel in ["afeatures_simple", "afeatures_otsu", "pfeatures"]:
+
+    feature_path = os.path.join(perf.working_path, 'Datasets', features_excel + ".xlsx")
+    DF_features = pd.read_excel(feature_path, index_col = 0)
+
+
+    print( "[INFO] feature shape: ", DF_features.shape)
+
+
+    f_names = ['MDIST_RD', 'MDIST_AP', 'MDIST_ML', 'RDIST_RD', 'RDIST_AP', 'RDIST_ML', 'TOTEX_RD', 'TOTEX_AP', 'TOTEX_ML', 'MVELO_RD', 'MVELO_AP', 'MVELO_ML', 'RANGE_RD', 'RANGE_AP', 'RANGE_ML','AREA_CC', 'AREA_CE', 'AREA_SW', 'MFREQ_RD', 'MFREQ_AP', 'MFREQ_ML', 'FDPD_RD', 'FDPD_AP', 'FDPD_ML', 'FDCC', 'FDCE']
+    columnsName = f_names + [ "subject_ID", "left(0)/right(1)"]
+    DF_features.columns = columnsName
+
+
+
+
+    DF_side = DF_features[DF_features["left(0)/right(1)"] == 0]
+    DF_side.loc[DF_side.subject_ID == 4.0, "left(0)/right(1)"] = 1
+    DF_side.loc[DF_side.subject_ID != 4.0, "left(0)/right(1)"] = 0
+
+
+    DF = FS.mRMR(DF_side.iloc[:,:-2], DF_side.iloc[:,-1])
+
+    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "_10best_FS.tex"), "w") as tf:
+        tf.write(DF.iloc[:10,:].to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "_10worst_FS.tex"), "w") as tf:
+        tf.write(DF.iloc[-10:,:].to_latex())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sys.exit()
 
 
 Results_DF_all = Results_DF[   Results_DF["Features_Set"] == "All"   ]
@@ -108,15 +273,15 @@ for idx, temp in enumerate(Modes):
     a = ["Correlation", "Euclidean distance"]
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Mode"] == temp   ]
 
-    data.append(Results_DF_all_mode["Mean_Accuracy_Left"].values)
+    data.append(Results_DF_all_mode["Mean_Acc_L"].values)
 
 
-    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
-    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
-    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
-    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Right"].mean(),      Results_DF_all_mode["Mean_EER_Right"].std(), Results_DF_all_mode["Mean_EER_Right"].min(), Results_DF_all_mode["Mean_EER_Right"].max())    
+    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_L"].mean(),  Results_DF_all_mode["Mean_Acc_L"].std(), Results_DF_all_mode["Mean_Acc_L"].min(), Results_DF_all_mode["Mean_Acc_L"].max())
+    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_R"].mean(), Results_DF_all_mode["Mean_Acc_R"].std(), Results_DF_all_mode["Mean_Acc_R"].min(), Results_DF_all_mode["Mean_Acc_R"].max())
+    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_L"].mean(),       Results_DF_all_mode["Mean_EER_L"].std(), Results_DF_all_mode["Mean_EER_L"].min(), Results_DF_all_mode["Mean_EER_L"].max())
+    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_R"].mean(),      Results_DF_all_mode["Mean_EER_R"].std(), Results_DF_all_mode["Mean_EER_R"].min(), Results_DF_all_mode["Mean_EER_R"].max())    
        
-    # plt.boxplot(Results_DF_all_mode["Mean_Accuracy_Left"])
+    # plt.boxplot(Results_DF_all_mode["Mean_Acc_L"])
     # plt.show()
 
     cols = ["FAR_L_" + str(i) for i in range(100)] 
@@ -161,10 +326,7 @@ for idx, temp in enumerate(Modes):
     plt.gca().set_aspect('equal')
     plt.legend(loc="best")
 
-PATH = os.path.join("Manuscripts", "src", "figures", "Correlation.png")
-plt.tight_layout()
-plt.savefig(PATH)
-plt.close('all')
+
 
 stat, p = shapiro(data[1])
 if p > 0.05:
@@ -201,12 +363,12 @@ data = list()
 for idx, temp in enumerate(model_types):
     a = ["Minimum", "Median", "Average"]
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Model_Type"] == temp   ]
-    data.append(Results_DF_all_mode["Mean_Accuracy_Left"].values)
+    data.append(Results_DF_all_mode["Mean_Acc_L"].values)
 
-    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
-    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
-    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
-    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Right"].mean(),      Results_DF_all_mode["Mean_EER_Right"].std(), Results_DF_all_mode["Mean_EER_Right"].min(), Results_DF_all_mode["Mean_EER_Right"].max())    
+    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_L"].mean(),  Results_DF_all_mode["Mean_Acc_L"].std(), Results_DF_all_mode["Mean_Acc_L"].min(), Results_DF_all_mode["Mean_Acc_L"].max())
+    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_R"].mean(), Results_DF_all_mode["Mean_Acc_R"].std(), Results_DF_all_mode["Mean_Acc_R"].min(), Results_DF_all_mode["Mean_Acc_R"].max())
+    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_L"].mean(),       Results_DF_all_mode["Mean_EER_L"].std(), Results_DF_all_mode["Mean_EER_L"].min(), Results_DF_all_mode["Mean_EER_L"].max())
+    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_R"].mean(),      Results_DF_all_mode["Mean_EER_R"].std(), Results_DF_all_mode["Mean_EER_R"].min(), Results_DF_all_mode["Mean_EER_R"].max())    
 
     cols = ["FAR_L_" + str(i) for i in range(100)] 
     FAR_L.append(Results_DF_all_mode.loc[:, cols].mean().values)
@@ -280,10 +442,10 @@ for idx, temp in enumerate(normilizings):
 
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Normalizition"] == temp   ]
 
-    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
-    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
-    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
-    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Right"].mean(),      Results_DF_all_mode["Mean_EER_Right"].std(), Results_DF_all_mode["Mean_EER_Right"].min(), Results_DF_all_mode["Mean_EER_Right"].max())    
+    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_L"].mean(),  Results_DF_all_mode["Mean_Acc_L"].std(), Results_DF_all_mode["Mean_Acc_L"].min(), Results_DF_all_mode["Mean_Acc_L"].max())
+    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_R"].mean(), Results_DF_all_mode["Mean_Acc_R"].std(), Results_DF_all_mode["Mean_Acc_R"].min(), Results_DF_all_mode["Mean_Acc_R"].max())
+    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_L"].mean(),       Results_DF_all_mode["Mean_EER_L"].std(), Results_DF_all_mode["Mean_EER_L"].min(), Results_DF_all_mode["Mean_EER_L"].max())
+    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_R"].mean(),      Results_DF_all_mode["Mean_EER_R"].std(), Results_DF_all_mode["Mean_EER_R"].min(), Results_DF_all_mode["Mean_EER_R"].max())    
 
     
     
@@ -359,10 +521,10 @@ for idx, temp in enumerate(test_ratios):
   
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["Test_Size"] == temp   ].reset_index()
 
-    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
-    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
-    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
-    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Right"].mean(),      Results_DF_all_mode["Mean_EER_Right"].std(), Results_DF_all_mode["Mean_EER_Right"].min(), Results_DF_all_mode["Mean_EER_Right"].max())    
+    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_L"].mean(),  Results_DF_all_mode["Mean_Acc_L"].std(), Results_DF_all_mode["Mean_Acc_L"].min(), Results_DF_all_mode["Mean_Acc_L"].max())
+    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_R"].mean(), Results_DF_all_mode["Mean_Acc_R"].std(), Results_DF_all_mode["Mean_Acc_R"].min(), Results_DF_all_mode["Mean_Acc_R"].max())
+    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_L"].mean(),       Results_DF_all_mode["Mean_EER_L"].std(), Results_DF_all_mode["Mean_EER_L"].min(), Results_DF_all_mode["Mean_EER_L"].max())
+    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_R"].mean(),      Results_DF_all_mode["Mean_EER_R"].std(), Results_DF_all_mode["Mean_EER_R"].min(), Results_DF_all_mode["Mean_EER_R"].max())    
 
     print(        Results_DF_all_mode.at[0, "Mean_sample_test_Left"])
     Z.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:2.2f}, {:2.2f})".format(
@@ -452,10 +614,10 @@ for idx, temp in enumerate(persentages):
   
     Results_DF_all_mode = Results_DF_all[   Results_DF_all["PCA"] == temp   ]
 
-    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Left"].mean(),  Results_DF_all_mode["Mean_Accuracy_Left"].std(), Results_DF_all_mode["Mean_Accuracy_Left"].min(), Results_DF_all_mode["Mean_Accuracy_Left"].max())
-    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Accuracy_Right"].mean(), Results_DF_all_mode["Mean_Accuracy_Right"].std(), Results_DF_all_mode["Mean_Accuracy_Right"].min(), Results_DF_all_mode["Mean_Accuracy_Right"].max())
-    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Left"].mean(),       Results_DF_all_mode["Mean_EER_Left"].std(), Results_DF_all_mode["Mean_EER_Left"].min(), Results_DF_all_mode["Mean_EER_Left"].max())
-    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_Right"].mean(),      Results_DF_all_mode["Mean_EER_Right"].std(), Results_DF_all_mode["Mean_EER_Right"].min(), Results_DF_all_mode["Mean_EER_Right"].max())    
+    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_L"].mean(),  Results_DF_all_mode["Mean_Acc_L"].std(), Results_DF_all_mode["Mean_Acc_L"].min(), Results_DF_all_mode["Mean_Acc_L"].max())
+    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_Acc_R"].mean(), Results_DF_all_mode["Mean_Acc_R"].std(), Results_DF_all_mode["Mean_Acc_R"].min(), Results_DF_all_mode["Mean_Acc_R"].max())
+    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_L"].mean(),       Results_DF_all_mode["Mean_EER_L"].std(), Results_DF_all_mode["Mean_EER_L"].min(), Results_DF_all_mode["Mean_EER_L"].max())
+    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_all_mode["Mean_EER_R"].mean(),      Results_DF_all_mode["Mean_EER_R"].std(), Results_DF_all_mode["Mean_EER_R"].min(), Results_DF_all_mode["Mean_EER_R"].max())    
 
 
 
@@ -536,10 +698,10 @@ for idx, temp in enumerate(feature_names):
     Results_DF_temp = Results_DF[   Results_DF["Features_Set"] == temp   ]
     Results_DF_temp = Results_DF_temp[   Results_DF_temp["PCA"] == 1   ]
 
-    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_Accuracy_Left"].mean(),  Results_DF_temp["Mean_Accuracy_Left"].std(), Results_DF_temp["Mean_Accuracy_Left"].min(), Results_DF_temp["Mean_Accuracy_Left"].max())
-    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_Accuracy_Right"].mean(), Results_DF_temp["Mean_Accuracy_Right"].std(), Results_DF_temp["Mean_Accuracy_Right"].min(), Results_DF_temp["Mean_Accuracy_Right"].max())
-    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_EER_Left"].mean(),       Results_DF_temp["Mean_EER_Left"].std(), Results_DF_temp["Mean_EER_Left"].min(), Results_DF_temp["Mean_EER_Left"].max())
-    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_EER_Right"].mean(),      Results_DF_temp["Mean_EER_Right"].std(), Results_DF_temp["Mean_EER_Right"].min(), Results_DF_temp["Mean_EER_Right"].max())    
+    X.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_Acc_L"].mean(),  Results_DF_temp["Mean_Acc_L"].std(), Results_DF_temp["Mean_Acc_L"].min(), Results_DF_temp["Mean_Acc_L"].max())
+    X.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_Acc_R"].mean(), Results_DF_temp["Mean_Acc_R"].std(), Results_DF_temp["Mean_Acc_R"].min(), Results_DF_temp["Mean_Acc_R"].max())
+    Y.iloc[idx,0] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_EER_L"].mean(),       Results_DF_temp["Mean_EER_L"].std(), Results_DF_temp["Mean_EER_L"].min(), Results_DF_temp["Mean_EER_L"].max())
+    Y.iloc[idx,1] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(Results_DF_temp["Mean_EER_R"].mean(),      Results_DF_temp["Mean_EER_R"].std(), Results_DF_temp["Mean_EER_R"].min(), Results_DF_temp["Mean_EER_R"].max())    
 
     cols = ["FAR_L_" + str(i) for i in range(100)] 
     FAR_L.append(Results_DF_temp.loc[:, cols].mean().values)

@@ -19,25 +19,26 @@ modes = ["corr", "dist"]
 model_types = ["min", "median", "average"]
 normilizings = ["z-score", "minmax"]
 verbose = False
-# for _ in range(3):
-# features_excel = "afeatures_simple" # "afeatures_simple", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"
+
+features_types = ["afeatures_simple", "afeatures_otsu", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"]
+color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 
 working_path = os.getcwd()
 score = "A"
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
-cols = ["Feature_set", "Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number_of_PCs",
-        "Mean_sample_test_Left", "Mean_Accuracy_Left", "Mean_f1-score_Left", "Mean_EER_Left", 
-        "Mean_sample_test_Right","Mean_Accuracy_Right", "Mean_f1-score_Right", "Mean_EER_Right",
+cols = ["Feature_Type", "Mode", "Model_Type", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number_of_PCs",
+        "Mean_sample_test_L", "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L", 
+        "Mean_sample_test_R","Mean_Acc_R", "Mean_f1_R", "Mean_EER_R",
 
-        "std_sample_test_Left", "std_Accuracy_Left", "std_f1-score_Left", "std_EER_Left", 
-        "std_sample_test_Right","std_Accuracy_Right", "std_f1-score_Right", "std_EER_Right",
+        "std_sample_test_L", "std_Acc_L", "std_f1_L", "std_EER_L", 
+        "std_sample_test_R","std_Acc_R", "std_f1_R", "std_EER_R",
 
-        "Min_sample_test_Left", "Min_Accuracy_Left", "Min_f1-score_Left", "Min_EER_Left", 
-        "Min_sample_test_Right","Min_Accuracy_Right", "Min_f1-score_Right", "Min_EER_Right",
+        "Min_sample_test_L", "Min_Acc_L", "Min_f1_L", "Min_EER_L", 
+        "Min_sample_test_R","Min_Acc_R", "Min_f1_R", "Min_EER_R",
 
-        "Max_sample_test_Left", "Max_Accuracy_Left", "Max_f1-score_Left", "Max_EER_Left", 
-        "Max_sample_test_Right", "Max_Accuracy_Right", "Max_f1-score_Right", "Max_EER_Right"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+        "Max_sample_test_L", "Max_Acc_L", "Max_f1_L", "Max_EER_L", 
+        "Max_sample_test_R", "Max_Acc_R", "Max_f1_R", "Max_EER_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
 
 
 
@@ -292,7 +293,35 @@ def fcn(DF_features_all, foldername, features_excel):
     return z
 
 
+def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
+    for idx in range(len(FAR_L)):
+        plt.subplot(1,2,1)
+        # auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+        # label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
+        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+
+        plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.0])
+        plt.xlabel('False Acceptance Rate')
+        plt.ylabel('False Rejection Rate')
+        plt.title('ROC curve, left side')
+        plt.gca().set_aspect('equal')
+        plt.legend(loc="best")
+
+        plt.subplot(1,2,2)
+        # auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+
+        plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.0])
+        plt.xlabel('False Acceptance Rate')
+        plt.ylabel('False Rejection Rate')
+        plt.title('ROC curve, Right side')
+        plt.gca().set_aspect('equal')
+        plt.legend(loc="best")
 
 
 def model(distModel1, distModel2, model_type = "average", score = None ):
