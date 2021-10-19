@@ -206,7 +206,7 @@ for f_type in perf.features_types:
 
 
 
-for features_excel in ["afeatures_simple", "afeatures_otsu", "pfeatures"]:
+for features_excel in ["afeatures-simple", "afeatures-otsu", "pfeatures"]:
 
     feature_path = os.path.join(perf.working_path, 'Datasets', features_excel + ".xlsx")
     DF_features = pd.read_excel(feature_path, index_col = 0)
