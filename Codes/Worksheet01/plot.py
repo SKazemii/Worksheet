@@ -53,6 +53,10 @@ Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col 
 Results_DF["Mode"] = Results_DF["Mode"].map(lambda x: "Correlation" if x == "corr" else "Euclidean distance")
 Results_DF["Normalizition"] = Results_DF["Normalizition"].map(lambda x: "Z-score algorithm" if x == "z-score" else "Minmax algorithm")
 Results_DF["PCA"] = Results_DF["PCA"].map(lambda x: "All PCs" if x == 1.0 else "keeping 95% variance")
+Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "afeatures-simple" if x == "afeatures_simple" else x)
+Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "afeatures-otsu" if x == "afeatures_otsu" else x)
+Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-otsu" if x == "COAs_otsu" else x)
+Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-simple" if x == "COAs_simple" else x)
 Results_DF.columns = perf.cols
 
 
@@ -95,7 +99,7 @@ X = pd.DataFrame(index=["COAs_otsu", "COAs_simple", "COPs"] , columns=["Accuracy
 Y = pd.DataFrame(index=["COAs_otsu", "COAs_simple", "COPs"] , columns=[ "EER Left", "EER Right"])
 Results_DF_group = Results_DF.groupby(["Feature_Type"])
 
-for f_type in ["COAs_otsu", "COAs_simple", "COPs"]:   
+for f_type in ["COAs-otsu", "COAs-simple", "COPs"]:   
     
     DF = Results_DF_group.get_group((f_type))
     X.loc[f_type, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
@@ -119,7 +123,7 @@ plt.savefig(os.path.join("Manuscripts", "src", "figures", "COX.png"))
 plt.close('all')
 
 
-for f_type in ["afeatures_simple", "afeatures_otsu", "pfeatures"]:   
+for f_type in ["afeatures-simple", "afeatures-otsu", "pfeatures"]:   
     plt.figure(figsize=(14,8))
 
     Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set"])

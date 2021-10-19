@@ -20,7 +20,7 @@ model_types = ["min", "median", "average"]
 normilizings = ["z-score", "minmax"]
 verbose = False
 
-features_types = ["afeatures_simple", "afeatures_otsu", "pfeatures", "COAs_otsu", "COAs_simple", "COPs"]
+features_types = ["afeatures-simple", "afeatures-otsu", "pfeatures", "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 
