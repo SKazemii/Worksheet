@@ -64,21 +64,21 @@ Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
 
 
 X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L'], ascending = [False, True]).iloc[:10,:13].drop(columns =['Time', 'Number_of_PCs', 'Mean_sample_test_L'])
-with open(os.path.join("Manuscripts", "src", "tables", "top10_L.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "top10-L.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())
 
 X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L'], ascending = [True, False]).iloc[:10,:13].drop(columns =['Time', 'Number_of_PCs', 'Mean_sample_test_L'])
-with open(os.path.join("Manuscripts", "src", "tables", "worse10_L.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "worse10-L.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())
 
 
 
 X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R'], ascending = [False, True]).iloc[:10,:17].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'Mean_sample_test_R', 'Mean_sample_test_L', 'Mean_Acc_L', 'Mean_EER_L'])
-with open(os.path.join("Manuscripts", "src", "tables", "top10_R.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "top10-R.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())      
 
 X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R'], ascending = [True, False]).iloc[:10,:17].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'Mean_sample_test_R', 'Mean_sample_test_L', 'Mean_Acc_L', 'Mean_EER_L'])
-with open(os.path.join("Manuscripts", "src", "tables", "worse10_R.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "worse10-R.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())          
 
 
@@ -109,9 +109,9 @@ for f_type in ["COAs_otsu", "COAs_simple", "COPs"]:
     FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
 
 
-with open(os.path.join("Manuscripts", "src", "tables", "COX_Acc.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "COX-Acc.tex"), "w") as tf:
     tf.write(X.to_latex())
-with open(os.path.join("Manuscripts", "src", "tables", "COX_EER.tex"), "w") as tf:
+with open(os.path.join("Manuscripts", "src", "tables", "COX-EER.tex"), "w") as tf:
     tf.write(Y.to_latex())
 perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, ["COAs_otsu", "COAs_simple", "COPs"])
 plt.tight_layout()
@@ -151,9 +151,9 @@ for f_type in ["afeatures_simple", "afeatures_otsu", "pfeatures"]:
     plt.close('all')
 
 
-    with open(os.path.join("Manuscripts", "src", "tables", f_type + "_Acc.tex"), "w") as tf:
+    with open(os.path.join("Manuscripts", "src", "tables", f_type + "-Acc.tex"), "w") as tf:
         tf.write(X.to_latex())
-    with open(os.path.join("Manuscripts", "src", "tables", f_type + "_EER.tex"), "w") as tf:
+    with open(os.path.join("Manuscripts", "src", "tables", f_type + "-EER.tex"), "w") as tf:
         tf.write(Y.to_latex())
 
 
@@ -186,13 +186,13 @@ for f_type in perf.features_types:
 
         perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, values)
         plt.tight_layout()
-        plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + "_" + column + ".png"))
+        plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + "-" + column + ".png"))
         plt.close('all')
 
 
-        with open(os.path.join("Manuscripts", "src", "tables", f_type + "_" + column + "_Acc.tex"), "w") as tf:
+        with open(os.path.join("Manuscripts", "src", "tables", f_type + "-" + column + "-Acc.tex"), "w") as tf:
             tf.write(X.to_latex())
-        with open(os.path.join("Manuscripts", "src", "tables", f_type + "_" + column + "_EER.tex"), "w") as tf:
+        with open(os.path.join("Manuscripts", "src", "tables", f_type + "-" + column + "-EER.tex"), "w") as tf:
             tf.write(Y.to_latex())
 
 
@@ -225,9 +225,9 @@ for features_excel in ["afeatures_simple", "afeatures_otsu", "pfeatures"]:
 
     DF = FS.mRMR(DF_side.iloc[:,:-2], DF_side.iloc[:,-1])
 
-    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "_10best_FS.tex"), "w") as tf:
+    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "-10best-FS.tex"), "w") as tf:
         tf.write(DF.iloc[:10,:].to_latex())
-    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "_10worst_FS.tex"), "w") as tf:
+    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "-10worst-FS.tex"), "w") as tf:
         tf.write(DF.iloc[-10:,:].to_latex())
 
 

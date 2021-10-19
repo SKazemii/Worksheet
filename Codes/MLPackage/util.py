@@ -296,10 +296,10 @@ def fcn(DF_features_all, foldername, features_excel):
 def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
     for idx in range(len(FAR_L)):
         plt.subplot(1,2,1)
-        # auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
+        auc = (1 + np.trapz( FRR_L[idx], FAR_L[idx]))
         # label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
@@ -311,8 +311,8 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
         plt.legend(loc="best")
 
         plt.subplot(1,2,2)
-        # auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
-        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        auc = (1 + np.trapz( FRR_R[idx], FAR_R[idx]))
+        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
