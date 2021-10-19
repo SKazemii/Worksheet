@@ -1,16 +1,16 @@
-\begin{tabular}{llllrlllrrr}
+\begin{tabular}{llllrllrrrr}
 \toprule
-{} &      Feature\_Type &                Mode & Model-Type &  Test\_Size &      Normalizition & Features\_Set &                   PCA &  Mean\_Acc\_L &  Mean\_f1\_L &  Mean\_EER\_L \\
+{} & Feature\_Type &  Mode & Criteria &  Test\_Size & Normalizition & Features\_Set &   PCA &  Mean\_Acc\_L &  Mean\_f1\_L &  Mean\_EER\_L \\
 \midrule
-0 &         pfeatures &  Euclidean distance &     median &        0.2 &  Z-score algorithm &        RANGE &               All PCs &       73.08 &      71.21 &        0.26 \\
-0 &  afeatures-simple &  Euclidean distance &    average &        0.2 &  Z-score algorithm &        RANGE &               All PCs &       72.52 &      71.74 &        0.29 \\
-0 &         pfeatures &  Euclidean distance &    average &        0.2 &  Z-score algorithm &        RANGE &               All PCs &       72.47 &      71.90 &        0.29 \\
-0 &    afeatures-otsu &  Euclidean distance &    average &        0.2 &  Z-score algorithm &        RANGE &               All PCs &       72.11 &      71.62 &        0.29 \\
-0 &    afeatures-otsu &  Euclidean distance &     median &        0.2 &  Z-score algorithm &        RANGE &               All PCs &       71.66 &      69.28 &        0.26 \\
-0 &         pfeatures &  Euclidean distance &    average &        0.2 &  Z-score algorithm &        TOTEX &               All PCs &       71.54 &      70.43 &        0.31 \\
-0 &         pfeatures &  Euclidean distance &    average &        0.2 &  Z-score algorithm &        MVELO &               All PCs &       71.41 &      70.28 &        0.31 \\
-0 &         pfeatures &  Euclidean distance &    average &        0.2 &  Z-score algorithm &        RANGE &  keeping 95\% variance &       70.80 &      69.52 &        0.31 \\
-0 &         pfeatures &  Euclidean distance &        min &        0.2 &  Z-score algorithm &        RANGE &               All PCs &       70.75 &      69.85 &        0.31 \\
-0 &         pfeatures &  Euclidean distance &     median &        0.2 &  Z-score algorithm &        RANGE &  keeping 95\% variance &       70.44 &      67.89 &        0.28 \\
+0 &    pfeatures &  dist &      med &        0.2 &       z-score &        RANGE &  1.00 &       73.08 &      71.21 &        0.26 \\
+0 &     afeat\_si &  dist &      ave &        0.2 &       z-score &        RANGE &  1.00 &       72.52 &      71.74 &        0.29 \\
+0 &    pfeatures &  dist &      ave &        0.2 &       z-score &        RANGE &  1.00 &       72.47 &      71.90 &        0.29 \\
+0 &     afeat\_ot &  dist &      ave &        0.2 &       z-score &        RANGE &  1.00 &       72.11 &      71.62 &        0.29 \\
+0 &     afeat\_ot &  dist &      med &        0.2 &       z-score &        RANGE &  1.00 &       71.66 &      69.28 &        0.26 \\
+0 &    pfeatures &  dist &      ave &        0.2 &       z-score &        TOTEX &  1.00 &       71.54 &      70.43 &        0.31 \\
+0 &    pfeatures &  dist &      ave &        0.2 &       z-score &        MVELO &  1.00 &       71.41 &      70.28 &        0.31 \\
+0 &    pfeatures &  dist &      ave &        0.2 &       z-score &        RANGE &  0.95 &       70.80 &      69.52 &        0.31 \\
+0 &    pfeatures &  dist &      min &        0.2 &       z-score &        RANGE &  1.00 &       70.75 &      69.85 &        0.31 \\
+0 &    pfeatures &  dist &      med &        0.2 &       z-score &        RANGE &  0.95 &       70.44 &      67.89 &        0.28 \\
 \bottomrule
 \end{tabular}
