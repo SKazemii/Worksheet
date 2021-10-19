@@ -34,6 +34,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \iffalse
+
 \section{Score Matrix}
     \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures, COAs-otsu, COAs-simple, COPs}{
     \begin{frame}
@@ -173,9 +174,6 @@
     \end{frame}
     
     }
-    
-    
-
 \section{features}
     \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures, COX-time-series}{
     \begin{frame}
@@ -219,12 +217,10 @@
     \end{frame}
     
     }
-    
-\fi
 \section{features selection}
     \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures}{
     \begin{frame}
-    \frametitle{Comparing different extracted features over \n based on FS algorithm}
+    \frametitle{Comparing different extracted features over \n \ based on FS algorithm}
     \tiny
     \begin{table}
     \centering
@@ -239,27 +235,71 @@
     \end{frame}
     
     \begin{frame}
-    \frametitle{Comparing different extracted features over \n based on FS algorithm}
+    \frametitle{Comparing different extracted features over \n \ based on FS algorithm}
     \tiny
     \begin{table}
     \centering
     \captionsetup{labelformat=empty}
     \caption{\footnotesize The top 10 features over \n}
     \label{tab:parameters condition}
-    \input{Manuscripts/src/tables/\n-10worse-FS}
+    \input{Manuscripts/src/tables/\n-10worst-FS}
     \end{table}
     
-    
-    
     \end{frame}
     
-    \begin{frame}
-    \centering
-    \frametitle{Comparing different extracted features over \n}
-    \includegraphics[scale=0.3]{Manuscripts/src/figures/\n.png}
-    \end{frame}
+
     
     }
+
+\fi
+\section{the best and worst top models}
+    \begin{frame}
+    \frametitle{The best top models on left foot}
+    \tiny
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The top 10 models on left foot.}
+    \input{Manuscripts/src/tables/top10-L}
+    \end{table}
+    
+    \end{frame}
+    \begin{frame}
+    \frametitle{The best top models on right foot}
+    \tiny
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The top 10 models on right foot.}
+    \input{Manuscripts/src/tables/top10-R}
+    \end{table}
+    
+    \end{frame}
+    
+    
+    
+    \begin{frame}
+    \frametitle{The worst top models on left foot}
+    \tiny
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The worst 10 models on left foot.}
+    \input{Manuscripts/src/tables/worse10-L}
+    \end{table}
+    
+    \end{frame}
+    \begin{frame}
+    \frametitle{The worst top models on right foot}
+    \tiny
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The worst 10 models on right foot.}
+    \input{Manuscripts/src/tables/worse10-R}
+    \end{table}
+    
+    \end{frame}
 
 
 
