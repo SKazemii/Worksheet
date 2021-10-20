@@ -20,17 +20,18 @@ pd.options.mode.chained_assignment = None
 THRESHOLDs = np.linspace(0, 1, 100)
 test_ratios = [0.2]
 persentages = [1.0, 0.95]
-modes = ["corr", "dist"]
+modes = ["dist", "corr"]
 model_types = ["min", "median", "average"]
 normilizings = ["z-score", "minmax"]
 verbose = False
 Debug = False
 random_test_acc = 50
+template_selection_methods = ["None", "DEND", "MDIST"]
+k_clusters = [4, 7, 12]
+
 
 features_types = ["afeatures-simple", "afeatures-otsu", "pfeatures", "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
-template_selection_methods = [None, "DEND", "MDIST"]
-k_clusters = [2, 3, 4]
 
 working_path = os.getcwd()
 score = "A"
@@ -135,7 +136,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
 
     tic=timeit.default_timer()
-    folder = str(persentage) + "_" + normilizing + "_" + feat_name + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
+    folder = str(persentage) + "_" + normilizing + "_" + feat_name + "_" + mode + "_" + model_type + "_" +  str(test_ratio) + "_" + template_selection_method + "_" + str(k_cluster)
     folder_path = os.path.join(working_path, 'results', features_excel, folder)
     Pathlb(folder_path).mkdir(parents=True, exist_ok=True)
 
@@ -222,7 +223,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
             DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
             DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-            if template_selection_method is not None:
+            if template_selection_method != "None":
                 DF_positive_samples_train = template_selection(DF_positive_samples_train, method = template_selection_method, k_cluster = k_cluster, verbose = verbose)
 
 
@@ -303,17 +304,17 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 EER_L.append(EER_temp)
                 FAR_L.append(FAR_temp)
                 FRR_L.append(FRR_temp)
-                ACC_L.append([subject, np.mean(acc), np.mean(f1), DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_L.append([subject, np.mean(acc), np.mean(f1), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
                 
             elif direction == "right_1":
                 EER_R.append(EER_temp)
                 FAR_R.append(FAR_temp)
                 FRR_R.append(FRR_temp)
-                ACC_R.append([subject, np.mean(acc), np.mean(f1), DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_R.append([subject, np.mean(acc), np.mean(f1), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
 
-    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
+    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
     DF_temp = pd.DataFrame(np.concatenate((ACC_L, EER_L, FAR_L, FRR_L), axis=1), columns = columnsname )
     DF_temp.to_excel(os.path.join(folder_path,   'Left.xlsx'))
     DF_temp = pd.DataFrame(np.concatenate((ACC_R, EER_R, FAR_R, FRR_R), axis=1), columns = columnsname )
@@ -731,7 +732,7 @@ def main():
 
     folder = str(1.0) + "_z-score_" + str(-3) + "_dist_median_" +  str(0.2) 
     
-    print(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "DEND").iloc[0,8:18])
+    print(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None").iloc[0,8:18])
     # collect_results(perf.fcn(DF_features_all,folder))
 
     

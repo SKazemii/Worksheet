@@ -69,15 +69,15 @@ def main():
         print("[INFO] feature shape: ", DF_features_all.shape)
         
         if features_excel == "COAs_otsu" or features_excel == "COAs_simple" or features_excel == "COPs":
-            for persentage in persentages:
+            for mode in modes:
                 for template_selection_method in template_selection_methods:
                     for k_cluster in k_clusters:
-                        if k_cluster != k_clusters[0] and template_selection_method is None:
+                        if k_cluster != k_clusters[0] and template_selection_method == "None":
                             continue 
                         for normilizing in normilizings:
                             for x in [-3]:
                                 pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-                                for mode in modes:  
+                                for persentage in persentages:  
                                     for model_type in model_types:
                                         for test_ratio in test_ratios:
                                             folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
@@ -88,15 +88,15 @@ def main():
                                 pool.join()
 
         else:
-            for persentage in persentages:
+            for mode in modes:
                 for template_selection_method in template_selection_methods:
                     for k_cluster in k_clusters:
-                        if k_cluster != k_clusters[0] and template_selection_method is None:
+                        if k_cluster != k_clusters[0] and template_selection_method == "None":
                             continue
                         for normilizing in normilizings:
-                            for x in range(-3,DF_features_all.shape[1]-2,3):
+                            for x in [-3]:#range(-3,DF_features_all.shape[1]-2,3):
                                 pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-                                for mode in modes:  
+                                for persentage in persentages:  
                                     for model_type in model_types:
                                         if x != -3 and persentage != 1.0:
                                             continue
