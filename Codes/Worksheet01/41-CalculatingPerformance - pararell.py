@@ -4,6 +4,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import numpy as np
 import pandas as pd
 
+pd.options.mode.chained_assignment = None 
+
 # from scipy import ndimage
 import matplotlib.pyplot as plt
 import sys, os, timeit
@@ -47,6 +49,8 @@ def main():
     modes = perf.modes
     model_types = perf.model_types
     normilizings = perf.normilizings
+    template_selection_methods = perf.template_selection_methods
+    k_clusters = perf.k_clusters
 
     # test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
     # persentages = [0.95]#, 1.0]
@@ -66,37 +70,45 @@ def main():
         
         if features_excel == "COAs_otsu" or features_excel == "COAs_simple" or features_excel == "COPs":
             for persentage in persentages:
-                for normilizing in normilizings:
-                    for x in [-3]:
-                        pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-                        for mode in modes:  
-                            for model_type in model_types:
-                                for test_ratio in test_ratios:
-                                    folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
-                                    pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel), callback=collect_results)
-                                    # collect_results(perf.fcn(DF_features_all,folder))
+                for template_selection_method in template_selection_methods:
+                    for k_cluster in k_clusters:
+                        if k_cluster != k_clusters[0] and template_selection_method is None:
+                            continue 
+                        for normilizing in normilizings:
+                            for x in [-3]:
+                                pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+                                for mode in modes:  
+                                    for model_type in model_types:
+                                        for test_ratio in test_ratios:
+                                            folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
+                                            pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel, k_cluster, template_selection_method), callback=collect_results)
+                                            # collect_results(perf.fcn(DF_features_all, folder))
 
-                        pool.close()
-                        pool.join()
+                                pool.close()
+                                pool.join()
 
         else:
             for persentage in persentages:
-                for normilizing in normilizings:
-                    for x in range(-3,DF_features_all.shape[1]-2,3):
-                        pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-                        for mode in modes:  
-                            for model_type in model_types:
-                                if x != -3 and persentage != 1.0:
-                                    continue
+                for template_selection_method in template_selection_methods:
+                    for k_cluster in k_clusters:
+                        if k_cluster != k_clusters[0] and template_selection_method is None:
+                            continue
+                        for normilizing in normilizings:
+                            for x in range(-3,DF_features_all.shape[1]-2,3):
+                                pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+                                for mode in modes:  
+                                    for model_type in model_types:
+                                        if x != -3 and persentage != 1.0:
+                                            continue
 
-                                for test_ratio in test_ratios:
-                                    folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
-                                    pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel), callback=collect_results)
-                                    # collect_results(perf.fcn(DF_features_all,folder))
+                                        for test_ratio in test_ratios:
+                                            folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
+                                            pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel, k_cluster, template_selection_method), callback=collect_results)
+                                            # collect_results(perf.fcn(DF_features_all,folder))
 
 
-                        pool.close()
-                        pool.join()
+                                pool.close()
+                                pool.join()
 
 
 
