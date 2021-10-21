@@ -52,6 +52,7 @@ def main():
     normilizings = perf.normilizings
     template_selection_methods = perf.template_selection_methods
     k_clusters = perf.k_clusters
+    level = logging.DEBUG
 
     # test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
     # persentages = [0.95]#, 1.0]
@@ -112,18 +113,20 @@ def main():
                                 pool.join()
 
 
-def create_logger():
+def create_logger(level):
     loggerName = Pathlb(__file__).stem
     log_path = os.path.join(working_path, 'logs')
     Pathlb(log_path).mkdir(parents=True, exist_ok=True)
 
     logger = logging.getLogger(loggerName)
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[%(asctime)s]-[%(name)s @ %(lineno)d]]-[%(levelname)s]\t%(message)s', datefmt='%m/%d/%y %I:%M:%S %p')
+    logger.setLevel(level)
+    formatter = logging.Formatter('[%(asctime)s]-[%(name)s @ %(lineno)ds]-[%(levelname)s]\t%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     file_handler = logging.FileHandler( os.path.join(log_path, loggerName + '_loger.log'), mode = 'w')
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(level)
     file_handler.setFormatter(formatter)
     stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+
     stream_handler.setFormatter(formatter)
 
     logger.addHandler(file_handler)
@@ -131,7 +134,7 @@ def create_logger():
     return logger
 
 if __name__ == '__main__': 
-    logger = create_logger()
+    logger = create_logger(logging.DEBUG)
     logger.info("Starting !!!")
     tic = timeit.default_timer()
     main()
