@@ -1,4 +1,5 @@
 import warnings
+import logging
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
@@ -9,7 +10,7 @@ pd.options.mode.chained_assignment = None
 # from scipy import ndimage
 import matplotlib.pyplot as plt
 import sys, os, timeit
-# from pathlib import Path as Pathlb
+from pathlib import Path as Pathlb
 
 import multiprocessing
 # from scipy.spatial import distance
@@ -64,9 +65,9 @@ def main():
         DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
 
-        print("[INFO] OS: ", sys.platform)
-        print("[INFO] Core Number: ", multiprocessing.cpu_count())
-        print("[INFO] feature shape: ", DF_features_all.shape)
+        logger.info("OS: {}".format(sys.platform))
+        logger.info("Core Numbers: {}".format(multiprocessing.cpu_count()))
+        logger.info("Feature shape: {}".format(DF_features_all.shape))
         
         if features_excel == "COAs_otsu" or features_excel == "COAs_simple" or features_excel == "COPs":
             for mode in modes:
@@ -111,10 +112,29 @@ def main():
                                 pool.join()
 
 
+def create_logger():
+    loggerName = Pathlb(__file__).stem
+    log_path = os.path.join(working_path, 'logs', loggerName + '_loger.log')
+
+    logger = logging.getLogger(loggerName)
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('[%(asctime)s]-[%(name)s @ %(lineno)d]]-[%(levelname)s]\t%(message)s', datefmt='%m/%d/%y %I:%M:%S %p')
+    file_handler = logging.FileHandler(log_path, mode = 'w')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    return logger
 
 if __name__ == '__main__': 
-    print("\n\n\n[INFO] starting !!!")
+    logger = create_logger()
+    logger.info("Starting !!!")
     tic = timeit.default_timer()
     main()
     toc = timeit.default_timer()
-    print("[INFO] Done ({:2.2f} process time)!!!\n\n\n".format(toc-tic))
+    logger.info("Done ({:2.2f} process time)!!!\n\n\n".format(toc-tic))
+
+

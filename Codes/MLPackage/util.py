@@ -1,6 +1,11 @@
+
+import logging
+from pathlib import Path as Pathlb
+
+
+
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.lib.function_base import median
 import pandas as pd
 
 import sys, os, timeit
@@ -9,49 +14,60 @@ from scipy.spatial import distance
 
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
-from sklearn.metrics import accuracy_score, f1_score
-
-from pathlib import Path as Pathlb
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_curve
 
 
 pd.options.mode.chained_assignment = None 
 
 
 THRESHOLDs = np.linspace(0, 1, 100)
-test_ratios = [0.2]
-persentages = [1.0, 0.95]
-modes = ["dist", "corr"]
-model_types = ["min", "median", "average"]
-normilizings = ["z-score", "minmax"]
+test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+persentages = [0.95]
+modes = ["dist"]#, "corr"]
+model_types = [ "median"]#, "min", "average"]
+normilizings = ["z-score"]#, "minmax"]
 verbose = False
 Debug = False
 random_test_acc = 50
-template_selection_methods = ["None", "DEND", "MDIST"]
-k_clusters = [4, 7, 12]
+template_selection_methods = ["None"]#, "DEND", "MDIST"]
+k_clusters = [4]#, 7, 12]
+level = logging.INFO
 
-
-features_types = ["afeatures-simple", "afeatures-otsu", "pfeatures", "COAs-otsu", "COAs-simple", "COPs"]
+features_types = ["pfeatures"]#, "afeatures-simple", "afeatures-otsu", "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 working_path = os.getcwd()
 score = "A"
 feature_names = ["MDIST", "RDIST", "TOTEX", "MVELO", "RANGE", "AREAXX", "MFREQ", "FDPD", "FDCX"]
+
 cols = ["Feature_Type", "Mode", "Criteria", "Test_Size", "Normalizition", "Features_Set", "PCA", "Time", "Number_of_PCs",
-        "Mean_sample_test_L", "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L", 
-        "Mean_sample_test_R","Mean_Acc_R", "Mean_f1_R", "Mean_EER_R",
 
         "template-selection-method", "k-cluster",
-
-        "std_sample_test_L", "std_Acc_L", "std_f1_L", "std_EER_L", 
-        "std_sample_test_R","std_Acc_R", "std_f1_R", "std_EER_R",
-
-        "Min_sample_test_L", "Min_Acc_L", "Min_f1_L", "Min_EER_L", 
-        "Min_sample_test_R","Min_Acc_R", "Min_f1_R", "Min_EER_R",
-
-        "Max_sample_test_L", "Max_Acc_L", "Max_f1_L", "Max_EER_L", 
-        "Max_sample_test_R", "Max_Acc_R", "Max_f1_R", "Max_EER_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+        "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L", "Mean_sample_training_L", "Mean_sample_test_L",
+        "Mean_Acc_R", "Mean_f1_R", "Mean_EER_R", "Mean_sample_training_R", "Mean_sample_test_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
 
 
+
+def create_logger():
+    loggerName = Pathlb(__file__).stem
+    log_path = os.path.join(working_path, 'logs', loggerName + '_loger.log')
+
+    logger = logging.getLogger(loggerName)
+    logger.setLevel(level)
+    formatter = logging.Formatter('[%(asctime)s]-[%(name)s @ %(lineno)d]]-[%(levelname)s]\t%(message)s', datefmt='%m/%d/%y %I:%M:%S %p')
+    file_handler = logging.FileHandler(log_path, mode = 'w')
+    file_handler.setLevel(level)
+    file_handler.setFormatter(formatter)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    return logger
+
+
+logger = create_logger()
 from sklearn.cluster import KMeans
 
 def template_selection(DF_positive_samples_train,  method, k_cluster, verbose = verbose):
@@ -69,7 +85,7 @@ def template_selection(DF_positive_samples_train,  method, k_cluster, verbose = 
             DF_positive_samples_train_clustered.iloc[cluster, :] = mean_cluster.iloc[0,:-2]
 
         if verbose: 
-            print("[INFO] clustered data size: ", DF_positive_samples_train_clustered.shape)
+            logger.info("Clustered data size: ", DF_positive_samples_train_clustered.shape)
     elif method == "MDIST":
         A = distance.squareform(distance.pdist(DF_positive_samples_train.iloc[:, :-2].values)).mean(axis=1)
         i = np.argsort(A)[:k_cluster]
@@ -148,17 +164,17 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
     
 
 
-    print("[INFO] start:   +++   ", folder)
+    logger.info("Start:   +++   {}".format(folder))
 
     for subject in subjects:
         if (subject % 86) == 0:
             continue
         
         if (subject % 30) == 0 and verbose is True:
-            print("[INFO] --------------- Subject Number: ", subject)
+            logger.info("--------------- Subject Number: {}".format(subject))
         
         if (Debug is True) and ((subject % 10) == 0):
-            print("[INFO] [Debug Mode]--------------- Subject Number: ", subject)
+            logger.debug("--------------- Subject Number: {}".format(subject))
             break
 
         for idx, direction in enumerate(["left_0", "right_1"]):
@@ -273,6 +289,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
             acc = list()
             f1 = list()
+            eer = list()
             t_idx = EER_temp[1]
             for _ in range(random_test_acc):
                 pos_samples = DF_positive_samples_test.shape
@@ -289,8 +306,13 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
             
                 y_pred = np.zeros((Model_test.shape))
                 y_pred[Model_test > THRESHOLDs[t_idx]] = 1
+
+                fpr, tpr, thresholds = roc_curve(DF_temp.iloc[:,-2].values, y_pred)
+
+                logger.debug(compute_eer(fpr, 1-tpr))
                 acc.append( accuracy_score(DF_temp.iloc[:,-2].values, y_pred)*100 )
                 f1.append(  f1_score(DF_temp.iloc[:,-2].values, y_pred)*100 )
+                eer.append(compute_eer(fpr, 1-tpr))
                 # print(Model_test)
 
                 # print(y_pred)
@@ -304,17 +326,17 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 EER_L.append(EER_temp)
                 FAR_L.append(FAR_temp)
                 FRR_L.append(FRR_temp)
-                ACC_L.append([subject, np.mean(acc), np.mean(f1), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_L.append([subject, np.mean(acc), np.mean(f1), np.mean(eer), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
                 
             elif direction == "right_1":
                 EER_R.append(EER_temp)
                 FAR_R.append(FAR_temp)
                 FRR_R.append(FRR_temp)
-                ACC_R.append([subject, np.mean(acc), np.mean(f1), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_R.append([subject, np.mean(acc), np.mean(f1), np.mean(eer), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
-
-    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
+            
+    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "mean(eer)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
     DF_temp = pd.DataFrame(np.concatenate((ACC_L, EER_L, FAR_L, FRR_L), axis=1), columns = columnsname )
     DF_temp.to_excel(os.path.join(folder_path,   'Left.xlsx'))
     DF_temp = pd.DataFrame(np.concatenate((ACC_R, EER_R, FAR_R, FRR_R), axis=1), columns = columnsname )
@@ -322,58 +344,25 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
 
     toc=timeit.default_timer()
-    print("[INFO] End:     ---    {}, \t\t Process time: {:.2f}  seconds".format(folder, toc - tic)) 
+    logger.info("End:     ---    {}, \t\t Process time: {:.2f}  seconds".format(folder, toc - tic)) 
 
 
-
+    logger.info(np.mean( np.array(ACC_L)[:,1:6]  , axis=0))
+    
     A = [[features_excel, mode, model_type, test_ratio, normilizing, feat_name, persentage, (toc - tic), num_pc,
-
-        np.mean( np.array(ACC_L)[:,4] ), 
-        np.mean( np.array(ACC_L)[:,2] ), 
-        np.mean( np.array(ACC_L)[:,3] ), 
-        np.mean( np.array(EER_L)[:,0] ),
-        np.mean( np.array(ACC_R)[:,4] ), 
-        np.mean( np.array(ACC_R)[:,2] ),
-        np.mean( np.array(ACC_R)[:,3] ), 
-        np.mean( np.array(EER_R)[:,0] ),
-
+        
         template_selection_method,
-        k_cluster,
+        k_cluster]+
 
-        np.std( np.array(ACC_L)[:,4] ), 
-        np.std( np.array(ACC_L)[:,2] ),
-        np.std( np.array(ACC_L)[:,3] ), 
-        np.std( np.array(EER_L)[:,0] ),
-        np.std( np.array(ACC_R)[:,4] ), 
-        np.std( np.array(ACC_R)[:,2] ),
-        np.std( np.array(ACC_R)[:,3] ), 
-        np.std( np.array(EER_R)[:,0] ),
-
-        np.min( np.array(ACC_L)[:,4] ), 
-        np.min( np.array(ACC_L)[:,2] ),
-        np.min( np.array(ACC_L)[:,3] ), 
-        np.min( np.array(EER_L)[:,0] ),
-        np.min( np.array(ACC_R)[:,4] ), 
-        np.min( np.array(ACC_R)[:,2] ),
-        np.min( np.array(ACC_R)[:,3] ), 
-        np.min( np.array(EER_R)[:,0] ),
-
-
-        np.max( np.array(ACC_L)[:,4] ), 
-        np.max( np.array(ACC_L)[:,2] ),
-        np.max( np.array(ACC_L)[:,3] ), 
-        np.max( np.array(EER_L)[:,0] ),
-        np.max( np.array(ACC_R)[:,4] ), 
-        np.max( np.array(ACC_R)[:,2] ),
-        np.max( np.array(ACC_R)[:,3] ), 
-        np.max( np.array(EER_R)[:,0] )] +
-
+        np.mean( np.array(ACC_L)[:,1:6] , axis=0).tolist()+
+        np.mean( np.array(ACC_R)[:,1:6] , axis=0).tolist()+
         np.concatenate((np.mean(np.array(FAR_L), axis=0), np.mean(np.array(FRR_L), axis=0)), axis=0).tolist()+
         np.concatenate((np.mean(np.array(FAR_R), axis=0), np.mean(np.array(FRR_R), axis=0)), axis=0).tolist()]
 
 
-
     z = pd.DataFrame(A, columns = cols )
+    logger.debug("shape of return DF (z): {}".format(z.shape))
+
     return z
 
 
@@ -406,6 +395,8 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
         plt.title('ROC curve, Right side')
         plt.gca().set_aspect('equal')
         plt.legend(loc="best")
+
+
 
 
 def model(distModel1, distModel2, model_type = "average", score = None ):
@@ -505,32 +496,33 @@ def ROC_plot(TPR, FPR):
     # plt.savefig(path + 'AUC.png')
 
 
-def ROC_plot_v2(FPR, FNR,THRESHOLDs, path):
+def ROC_plot_v2(FPR, FNR,THRESHOLDs):
     """plot ROC curve"""
     # fig = plt.figure()
-    color = ['darkorange', 'orange']
-    auc = 1/(1 + np.trapz( FPR,FNR))
-    plt.plot(FPR, FNR, linestyle='--', marker='o', color=color[path], lw = 2, label='ROC curve', clip_on=False)
-    plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.0])
-    plt.xlabel('False Acceptance Rate')
-    plt.ylabel('False Rejection Rate')
-    plt.title('ROC curve, AUC = %.2f'%auc)
-    plt.legend(loc="best")
+    # color = ['darkorange', 'orange']
+    # auc = 1/(1 + np.trapz( FPR,FNR))
+    # plt.plot(FPR, FNR, linestyle='--', marker='o', color=color[path], lw = 2, label='ROC curve', clip_on=False)
+    # plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+    # plt.xlim([0.0, 1.0])
+    # plt.ylim([0.0, 1.0])
+    # plt.xlabel('False Acceptance Rate')
+    # plt.ylabel('False Rejection Rate')
+    # plt.title('ROC curve, AUC = %.2f'%auc)
+    # plt.legend(loc="best")
     # path1 = path + "_ROC.png"
 
     # plt.savefig(path1)
 
-    # plt.figure()
-    # plt.plot(THRESHOLDs, FPR, linestyle='--', marker='o', color='darkorange', lw = 2, label='FAR curve', clip_on=False)
-    # plt.plot(THRESHOLDs, FNR, linestyle='--', marker='o', color='navy', lw = 2, label='FRR curve', clip_on=False)
+    plt.figure()
+    plt.plot(THRESHOLDs, FPR, linestyle='--', marker='o', color='darkorange', lw = 2, label='FAR curve', clip_on=False)
+    plt.plot(THRESHOLDs, FNR, linestyle='--', marker='o', color='navy', lw = 2, label='FRR curve', clip_on=False)
 
-    # EER,_ = compute_eer(FPR, FNR)
+    EER,_ = compute_eer(FPR, FNR)
     # path2 = path + "_ACC.png"
-    # plt.title('FPR and FNR curve, EER = %.2f'%EER)
-    # plt.legend(loc="upper right")
-    # plt.xlabel('Threshold')
+    plt.title('FPR and FNR curve, EER = %.2f'%EER)
+    plt.legend(loc="upper right")
+    plt.xlabel('Threshold')
+    plt.show()
     # plt.savefig(path2)
     # plt.close('all')
 
@@ -730,13 +722,13 @@ def main():
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
 
-    folder = str(1.0) + "_z-score_" + str(-3) + "_dist_median_" +  str(0.2) 
+    folder = str(0.95) + "_z-score_" + str(-3) + "_dist_median_" +  str(0.9) 
     
-    print(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None").iloc[0,8:18])
+    logger.debug(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None").iloc[0,8:18])
     # collect_results(perf.fcn(DF_features_all,folder))
 
     
-    print("[INFO] Done!!!")
+    logger.info("Done!!!")
 
 
 
