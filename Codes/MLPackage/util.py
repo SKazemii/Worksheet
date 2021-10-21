@@ -23,8 +23,8 @@ pd.options.mode.chained_assignment = None
 THRESHOLDs = np.linspace(0, 1, 100)
 test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
 persentages = [0.95]
-modes = ["dist"]#, "corr"]
-model_types = [ "median"]#, "min", "average"]
+modes = ["dist", "corr"]
+model_types = [ "median", "min", "average"]
 normilizings = ["z-score"]#, "minmax"]
 verbose = False
 Debug = False
@@ -50,12 +50,14 @@ cols = ["Feature_Type", "Mode", "Criteria", "Test_Size", "Normalizition", "Featu
 
 def create_logger():
     loggerName = Pathlb(__file__).stem
-    log_path = os.path.join(working_path, 'logs', loggerName + '_loger.log')
+
+    log_path = os.path.join(working_path, 'logs')
+    Pathlb(log_path).mkdir(parents=True, exist_ok=True)
 
     logger = logging.getLogger(loggerName)
     logger.setLevel(level)
     formatter = logging.Formatter('[%(asctime)s]-[%(name)s @ %(lineno)d]]-[%(levelname)s]\t%(message)s', datefmt='%m/%d/%y %I:%M:%S %p')
-    file_handler = logging.FileHandler(log_path, mode = 'w')
+    file_handler = logging.FileHandler( os.path.join(log_path, loggerName + '_loger.log'), mode = 'w')
     file_handler.setLevel(level)
     file_handler.setFormatter(formatter)
     stream_handler = logging.StreamHandler()
@@ -346,8 +348,6 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
     toc=timeit.default_timer()
     logger.info("End:     ---    {}, \t\t Process time: {:.2f}  seconds".format(folder, toc - tic)) 
 
-
-    logger.info(np.mean( np.array(ACC_L)[:,1:6]  , axis=0))
     
     A = [[features_excel, mode, model_type, test_ratio, normilizing, feat_name, persentage, (toc - tic), num_pc,
         

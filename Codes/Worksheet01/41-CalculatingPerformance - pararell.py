@@ -114,12 +114,13 @@ def main():
 
 def create_logger():
     loggerName = Pathlb(__file__).stem
-    log_path = os.path.join(working_path, 'logs', loggerName + '_loger.log')
+    log_path = os.path.join(working_path, 'logs')
+    Pathlb(log_path).mkdir(parents=True, exist_ok=True)
 
     logger = logging.getLogger(loggerName)
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(asctime)s]-[%(name)s @ %(lineno)d]]-[%(levelname)s]\t%(message)s', datefmt='%m/%d/%y %I:%M:%S %p')
-    file_handler = logging.FileHandler(log_path, mode = 'w')
+    file_handler = logging.FileHandler( os.path.join(log_path, loggerName + '_loger.log'), mode = 'w')
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     stream_handler = logging.StreamHandler()
