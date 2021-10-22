@@ -49,7 +49,7 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
-Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
+Results_DF = pd.read_excel(os.path.join(project_dir, 'DF.xlsx'), index_col = 0)
 Results_DF.columns = perf.cols
 
 
@@ -65,21 +65,21 @@ Results_DF_temp["Feature_Type"] = Results_DF_temp["Feature_Type"].map(lambda x: 
 Results_DF_temp["Criteria"] = Results_DF_temp["Criteria"].map(lambda x: "ave" if x == "average" else x)
 Results_DF_temp["Criteria"] = Results_DF_temp["Criteria"].map(lambda x: "med" if x == "median" else x)
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L', 'Mean_f1_L'], ascending = [False, True, False]).iloc[:10,:13].drop(columns =['Time', 'Number_of_PCs', 'Mean_sample_test_L'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L_te', 'Mean_f1_L'], ascending = [False, True, False]).iloc[:10,:15].drop(columns =['Time', 'Number_of_PCs', 'sklearn_EER_L'])
 with open(os.path.join("Manuscripts", "src", "tables", "top10-L.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L', 'Mean_f1_L'], ascending = [True, False, True]).iloc[:10,:13].drop(columns =['Time', 'Number_of_PCs', 'Mean_sample_test_L'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L_te', 'Mean_f1_L'], ascending = [True, False, True]).iloc[:10,:15].drop(columns =['Time', 'Number_of_PCs', 'sklearn_EER_L'])
 with open(os.path.join("Manuscripts", "src", "tables", "worse10-L.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())
 
 
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R', 'Mean_f1_R'], ascending = [False, True, False]).iloc[:10,:17].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'Mean_sample_test_R', 'Mean_sample_test_L', 'Mean_Acc_L', 'Mean_EER_L'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R_te', 'Mean_f1_R'], ascending = [False, True, False]).iloc[:10,:19].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'sklearn_EER_L', 'Mean_Acc_L', 'Mean_EER_L_te', 'Mean_EER_L_tr'])
 with open(os.path.join("Manuscripts", "src", "tables", "top10-R.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())      
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R', 'Mean_f1_R'], ascending = [True, False, True]).iloc[:10,:17].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'Mean_sample_test_R', 'Mean_sample_test_L', 'Mean_Acc_L', 'Mean_EER_L'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R_te', 'Mean_f1_R'], ascending = [True, False, True]).iloc[:10,:19].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'sklearn_EER_L',  'Mean_Acc_L', 'Mean_EER_L_te', 'Mean_EER_L_tr'])
 with open(os.path.join("Manuscripts", "src", "tables", "worse10-R.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())          
 
@@ -93,43 +93,58 @@ Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-otsu
 Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-simple" if x == "COAs_simple" else x)
 
 
-for mode in ["Correlation", "Euclidean distance"]:
-    for criteria in perf.model_types:
+# for mode in ["Correlation", "Euclidean distance"]:
+#     for criteria in perf.model_types:
         
-        plt.figure(figsize=(14,8))
-        Results_DF_group = Results_DF.groupby(["Mode", "Criteria", "Test_Size"])
-        values = Results_DF["Test_Size"].sort_values().unique()
-        print(str(values))
-        X = pd.DataFrame(index=values , columns=["Accuracy Left", "Accuracy Right"])
-        Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
-        FAR_L = list()
-        FRR_L = list()
-        FAR_R = list()
-        FRR_R = list()        
-        for value in values:
-            
-            DF = Results_DF_group.get_group((mode, criteria, value))
-            X.loc[value, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
-            X.loc[value, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
-            Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L"].mean(),       DF["Mean_EER_L"].std(), DF["Mean_EER_L"].min(), DF["Mean_EER_L"].max())
-            Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R"].mean(),      DF["Mean_EER_R"].std(), DF["Mean_EER_R"].min(), DF["Mean_EER_R"].max())    
+plt.figure(figsize=(14,8))
+Results_DF_group = Results_DF.groupby(["Test_Size"])
+values = Results_DF["Test_Size"].sort_values().unique()
+X = pd.DataFrame(index=values , columns=["Accuracy", "F1-score", "EER"])
+Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()        
+for value in values:
+    
+    DF = Results_DF_group.get_group((value))
+    X.loc[value, "Accuracy"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
+        (DF["Mean_Acc_L"].mean()+DF["Mean_Acc_R"].mean())/2, 
+        (DF["Mean_Acc_L"].std()+ DF["Mean_Acc_R"].min())/2,
+        (DF["Mean_Acc_L"].min()+ DF["Mean_Acc_R"].min())/2, 
+        (DF["Mean_Acc_L"].max()+ DF["Mean_Acc_R"].max())/2)
+    X.loc[value, "EER"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
+        (DF["Mean_EER_L_te"].mean()+DF["Mean_EER_R_te"].mean())/2,  
+        (DF["Mean_EER_L_te"].std()+ DF["Mean_EER_R_te"].min())/2,
+        (DF["Mean_EER_L_te"].min()+ DF["Mean_EER_R_te"].min())/2, 
+        (DF["Mean_EER_L_te"].max()+ DF["Mean_EER_R_te"].max())/2)
+    X.loc[value, "F1-score"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
+        (DF["Mean_f1_L"].mean()+DF["Mean_f1_R"].mean())/2,  
+        (DF["Mean_f1_L"].std()+ DF["Mean_f1_R"].min())/2,
+        (DF["Mean_f1_L"].min()+ DF["Mean_f1_R"].min())/2, 
+        (DF["Mean_f1_L"].max()+ DF["Mean_f1_R"].max())/2)
 
-            # print(DF)
-            FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
-            FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
-            FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
-            FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+    # X.loc[value, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
+    # X.loc[value, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+    # Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L_te"].mean(),       DF["Mean_EER_L_te"].std(), DF["Mean_EER_L_te"].min(), DF["Mean_EER_L_te"].max())
+    # Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R_te"].mean(),      DF["Mean_EER_R_te"].std(), DF["Mean_EER_R_te"].min(), DF["Mean_EER_R_te"].max())    
 
-        perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, str(values))
-        plt.tight_layout()
-        plt.savefig(os.path.join("Manuscripts", "src", "figures", mode + "-" + criteria + ".png"))
-        plt.close('all')
+    # print(DF)
+    FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+    FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+    FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+    FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, str(values))
+plt.tight_layout()
+plt.savefig(os.path.join("Manuscripts", "src", "figures", "testsize.png"))
+plt.close('all')
 
 
-        with open(os.path.join("Manuscripts", "src", "tables", mode + "-" + criteria + "-Acc.tex"), "w") as tf:
-            tf.write(X.to_latex())
-        with open(os.path.join("Manuscripts", "src", "tables", mode + "-" + criteria + "-EER.tex"), "w") as tf:
-            tf.write(Y.to_latex())
+with open(os.path.join("Manuscripts", "src", "tables", "testsize.tex"), "w") as tf:
+    tf.write(X.to_latex())
+# with open(os.path.join("Manuscripts", "src", "tables", "testsize-EER.tex"), "w") as tf:
+#     tf.write(Y.to_latex())
 
 
 

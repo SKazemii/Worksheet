@@ -44,8 +44,8 @@ cols = ["Feature_Type", "Mode", "Criteria",
         "Test_Size", "Normalizition", "Features_Set",
         "PCA", "Time", "Number_of_PCs",
         "template-selection-method", "k-cluster",
-        "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L", "sklearn_EER", "mean_FAR_FRR_EER", "Mean_sample_training_L", "Mean_sample_test_L",
-        "Mean_Acc_R", "Mean_f1_R", "Mean_EER_R", "sklearn_EER", "mean_FAR_FRR_EER", "Mean_sample_training_R", "Mean_sample_test_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+        "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L_tr", "sklearn_EER_L", "Mean_EER_L_te", "Mean_sample_training_L", "Mean_sample_test_L",
+        "Mean_Acc_R", "Mean_f1_R", "Mean_EER_R_tr", "sklearn_EER_R", "Mean_EER_R_te", "Mean_sample_training_R", "Mean_sample_test_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
 
 
 
@@ -69,6 +69,7 @@ def create_logger(level):
     logger.addHandler(stream_handler)
     return logger
 
+logger = create_logger(logging.INFO)
 
 from sklearn.cluster import KMeans
 
@@ -787,19 +788,23 @@ def main():
 
     feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
-    
-    # folder = str(0.95) + "_z-score_" + str(-3) + "_dist_min_" +  str(0.9)      
-    # collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
+
+    for iiii in modes:
+        for iii in model_types:
+            for ii in test_ratios:
+                folder = str(0.95) + "_z-score_" + str(-3) + "_" + iiii + "_" + iii + "_" +  str(ii) 
+                # print(folder)     
+                collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
 
 
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    # pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
-    for ii in test_ratios:
-        folder = str(0.95) + "_z-score_" + str(-3) + "_dist_median_" +  str(ii)      
-        pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
+    # for ii in test_ratios:
+    #     folder = str(0.95) + "_z-score_" + str(-3) + "_dist_median_" +  str(ii)      
+    #     pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
         
-    pool.close()
-    pool.join()
+    # pool.close()
+    # pool.join()
     
 
     
@@ -808,7 +813,6 @@ def main():
 
 
 if __name__ == "__main__":
-    logger = create_logger(logging.INFO)
     logger.info("Starting !!!")
     tic = timeit.default_timer()
     main()
