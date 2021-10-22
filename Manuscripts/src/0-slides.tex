@@ -5,6 +5,11 @@
 \usefonttheme{serif}
 \subtitle{Using Beamer}
 \usepackage{pgffor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+
+
 
 \title{ \textbf{Stepscan Project}}
 \subtitle{Results of Worksheet 1-3}
@@ -33,6 +38,42 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Test Size}
+    \begin{frame}
+    \frametitle{Euclidean distance vs Correlation over \n}
+    \tiny
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The accuracy of Euclidean distance and Correlation on \n.}
+    \input{Manuscripts/src/tables/\n-Mode-Acc}
+    \end{table}
+    \begin{table}
+    \centering
+    \captionsetup{labelformat=empty}
+    \caption{\footnotesize The EER of Euclidean distance and Correlation on \n}
+    \label{tab:parameters condition}
+    \input{Manuscripts/src/tables/\n-Mode-EER}
+    \end{table}
+    
+    \begin{block}{\footnotesize Conditions}
+        \tiny These results are average over the results of below conditions: min, mean and median criteria, All PCs and 95\% variances, Min-Max and z-score algorithm. also all features in \n \ were considered.
+    \end{block}
+    
+    \end{frame}
+    
+    
+    
+    \begin{frame}
+    \centering
+    \frametitle{Euclidean distance vs Correlation (ROC curve) over \n}
+    \includegraphics[scale=0.3]{Manuscripts/src/figures/\n-Mode.png}
+    \end{frame}
+
+    
+    
+
 \iffalse
 
 \section{Score Matrix}
@@ -174,7 +215,7 @@
     \end{frame}
     
     }
-\section{features}
+\section{Features}
     \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures, COX-time-series}{
     \begin{frame}
     \frametitle{Comparing different extracted features over \n}
@@ -217,7 +258,7 @@
     \end{frame}
     
     }
-\section{features selection}
+\section{Features selection}
     \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures}{
     \begin{frame}
     \frametitle{Comparing different extracted features over \n \ based on FS algorithm}
@@ -250,11 +291,9 @@
 
     
     }
-
-\fi
-\section{the best and worst top models}
-    \begin{frame}
-    \frametitle{The best top models on left foot}
+\section{The best and worst top models}
+    \begin{frame}[shrink = 35]
+    \frametitle{The best top models}
     \tiny
     \begin{table}
     \centering
@@ -263,10 +302,7 @@
     \input{Manuscripts/src/tables/top10-L}
     \end{table}
     
-    \end{frame}
-    \begin{frame}
-    \frametitle{The best top models on right foot}
-    \tiny
+    
     \begin{table}
     \centering
     \captionsetup{labelformat=empty}
@@ -274,12 +310,15 @@
     \input{Manuscripts/src/tables/top10-R}
     \end{table}
     
+    
     \end{frame}
     
+
     
     
-    \begin{frame}
-    \frametitle{The worst top models on left foot}
+    
+    \begin{frame}[shrink = 35]
+    \frametitle{The worst top models}
     \tiny
     \begin{table}
     \centering
@@ -288,10 +327,7 @@
     \input{Manuscripts/src/tables/worse10-L}
     \end{table}
     
-    \end{frame}
-    \begin{frame}
-    \frametitle{The worst top models on right foot}
-    \tiny
+    
     \begin{table}
     \centering
     \captionsetup{labelformat=empty}
@@ -301,7 +337,7 @@
     
     \end{frame}
 
-
+\fi
 
 \end{document}
 
