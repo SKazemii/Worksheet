@@ -753,26 +753,26 @@ def collect_results(result):
 
 
 def main():
-    features_excel = "afeatures-simple"
-    
+    features_excelss = ["afeatures-simple", "pfeatures"]
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
-    feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
-    DF_features_all = pd.read_excel(feature_path, index_col = 0)
+    for features_excel in features_excelss:
+        feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
+        DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
-    for iiii in modes:
-        folder = str(1.0) + "_z-score_" + str(-3) + "_" + iiii + "_" + "min" + "_" +  str(0) 
-        # print(folder)     
-        collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
+        # for iiii in modes:
+        #     folder = str(1.0) + "_z-score_" + str(-3) + "_" + iiii + "_" + "min" + "_" +  str(0) 
+        #     # print(folder)     
+        #     collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
 
 
-    # pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-
-    # for ii in test_ratios:
-    #     folder = str(0.95) + "_z-score_" + str(-3) + "_dist_median_" +  str(ii)      
-    #     pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
+        for i in modes:
+            for ii in range(-3,DF_features_all.shape[1]-2,3):
+                folder = str(1.0) + "_z-score_" + str(ii) + "_" + i + "_" + "min" + "_" +  str(0) 
+                pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
         
-    # pool.close()
-    # pool.join()
+    pool.close()
+    pool.join()
     
 
     
