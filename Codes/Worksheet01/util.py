@@ -397,7 +397,9 @@ def calculating_fxr(Model_client, Model_imposter, distModel1, distModel2, THRESH
             FAR_temp.append(np.sum(E2)/distModel2.shape[1])
     return FAR_temp, FRR_temp
 
-def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
+def plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels):
+    plt.figure(figsize=(14,8))
+
     for idx in range(len(FAR_L)):
         plt.subplot(1,2,1)
         auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
@@ -427,6 +429,7 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
         plt.gca().set_aspect('equal')
         plt.legend(loc="best")
 
+    plt.tight_layout()
 
 
 
@@ -511,51 +514,26 @@ def compute_eer(fpr, fnr):
     return eer, min_index
 
 
-def ROC_plot(TPR, FPR):
+def plot_ACC(FAR_L, FRR_L, FAR_R, FRR_R, THRESHOLDs):
     """plot ROC curve"""
-    plt.figure()
-    auc = 1 * np.trapz(TPR, FPR)
-
-    plt.plot(FPR, TPR, linestyle='--', marker='o', color='darkorange', lw = 2, label='ROC curve', clip_on=False)
-    plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.0])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC curve, AUC = %.2f'%auc)
-    plt.legend(loc="lower right")
-    # plt.savefig(path + 'AUC.png')
-
-
-def ROC_plot_v2(FPR, FNR,THRESHOLDs):
-    """plot ROC curve"""
-    # fig = plt.figure()
-    # color = ['darkorange', 'orange']
-    # auc = 1/(1 + np.trapz( FPR,FNR))
-    # plt.plot(FPR, FNR, linestyle='--', marker='o', color=color[path], lw = 2, label='ROC curve', clip_on=False)
-    # plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
-    # plt.xlim([0.0, 1.0])
-    # plt.ylim([0.0, 1.0])
-    # plt.xlabel('False Acceptance Rate')
-    # plt.ylabel('False Rejection Rate')
-    # plt.title('ROC curve, AUC = %.2f'%auc)
-    # plt.legend(loc="best")
-    # path1 = path + "_ROC.png"
-
-    # plt.savefig(path1)
-
-    plt.figure()
-    plt.plot(THRESHOLDs, FPR, linestyle='--', marker='o', color='darkorange', lw = 2, label='FAR curve', clip_on=False)
-    plt.plot(THRESHOLDs, FNR, linestyle='--', marker='o', color='navy', lw = 2, label='FRR curve', clip_on=False)
-
-    EER,_ = compute_eer(FPR, FNR)
-    # path2 = path + "_ACC.png"
-    plt.title('FPR and FNR curve, EER = %.2f'%EER)
-    plt.legend(loc="upper right")
+    plt.figure(figsize=(14,8))
+    plt.subplot(1,2,1)
+    plt.plot(THRESHOLDs, FAR_L, linestyle='--', marker='o', color='darkorange', lw = 2, label='FAR curve', clip_on=False)
+    plt.plot(THRESHOLDs, FRR_L, linestyle='--', marker='o', color='navy', lw = 2, label='FRR curve', clip_on=False)
+    plt.title('ACC curve, Left side')
+    plt.legend(loc="best")
     plt.xlabel('Threshold')
-    plt.show()
-    # plt.savefig(path2)
-    # plt.close('all')
+
+    plt.subplot(1,2,2)
+    plt.plot(THRESHOLDs, FAR_R, linestyle='--', marker='o', color='darkorange', lw = 2, label='FAR curve', clip_on=False)
+    plt.plot(THRESHOLDs, FRR_R, linestyle='--', marker='o', color='navy', lw = 2, label='FRR curve', clip_on=False)
+    plt.title('ACC curve, Right side')
+    plt.legend(loc="best")
+    plt.xlabel('Threshold')
+
+    plt.tight_layout()
+
+
 
 
 def performance(model1, model2, path):

@@ -1,6 +1,11 @@
 # Example of the Shapiro-Wilk Normality Test 1-1
 import matplotlib.pyplot as plt
 from scipy.stats import shapiro, ttest_ind
+
+import numpy
+THRESHOLDs = numpy.linspace(0, 1, 100)
+print(THRESHOLDs)
+
 data = [0.873, 2.817, 0.121, -0.945, -0.055, -1.436, 0.360, -1.478, -1.637, -1.869]
 stat, p = shapiro(data)
 plt.hist(data)

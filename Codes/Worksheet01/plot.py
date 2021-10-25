@@ -1,26 +1,22 @@
 import warnings
+
+from pandas.core.frame import DataFrame
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
-import sys, os
+import sys, os, itertools
 from pathlib import Path as Pathlb
 
-
-# from scipy.spatial import distance
-# from sklearn import preprocessing
-# from sklearn.metrics import accuracy_score
-# from itertools import combinations, product
 
 
 from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from MLPackage import util as perf
-from MLPackage import FS 
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import util as perf
 
 
 plt.rcParams["font.size"] = 13
@@ -47,14 +43,103 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
+Results_DF = pd.read_excel(os.path.join(data_dir, 'DF_EER.xlsx'), index_col = 0)
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()   
+counter = itertools.cycle([0,0,0,0,1,1,1,1])
+for i in ["correlation", "distance"]:
+    mask = (Results_DF.Feature_Type == "COP features") & (Results_DF.Mode == i) & (Results_DF.Features_Set == "MDIST")
+    Results_DF_f = Results_DF.loc[mask]
+
+    FAR_L.append(Results_DF_f[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+    FRR_L.append(Results_DF_f[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+    FAR_R.append(Results_DF_f[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+    FRR_R.append(Results_DF_f[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+    perf.plot_ACC(FAR_L[next(counter)], FRR_L[next(counter)], FAR_R[next(counter)], FRR_R[next(counter)], THRESHOLDs)
+    plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_" + i + "_ACC.png"))
 
 
-Results_DF = pd.read_excel(os.path.join(project_dir, 'DF1.xlsx'), index_col = 0)
+
+labels = ["correlation", "distance"]
+perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels)
+plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_mode_ROC.png"))
+
+plt.show()
+plt.close('all')
+
+
+
+
+
+for f_type in ["COA features-simple", "COP features"]:   
+
+    Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set"])
+    values = Results_DF["Features_Set"].unique()
+
+    Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
+    FAR_L = list()
+    FRR_L = list()
+    FAR_R = list()
+    FRR_R = list()
+    for value in values:
+        
+        DF = Results_DF_group.get_group((f_type, value))
+        Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L_tr"].mean(),       DF["Mean_EER_L_tr"].std(), DF["Mean_EER_L_tr"].min(), DF["Mean_EER_L_tr"].max())
+        Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R_tr"].mean(),      DF["Mean_EER_R_tr"].std(), DF["Mean_EER_R_tr"].min(), DF["Mean_EER_R_tr"].max())    
+
+        # print(DF)
+        FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+        FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+        FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+        FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+    perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, values)
+    plt.tight_layout()
+    plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + "_ROC.png"))
+    plt.close('all')
+
+    with pd.ExcelWriter(os.path.join("Manuscripts", "src", "tables", f_type + "-EER.xlsx")) as writer:  
+        Y.to_excel(writer, sheet_name='Sheet_name_1')
+
+sys.exit()
+Results_DF = pd.read_excel(os.path.join(data_dir, 'DF.xlsx'), index_col = 0)
 Results_DF.columns = perf.cols
 
+pd.set_option('display.max_rows', 55)
 
 
+print(Results_DF.head())
+features_excelss = ["afeatures-simple", "pfeatures"]
+for features_excel in features_excelss:
+    for i in perf.modes:
+        for ii in ["All"] + perf.feature_names:
+            folder = str(1.0) + "_z-score_" + str(ii) + "_" + i + "_" + "min" + "_" +  str(0.0) + "_None_2" 
+            # print(folder)
+            left = pd.read_excel(os.path.join(data_dir, features_excel, folder,'Left.xlsx'), index_col = 0)
+            right = pd.read_excel(os.path.join(data_dir, features_excel, folder,'Right.xlsx'), index_col = 0)
+            mask = (Results_DF.Feature_Type == features_excel) & (Results_DF.Mode == i) & (Results_DF.Features_Set == ii)
+            Results_DF.loc[mask,"Mean_EER_L_tr"] = left.mean().dropna()["EER"] 
+            Results_DF.loc[mask,"Mean_EER_R_tr"] = right.mean().dropna()["EER"] 
+            # print(Results_DF[mask])
 
+
+            # # Results_DF.at[]
+            # print(left.mean().dropna()["EER"] )
+
+            # print(right.mean().dropna()["EER"] )
+
+    
+
+
+print(Results_DF.iloc[:,7:17])
+Results_DF.to_excel(perf.working_path + "/DF_EER.xlsx")
+
+print("Done!!!")
+sys.exit()
 
 Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
 
