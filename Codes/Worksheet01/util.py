@@ -21,7 +21,8 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_curv
 pd.options.mode.chained_assignment = None 
 
 
-THRESHOLDs = np.linspace(0, 1, 100)
+TH_dev = 1000
+THRESHOLDs = np.linspace(0, 1, TH_dev)
 test_ratios = [0]#.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
 persentages = [1.0]
 modes = ["dist", "corr"]
@@ -45,7 +46,7 @@ cols = ["Feature_Type", "Mode", "Criteria",
         "PCA", "Time", "Number_of_PCs",
         "template-selection-method", "k-cluster",
         "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L_tr", "sklearn_EER_L", "Mean_EER_L_te", "Mean_sample_training_L", "Mean_sample_test_L",
-        "Mean_Acc_R", "Mean_f1_R", "Mean_EER_R_tr", "sklearn_EER_R", "Mean_EER_R_te", "Mean_sample_training_R", "Mean_sample_test_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+        "Mean_Acc_R", "Mean_f1_R", "Mean_EER_R_tr", "sklearn_EER_R", "Mean_EER_R_te", "Mean_sample_training_R", "Mean_sample_test_R"] + ["FAR_L_" + str(i) for i in range(TH_dev)] + ["FRR_L_" + str(i) for i in range(TH_dev)] + ["FAR_R_" + str(i) for i in range(TH_dev)] + ["FRR_R_" + str(i) for i in range(TH_dev)]
 
 
 
@@ -341,7 +342,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 ACC_R.append([subject, np.mean(acc), np.mean(f1), np.mean(eer), np.mean(eer1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
             
-    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "mean(eer)", "mean(eer1)", "mean(eer2)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
+    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "mean(eer)", "mean(eer1)", "mean(eer2)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(TH_dev)] + ["FRR_" + str(i) for i in range(TH_dev)] 
     DF_temp = pd.DataFrame(np.concatenate((ACC_L, EER_L, FAR_L, FRR_L), axis=1), columns = columnsname )
     DF_temp.to_excel(os.path.join(folder_path,   'Left.xlsx'))
     DF_temp = pd.DataFrame(np.concatenate((ACC_R, EER_R, FAR_R, FRR_R), axis=1), columns = columnsname )
@@ -748,6 +749,7 @@ def main():
             for ii in range(-3,DF_features_all.shape[1]-2,3):
                 folder = str(1.0) + "_z-score_" + str(ii) + "_" + i + "_" + "min" + "_" +  str(0) 
                 pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
+                # collect_results(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None"))
         
     pool.close()
     pool.join()
