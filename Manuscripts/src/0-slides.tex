@@ -38,27 +38,27 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\iffalse
 
 \section{Test Size}
     \begin{frame}
-    \frametitle{Euclidean distance vs Correlation over \n}
+    \frametitle{Comparing different test size over Pressure Features}
     \tiny
     \begin{table}
     \centering
     \captionsetup{labelformat=empty}
-    \caption{\footnotesize The accuracy of Euclidean distance and Correlation on \n.}
-    \input{Manuscripts/src/tables/\n-Mode-Acc}
-    \end{table}
-    \begin{table}
-    \centering
-    \captionsetup{labelformat=empty}
-    \caption{\footnotesize The EER of Euclidean distance and Correlation on \n}
-    \label{tab:parameters condition}
-    \input{Manuscripts/src/tables/\n-Mode-EER}
+    \caption{\footnotesize Comparing Accuracy and EER of different test size over Pressure Features. These results are average of both sides.}
+    \input{Manuscripts/src/tables/testsize}
     \end{table}
     
     \begin{block}{\footnotesize Conditions}
-        \tiny These results are average over the results of below conditions: min, mean and median criteria, All PCs and 95\% variances, Min-Max and z-score algorithm. also all features in \n \ were considered.
+        \tiny These results are average over the results of below conditions:
+        \begin{itemize} 
+            \item min, mean and median criteria,
+            \item Both correlation and distance score matrix
+            \item Keeping 95\% variances
+            \item Z-score algorithm
+        \end{itemize} 
     \end{block}
     
     \end{frame}
@@ -67,14 +67,14 @@
     
     \begin{frame}
     \centering
-    \frametitle{Euclidean distance vs Correlation (ROC curve) over \n}
-    \includegraphics[scale=0.3]{Manuscripts/src/figures/\n-Mode.png}
+    \frametitle{Comparing different test size over Pressure Features}
+    \includegraphics[scale=0.3]{Manuscripts/src/figures/testsize.png}
     \end{frame}
 
     
     
 
-\iffalse
+\fi
 
 \section{Score Matrix}
     \foreach \n in {afeatures-simple, afeatures-otsu, pfeatures, COAs-otsu, COAs-simple, COPs}{
@@ -337,7 +337,7 @@
     
     \end{frame}
 
-\fi
+
 
 \end{document}
 
