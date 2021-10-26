@@ -33,7 +33,7 @@ random_test_acc = 0
 template_selection_methods = ["None"]#, "DEND", "MDIST"]
 k_clusters = [4]#, 7, 12]
 
-features_types = ["pfeatures", "afeatures-simple"]#, "afeatures-otsu", "COAs-otsu", "COAs-simple", "COPs"]
+features_types = ["pfeatures", "afeatures-simple", "afeatures-otsu"]#, "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 working_path = os.getcwd()
@@ -201,46 +201,45 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                                                                     random_state = 2)
             DF_negative_samples_train = DF_negative_samples.drop(DF_negative_samples_test.index)
             
-            num_pc = 11
-            # df_train = pd.concat([DF_positive_samples_train, DF_negative_samples_train])
-            # df_test = pd.concat([DF_positive_samples_test, DF_negative_samples_test])
+            df_train = pd.concat([DF_positive_samples_train, DF_negative_samples_train])
+            df_test = pd.concat([DF_positive_samples_test, DF_negative_samples_test])
 
-            # if normilizing == "minmax":
-            #     scaling = preprocessing.MinMaxScaler()
-            #     Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
-            #     Scaled_test = scaling.transform(df_test.iloc[:, :-2])
+            if normilizing == "minmax":
+                scaling = preprocessing.MinMaxScaler()
+                Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
+                Scaled_test = scaling.transform(df_test.iloc[:, :-2])
 
 
-            # elif normilizing == "z-score":
-            #     scaling = preprocessing.StandardScaler()
-            #     Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
-            #     Scaled_test = scaling.transform(df_test.iloc[:, :-2])
+            elif normilizing == "z-score":
+                scaling = preprocessing.StandardScaler()
+                Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
+                Scaled_test = scaling.transform(df_test.iloc[:, :-2])
             
 
-            # principal = PCA()
-            # PCA_out_train = principal.fit_transform(Scaled_train)
-            # PCA_out_test = principal.transform(Scaled_test)
+            principal = PCA()
+            PCA_out_train = principal.fit_transform(Scaled_train)
+            PCA_out_test = principal.transform(Scaled_test)
 
-            # variance_ratio = np.cumsum(principal.explained_variance_ratio_)
-            # high_var_PC = np.zeros(variance_ratio.shape)
-            # high_var_PC[variance_ratio <= persentage] = 1
+            variance_ratio = np.cumsum(principal.explained_variance_ratio_)
+            high_var_PC = np.zeros(variance_ratio.shape)
+            high_var_PC[variance_ratio <= persentage] = 1
 
-            # loadings = principal.components_
-            # num_pc = int(np.sum(high_var_PC))
-
-
+            loadings = principal.components_
+            num_pc = int(np.sum(high_var_PC))
 
 
-            # columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
-            # DF_features_PCA_train = (pd.DataFrame(np.concatenate((PCA_out_train[:,:num_pc],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName))
-            # DF_features_PCA_test = (pd.DataFrame(np.concatenate((PCA_out_test[:,:num_pc],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName))
 
-            # DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
-            # DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
+
+            columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
+            DF_features_PCA_train = (pd.DataFrame(np.concatenate((PCA_out_train[:,:num_pc],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName))
+            DF_features_PCA_test = (pd.DataFrame(np.concatenate((PCA_out_test[:,:num_pc],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName))
+
+            DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
+            DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
             
             
-            # DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
-            # DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
+            DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
+            DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
             
 
             if template_selection_method != "None":
@@ -271,46 +270,46 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
             eer2 = list()
             t_idx = EER_temp[1]
 
-            # for _ in range(random_test_acc):
-            #     pos_samples = DF_positive_samples_test.shape
-            #     temp = DF_negative_samples_test.sample(n = pos_samples[0])
+            for _ in range(random_test_acc):
+                pos_samples = DF_positive_samples_test.shape
+                temp = DF_negative_samples_test.sample(n = pos_samples[0])
 
-            #     DF_temp = pd.concat([DF_positive_samples_test, temp])
-            #     DF_temp["subject ID"] = DF_temp["subject ID"].map(lambda x: 1 if x == subject else 0)
+                DF_temp = pd.concat([DF_positive_samples_test, temp])
+                DF_temp["subject ID"] = DF_temp["subject ID"].map(lambda x: 1 if x == subject else 0)
 
 
-            #     distModel1 , distModel2 = compute_model(DF_positive_samples_train.iloc[:, :-2].values, DF_temp.iloc[:, :-2].values, mode = mode, score = score)
-            #     Model_client, Model_test = model(distModel1, distModel2, model_type = model_type, score = score)
+                distModel1 , distModel2 = compute_model(DF_positive_samples_train.iloc[:, :-2].values, DF_temp.iloc[:, :-2].values, mode = mode, score = score)
+                Model_client, Model_test = model(distModel1, distModel2, model_type = model_type, score = score)
 
-            #     FAR_temp_1, FRR_temp_1 = calculating_fxr(Model_client, Model_test, distModel1, distModel2, THRESHOLDs, score)
+                FAR_temp_1, FRR_temp_1 = calculating_fxr(Model_client, Model_test, distModel1, distModel2, THRESHOLDs, score)
 
 
             
-            #     y_pred = np.zeros((Model_test.shape))
-            #     y_test = DF_temp.iloc[:,-2].values
+                y_pred = np.zeros((Model_test.shape))
+                y_test = DF_temp.iloc[:,-2].values
 
 
-            #     y_pred[Model_test > THRESHOLDs[t_idx]] = 1
-            #     frr = 0
-            #     far = 0
+                y_pred[Model_test > THRESHOLDs[t_idx]] = 1
+                frr = 0
+                far = 0
 
-            #     for actual, prediction in zip(y_test, y_pred):
-            #         if actual == 1 and prediction == 0:
-            #             frr = frr + 1
-            #         if actual == 0 and prediction == 1:
-            #             far = far + 1
+                for actual, prediction in zip(y_test, y_pred):
+                    if actual == 1 and prediction == 0:
+                        frr = frr + 1
+                    if actual == 0 and prediction == 1:
+                        far = far + 1
 
-            #     fpr, tpr, thresholds = roc_curve(y_test, y_pred)
-            #     # logger.info("fpr: {}".format(fpr))
+                fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+                # logger.info("fpr: {}".format(fpr))
 
-            #     acc.append( accuracy_score(y_test, y_pred)*100 )
-            #     f1.append(  f1_score(y_test, y_pred)*100 )
-            #     eer.append(compute_eer(fpr, 1-tpr))
-            #     # eer1.append((FAR_temp_1[t_idx]+ FRR_temp_1[t_idx])/2)
-            #     eer2.append((frr + far)/(2*y_test.sum()))
-            #     # logger.info("far: {}".format(far))
-            #     # logger.info("frr: {}".format(frr))
-            #     # logger.info("eer2: {}\n".format((frr + far)/(2*y_test.sum())))
+                acc.append( accuracy_score(y_test, y_pred)*100 )
+                f1.append(  f1_score(y_test, y_pred)*100 )
+                eer.append(compute_eer(fpr, 1-tpr))
+                # eer1.append((FAR_temp_1[t_idx]+ FRR_temp_1[t_idx])/2)
+                eer2.append((frr + far)/(2*y_test.sum()))
+                # logger.info("far: {}".format(far))
+                # logger.info("frr: {}".format(frr))
+                # logger.info("eer2: {}\n".format((frr + far)/(2*y_test.sum())))
 
 
     
@@ -403,7 +402,7 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
         auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
         # label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
+        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
@@ -416,7 +415,7 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
 
         plt.subplot(1,2,2)
         auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
-        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
+        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])

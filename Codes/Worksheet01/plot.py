@@ -79,37 +79,40 @@ pd.set_option('display.max_rows', 55)
 
 Results_DF = pd.read_excel(os.path.join(data_dir, 'DF_EER.xlsx'), index_col = 0)
 
-FAR_L = list()
-FRR_L = list()
-FAR_R = list()
-FRR_R = list()   
-counter = itertools.cycle([0,0,0,0,1,1,1,1])
-for i in ["corr", "dist"]:
-    mask = (Results_DF.Feature_Type == "pfeatures") & (Results_DF.Mode == i) & (Results_DF.Features_Set == "All")
-    Results_DF_f = Results_DF.loc[mask]
-
-    FAR_L.append(Results_DF_f[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-    FRR_L.append(Results_DF_f[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-    FAR_R.append(Results_DF_f[["FAR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-    FRR_R.append(Results_DF_f[["FRR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-
-    perf.plot_ACC(FAR_L[next(counter)], FRR_L[next(counter)], FAR_R[next(counter)], FRR_R[next(counter)], THRESHOLDs)
-    plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_" + i + "_ACC.png"))
 
 
 
-labels = ["corr", "dist"]
-perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels)
-plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_mode_ROC.png"))
-
-plt.show()
-plt.close('all')
+# plt.show()
+# plt.close('all')
 
 
 
 
 
-for f_type in ["afeatures-simple", "pfeatures"]:   
+for f_type in ["COA features-simple", "COP features"]:  
+    FAR_L = list()
+    FRR_L = list()
+    FAR_R = list()
+    FRR_R = list()   
+    counter = itertools.cycle([0,0,0,0,1,1,1,1])
+    for i in ["correlation", "distance"]:
+        mask = (Results_DF.Feature_Type == f_type) & (Results_DF.Mode == i) & (Results_DF.Features_Set == "All")
+        Results_DF_f = Results_DF.loc[mask]
+
+        FAR_L.append(Results_DF_f[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+        FRR_L.append(Results_DF_f[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+        FAR_R.append(Results_DF_f[["FAR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+        FRR_R.append(Results_DF_f[["FRR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+
+        perf.plot_ACC(FAR_L[next(counter)], FRR_L[next(counter)], FAR_R[next(counter)], FRR_R[next(counter)], THRESHOLDs)
+        plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_" + i + "_ACC.png"))
+
+
+
+    labels = ["correlation", "distance"]
+    perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels)
+    plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_"+f_type+"_ROC.png"))
+
 
     Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set"])
     values = Results_DF["Features_Set"].unique()
