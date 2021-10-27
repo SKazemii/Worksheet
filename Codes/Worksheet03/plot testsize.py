@@ -13,9 +13,8 @@ from pathlib import Path as Pathlb
 
 from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
-
+import ws3 as perf
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from MLPackage import util as perf
 from MLPackage import FS 
 from MLPackage import stat 
 
@@ -63,9 +62,9 @@ Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-simp
 pd.set_option('display.max_rows', 200)
 Results_DF["mean_acc"] = (Results_DF["Mean_Acc_L"] + Results_DF["Mean_Acc_R"])/2
 Results_DF["mean_eer"] = (Results_DF["Mean_EER_L_te"] + Results_DF["Mean_EER_R_te"])/2
-print(stat.stat(Results_DF[["Test_Size", "mean_acc"]], labels=["Test_Size", "mean_acc"], plot = False).head(100))
-print(stat.stat(Results_DF[["Test_Size", "mean_eer"]], labels=["Test_Size", "mean_eer"], plot = False).head(100))
-# plt.show()
+print(stat.stat(Results_DF[["Test_Size", "mean_acc"]], labels=["Test_Size", "mean_acc"], plot = True).head(100))
+print(stat.stat(Results_DF[["Test_Size", "mean_eer"]], labels=["Test_Size", "mean_eer"], plot = True).head(100))
+plt.show()
 
 1/0       
 plt.figure(figsize=(14,8))

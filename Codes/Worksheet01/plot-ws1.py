@@ -16,7 +16,7 @@ from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import util as perf
+import ws1 as perf
 
 
 plt.rcParams["font.size"] = 13

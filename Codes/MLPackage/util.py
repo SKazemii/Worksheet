@@ -22,14 +22,14 @@ pd.options.mode.chained_assignment = None
 
 
 THRESHOLDs = np.linspace(0, 1, 100)
-test_ratios = [0]#.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [1.0]
+test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+persentages = [.95]
 modes = ["dist", "corr"]
 model_types = [ "min"]#"median", "min", "average"]
 normilizings = ["z-score"]#, "minmax"]
 verbose = False
 Debug = False
-random_test_acc = 0
+random_test_acc = 50
 template_selection_methods = ["None"]#, "DEND", "MDIST"]
 k_clusters = [4]#, 7, 12]
 
@@ -44,8 +44,8 @@ cols = ["Feature_Type", "Mode", "Criteria",
         "Test_Size", "Normalizition", "Features_Set",
         "PCA", "Time", "Number_of_PCs",
         "template-selection-method", "k-cluster",
-        "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L_tr", "sklearn_EER_L", "Mean_EER_L_te", "Mean_sample_training_L", "Mean_sample_test_L",
-        "Mean_Acc_R", "Mean_f1_R", "Mean_EER_R_tr", "sklearn_EER_R", "Mean_EER_R_te", "Mean_sample_training_R", "Mean_sample_test_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
+        "Mean_Acc_L", "Mean_f1_L", "Mean_EER_L_te", "Mean_sample_training_L", "Mean_sample_test_L",
+        "Mean_Acc_R", "Mean_f1_R", "Mean_EER_R_te", "Mean_sample_training_R", "Mean_sample_test_R"] + ["FAR_L_" + str(i) for i in range(100)] + ["FRR_L_" + str(i) for i in range(100)] + ["FAR_R_" + str(i) for i in range(100)] + ["FRR_R_" + str(i) for i in range(100)]
 
 
 
@@ -189,6 +189,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
             DF_positive_samples = DF_side[DF_side["subject ID"] == subject]
             DF_negative_samples = DF_side[DF_side["subject ID"] != subject]
 
+
                 
                 
             DF_positive_samples_test = DF_positive_samples.sample(frac = test_ratio, 
@@ -209,66 +210,154 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
                 Scaled_test = scaling.transform(df_test.iloc[:, :-2])
 
-
             elif normilizing == "z-score":
                 scaling = preprocessing.StandardScaler()
                 Scaled_train = scaling.fit_transform(df_train.iloc[:, :-2])
                 Scaled_test = scaling.transform(df_test.iloc[:, :-2])
             
+            if persentage == 1.0:
+                
+                num_pc = Scaled_train.shape[1]
+                
 
-            principal = PCA()
-            PCA_out_train = principal.fit_transform(Scaled_train)
-            PCA_out_test = principal.transform(Scaled_test)
+                columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
+                DF_features_PCA_train = pd.DataFrame(np.concatenate((Scaled_train[:,:num_pc],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName)
+                DF_features_PCA_test = pd.DataFrame(np.concatenate((Scaled_test[:,:num_pc],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName)
 
-            variance_ratio = np.cumsum(principal.explained_variance_ratio_)
-            high_var_PC = np.zeros(variance_ratio.shape)
-            high_var_PC[variance_ratio <= persentage] = 1
+                DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
+                DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
+                
+                
+                DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
+                DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-            loadings = principal.components_
-            num_pc = int(np.sum(high_var_PC))
+                logger.info("MaduleName: {}\n".format(DF_positive_samples_train.shape))             
+
+            elif persentage != 1.0 and features_excel in  ["pfeatures", "afeatures-simple", "afeatures-otsu"]:
+
+                principal = PCA()
+                PCA_out_train = principal.fit_transform(Scaled_train)
+                PCA_out_test = principal.transform(Scaled_test)
+
+                variance_ratio = np.cumsum(principal.explained_variance_ratio_)
+                high_var_PC = np.zeros(variance_ratio.shape)
+                high_var_PC[variance_ratio <= persentage] = 1
+
+                loadings = principal.components_
+                num_pc = int(np.sum(high_var_PC))
 
 
 
 
-            columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
-            DF_features_PCA_train = (pd.DataFrame(np.concatenate((PCA_out_train[:,:num_pc],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName))
-            DF_features_PCA_test = (pd.DataFrame(np.concatenate((PCA_out_test[:,:num_pc],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName))
+                columnsName = ["PC"+str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
+                DF_features_PCA_train = (pd.DataFrame(np.concatenate((PCA_out_train[:,:num_pc],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName))
+                DF_features_PCA_test = (pd.DataFrame(np.concatenate((PCA_out_test[:,:num_pc],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName))
 
-            DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
-            DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
+                DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
+                DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
+                
+                
+                DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
+                DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
             
-            
-            DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
-            DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
-            
+            elif persentage != 1.0 and (features_excel is not ["pfeatures", "afeatures-simple", "afeatures-otsu"]):
+                a = []
+                b = []
+                for temp in range(3):
+
+                    xx = int((DF_features_all.shape[1]-2)/3)
+                
+                    # logger.info("MaduleName: {}\n".format(Scaled_train.shape))
+                    
+                    
+                    principal = PCA()
+                    PCA_out_train = principal.fit_transform(Scaled_train[:, temp*xx:(temp+1)*xx])
+                    PCA_out_test = principal.transform(Scaled_test[:, temp*xx:(temp+1)*xx])
+
+                    variance_ratio = np.cumsum(principal.explained_variance_ratio_)
+                    high_var_PC = np.zeros(variance_ratio.shape)
+                    high_var_PC[variance_ratio <= persentage] = 1
+
+                    loadings = principal.components_
+                    num_pc = int(np.sum(high_var_PC))
+
+
+
+                    a.append(PCA_out_train[:,:num_pc])
+                    b.append(PCA_out_test[:,:num_pc])
+
+                    
+
+                   
+                for i in range(2):
+                    a[2] = np.concatenate((a[2],a[i]), axis=1)
+                    b[2] = np.concatenate((b[2],b[i]), axis=1)
+
+                num_pc = a[2].shape[1]
+
+                columnsName = ["PC_" + str(i) for i in list(range(1, num_pc+1))] + ["subject ID", "left(0)/right(1)"]
+                DF_features_PCA_train = (pd.DataFrame(np.concatenate((a[2],df_train.iloc[:, -2:].values), axis = 1), columns = columnsName))
+                DF_features_PCA_test = (pd.DataFrame(np.concatenate((b[2],df_test.iloc[:, -2:].values), axis = 1), columns = columnsName))
+                
+                DF_positive_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] == subject]
+                DF_negative_samples_train = DF_features_PCA_train[DF_features_PCA_train["subject ID"] != subject]
+                
+                
+                DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
+                DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
+
+                logger.debug("DF_positive_samples_train.shape {}".format(DF_positive_samples_train.shape))    
+                logger.debug("DF_negative_samples_train.shape {}".format(DF_negative_samples_train.shape))   
+                logger.debug("DF_positive_samples_test.shape {}".format(DF_positive_samples_test.shape))    
+                logger.debug("DF_negative_samples_test.shape {}".format(DF_negative_samples_test.shape))    
+                
+
 
             if template_selection_method != "None":
                 DF_positive_samples_train = template_selection(DF_positive_samples_train, method = template_selection_method, k_cluster = k_cluster, verbose = verbose)
 
 
 
-            distModel1, distModel2 = compute_model(DF_positive_samples_train.iloc[:, :-2].values,
-                                                        DF_negative_samples_train.iloc[:, :-2].values,
-                                                        mode = mode, score = score)
+            FAR_temp1 = []
+            FRR_temp1 = []
+            EER_temp1 = []
+            TH_temp1  = []
+            
+            for _ in range(random_test_acc):
+                pos_samples = DF_positive_samples_train.shape
+                temp = DF_negative_samples_train.sample(n = pos_samples[0])
 
 
-            Model_client, Model_imposter = model(distModel1,
-                                                        distModel2, 
-                                                        model_type = model_type, 
-                                                        score = score )
+                
+                
+                
+            
+                distModel1, distModel2 = compute_model(DF_positive_samples_train.iloc[:, :-2].values,
+                                                            temp.iloc[:, :-2].values,
+                                                            mode = mode, score = score)
+
+
+                Model_client, Model_imposter = model(distModel1,
+                                                            distModel2, 
+                                                            model_type = model_type, 
+                                                            score = score )
 
 
 
-            FAR_temp, FRR_temp = calculating_fxr(Model_client, Model_imposter, distModel1, distModel2, THRESHOLDs, score)
-            EER_temp = compute_eer(FAR_temp, FRR_temp)
+                FAR_temp, FRR_temp = calculating_fxr(Model_client, Model_imposter, distModel1, distModel2, THRESHOLDs, score)
+                EER_temp = compute_eer(FAR_temp, FRR_temp)
 
+                FAR_temp1.append(FAR_temp)
+                FRR_temp1.append(FRR_temp)
+                EER_temp1.append(EER_temp[0])
+                TH_temp1.append(EER_temp[1])
 
+            
+            
             acc = list()
             f1 = list()
-            eer = list()
-            eer1 = list()
             eer2 = list()
-            t_idx = EER_temp[1]
+            t_idx = int(np.ceil(np.mean(TH_temp1)))
 
             for _ in range(random_test_acc):
                 pos_samples = DF_positive_samples_test.shape
@@ -299,48 +388,31 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                     if actual == 0 and prediction == 1:
                         far = far + 1
 
-                fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+                # fpr, tpr, thresholds = roc_curve(y_test, y_pred)
                 # logger.info("fpr: {}".format(fpr))
 
                 acc.append( accuracy_score(y_test, y_pred)*100 )
                 f1.append(  f1_score(y_test, y_pred)*100 )
-                eer.append(compute_eer(fpr, 1-tpr))
-                # eer1.append((FAR_temp_1[t_idx]+ FRR_temp_1[t_idx])/2)
                 eer2.append((frr + far)/(2*y_test.sum()))
-                # logger.info("far: {}".format(far))
-                # logger.info("frr: {}".format(frr))
-                # logger.info("eer2: {}\n".format((frr + far)/(2*y_test.sum())))
 
 
-    
-            # # logger.info("\nfar: {}\n".format(FAR_temp_1[t_idx]))
-            # # logger.info("\nfrr: {}\n".format(FRR_temp_1[t_idx]))
-            # logger.info("t_idx: {}".format(t_idx))
-            # logger.info("eer sklearn: {}".format(np.mean(eer)))
-            # # logger.info("eer1: {}".format(np.mean(eer1)))
-            # logger.info("eer average of FAR and FRR: {}".format(np.mean(eer2)))
-            # # logger.info("Model_test: {}".format(Model_test.shape))
-            # # logger.info("DF_positive_samples_test: {}".format(DF_positive_samples_test.shape))
-            # logger.info("1-tpr: {}".format(1-tpr))
-            # logger.info("fpr: {}\n\n\n".format(fpr))
 
-            # ROC_plot_v2(fpr, 1-tpr,thresholds)
             
             if direction == "left_0":
-                EER_L.append(EER_temp)
+                EER_L.append((np.mean(EER_temp1), t_idx))
                 FAR_L.append(FAR_temp)
                 FRR_L.append(FRR_temp)
-                ACC_L.append([subject, np.mean(acc), np.mean(f1), np.mean(eer), np.mean(eer1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_L.append([subject, np.mean(acc), np.mean(f1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
                 
             elif direction == "right_1":
-                EER_R.append(EER_temp)
+                EER_R.append((np.mean(EER_temp1), t_idx))
                 FAR_R.append(FAR_temp)
                 FRR_R.append(FRR_temp)
-                ACC_R.append([subject, np.mean(acc), np.mean(f1), np.mean(eer), np.mean(eer1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_R.append([subject, np.mean(acc), np.mean(f1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
             
-    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "mean(eer)", "mean(eer1)", "mean(eer2)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
+    columnsname = ["subject ID", "mean(acc)", "mean(f1)", "mean(eer)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
     DF_temp = pd.DataFrame(np.concatenate((ACC_L, EER_L, FAR_L, FRR_L), axis=1), columns = columnsname )
     DF_temp.to_excel(os.path.join(folder_path,   'Left.xlsx'))
     DF_temp = pd.DataFrame(np.concatenate((ACC_R, EER_R, FAR_R, FRR_R), axis=1), columns = columnsname )
@@ -350,14 +422,14 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
     toc=timeit.default_timer()
     logger.info("End:     ---    {}, \t\t Process time: {:.2f}  seconds".format(folder, toc - tic)) 
 
-    
+
     A = [[features_excel, mode, model_type, test_ratio, normilizing, feat_name, persentage, (toc - tic), num_pc,
         
         template_selection_method,
         k_cluster]+
 
-        np.mean( np.array(ACC_L)[:,1:8] , axis=0).tolist()+
-        np.mean( np.array(ACC_R)[:,1:8] , axis=0).tolist()+
+        np.mean( np.array(ACC_L)[:,1:5] , axis=0).tolist()+
+        np.mean( np.array(ACC_R)[:,1:5] , axis=0).tolist()+
         np.concatenate((np.mean(np.array(FAR_L), axis=0), np.mean(np.array(FRR_L), axis=0)), axis=0).tolist()+
         np.concatenate((np.mean(np.array(FAR_R), axis=0), np.mean(np.array(FRR_R), axis=0)), axis=0).tolist()]
 
@@ -752,14 +824,17 @@ def collect_results(result):
 
 
 def main():
-    features_excel = "afeatures-simple"
+    features_excel = "COPs_wt"
     
 
     feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
+    
+        
+    
     for iiii in modes:
-        folder = str(1.0) + "_z-score_" + str(-3) + "_" + iiii + "_" + "min" + "_" +  str(0) 
+        folder = str(0.95) + "_z-score_" + str(-3) + "_" + iiii + "_" + "min" + "_" +  str(0.3) 
         # print(folder)     
         collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
 

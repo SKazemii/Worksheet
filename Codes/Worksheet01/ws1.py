@@ -22,10 +22,10 @@ pd.options.mode.chained_assignment = None
 
 
 TH_dev = 1000
-THRESHOLDs = np.linspace(0, 1, TH_dev)
+THRESHOLDs = np.linspace(.8, 1, TH_dev)
 test_ratios = [0]#.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
 persentages = [1.0]
-modes = ["dist", "corr"]
+modes = ["corr"]
 model_types = [ "min"]#"median", "min", "average"]
 normilizings = ["z-score"]#, "minmax"]
 verbose = False

@@ -18,7 +18,7 @@ from pathlib import Path as Pathlb
 from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
 
-import util as perf
+import ws3 as perf
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from MLPackage import FS
 

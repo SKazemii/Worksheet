@@ -100,11 +100,11 @@ def calculating_wt(features_excel, waveletname, pywt_mode, wavelet_level):
 
 def main():
 	
-	# print(pywt.families(short=False))
-	# print(pywt.Modes.modes)
-	# for family in pywt.families():
-	# 	print("%s family: " % family + ', '.join(pywt.wavelist(family)))	# print(dir(pywt))
-	waveletname = 'sym5'
+	print(pywt.families(short=False))
+	print(pywt.Modes.modes)
+	for family in pywt.families():
+		print("%s family: " % family + ", ".join(pywt.wavelist(family)))	# print(dir(pywt))
+	waveletname = "coif1"
 	wavelet_level = pywt.dwt_max_level(100, waveletname)
 	pywt_mode = "constant"
 
