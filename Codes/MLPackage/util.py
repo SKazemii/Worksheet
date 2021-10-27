@@ -22,18 +22,18 @@ pd.options.mode.chained_assignment = None
 
 
 THRESHOLDs = np.linspace(0, 1, 100)
-test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [.95]
-modes = ["dist", "corr"]
-model_types = [ "min"]#"median", "min", "average"]
-normilizings = ["z-score"]#, "minmax"]
+test_ratios = [0.3]#, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+persentages = [1.0, 0.95, 0.90, 0.80]
+modes = ["dist"]
+model_types = [ "median", "min", "average"]
+normilizings = ["z-score", "minmax"]
 verbose = False
 Debug = False
 random_test_acc = 50
 template_selection_methods = ["None"]#, "DEND", "MDIST"]
 k_clusters = [4]#, 7, 12]
 
-features_types = ["pfeatures", "afeatures-simple", "afeatures-otsu"]#, "COAs-otsu", "COAs-simple", "COPs"]
+features_types = ["pfeatures"]#, "afeatures-simple", "afeatures-otsu"]#, "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 working_path = os.getcwd()
@@ -69,7 +69,7 @@ def create_logger(level):
     logger.addHandler(stream_handler)
     return logger
 
-logger = create_logger(logging.INFO)
+logger = create_logger(logging.DEBUG)
 
 from sklearn.cluster import KMeans
 
@@ -411,7 +411,6 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 FRR_R.append(FRR_temp)
                 ACC_R.append([subject, np.mean(acc), np.mean(f1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
-            
     columnsname = ["subject ID", "mean(acc)", "mean(f1)", "mean(eer)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
     DF_temp = pd.DataFrame(np.concatenate((ACC_L, EER_L, FAR_L, FRR_L), axis=1), columns = columnsname )
     DF_temp.to_excel(os.path.join(folder_path,   'Left.xlsx'))
@@ -421,15 +420,18 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
     toc=timeit.default_timer()
     logger.info("End:     ---    {}, \t\t Process time: {:.2f}  seconds".format(folder, toc - tic)) 
+    # print(columnsname)
+    # print(cols)
 
+    # print(np.mean( np.array(ACC_R)[:,1:5] , axis=0).tolist())
 
     A = [[features_excel, mode, model_type, test_ratio, normilizing, feat_name, persentage, (toc - tic), num_pc,
         
         template_selection_method,
         k_cluster]+
 
-        np.mean( np.array(ACC_L)[:,1:5] , axis=0).tolist()+
-        np.mean( np.array(ACC_R)[:,1:5] , axis=0).tolist()+
+        np.mean( np.array(ACC_L)[:,1:6] , axis=0).tolist()+
+        np.mean( np.array(ACC_R)[:,1:6] , axis=0).tolist()+
         np.concatenate((np.mean(np.array(FAR_L), axis=0), np.mean(np.array(FRR_L), axis=0)), axis=0).tolist()+
         np.concatenate((np.mean(np.array(FAR_R), axis=0), np.mean(np.array(FRR_R), axis=0)), axis=0).tolist()]
 

@@ -332,14 +332,14 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 EER_L.append(EER_temp)
                 FAR_L.append(FAR_temp)
                 FRR_L.append(FRR_temp)
-                ACC_L.append([subject, np.mean(acc), np.mean(f1), np.mean(eer), np.mean(eer1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_L.append([subject, 0, 0, 0, 0, 0, DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
                 
             elif direction == "right_1":
                 EER_R.append(EER_temp)
                 FAR_R.append(FAR_temp)
                 FRR_R.append(FRR_temp)
-                ACC_R.append([subject, np.mean(acc), np.mean(f1), np.mean(eer), np.mean(eer1), np.mean(eer2), DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
+                ACC_R.append([subject, 0, 0, 0, 0, 0, DF_positive_samples_train.shape[0], DF_positive_samples_test.shape[0], DF_negative_samples_test.shape[0], test_ratio])
 
             
     columnsname = ["subject ID", "mean(acc)", "mean(f1)", "mean(eer)", "mean(eer1)", "mean(eer2)", "# positive samples training", "# positive samples test", "# negative samples test", "test_ratio", "EER", "t_idx" ] + ["FAR_" + str(i) for i in range(TH_dev)] + ["FRR_" + str(i) for i in range(TH_dev)] 
@@ -748,8 +748,8 @@ def main():
         for i in modes:
             for ii in range(-3,DF_features_all.shape[1]-2,3):
                 folder = str(1.0) + "_z-score_" + str(ii) + "_" + i + "_" + "min" + "_" +  str(0) 
-                pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
-                # collect_results(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None"))
+                # pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
+                collect_results(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None"))
         
     pool.close()
     pool.join()
@@ -759,7 +759,8 @@ def main():
     logger.info("Done!!!")
 
 
-
+import warnings
+warnings.simplefilter('error', RuntimeWarning)
 if __name__ == "__main__":
     logger.info("Starting !!!")
     tic = timeit.default_timer()
