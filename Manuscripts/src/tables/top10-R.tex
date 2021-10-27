@@ -1,16 +1,16 @@
-\begin{tabular}{llllrllrlrrrr}
+\begin{tabular}{llllrllrrrr}
 \toprule
-{} &      Feature\_Type &  Mode & Criteria &  Test\_Size & Normalizition & Features\_Set &  PCA & template-selection-method &  k-cluster &  Mean\_sample\_training\_L &  Mean\_sample\_test\_L &  Mean\_Acc\_R \\
+{} & Feature\_Type &  Mode & Criteria &  Test\_Size & Normalizition & Features\_Set &  PCA &  Mean\_Acc\_R &  Mean\_f1\_R &  Mean\_EER\_R \\
 \midrule
-0 &  afeatures-simple &  dist &      ave &        0.3 &       z-score &        MVELO &  1.0 &                      None &          4 &                   10.21 &                4.19 &       71.37 \\
-0 &  afeatures-simple &  dist &      ave &        0.3 &       z-score &        RANGE &  1.0 &                      None &          4 &                   10.21 &                4.19 &       71.28 \\
-0 &  afeatures-simple &  dist &      ave &        0.3 &       z-score &        TOTEX &  1.0 &                     MDIST &         12 &                    9.78 &                4.19 &       71.24 \\
-0 &  afeatures-simple &  dist &      ave &        0.3 &       z-score &        TOTEX &  1.0 &                      None &          4 &                   10.21 &                4.19 &       71.23 \\
-0 &  afeatures-simple &  dist &      min &        0.3 &        minmax &        RANGE &  1.0 &                      None &          4 &                   10.21 &                4.19 &       71.12 \\
-0 &         pfeatures &  dist &      ave &        0.3 &       z-score &        MVELO &  1.0 &                      None &          4 &                   10.21 &                4.19 &       71.10 \\
-0 &    afeatures-otsu &  dist &      ave &        0.3 &       z-score &        RANGE &  1.0 &                      None &          4 &                   10.21 &                4.19 &       71.02 \\
-0 &  afeatures-simple &  dist &      ave &        0.3 &       z-score &        RANGE &  1.0 &                     MDIST &         12 &                    9.78 &                4.19 &       71.00 \\
-0 &  afeatures-simple &  dist &      ave &        0.3 &       z-score &        RDIST &  1.0 &                     MDIST &         12 &                    9.78 &                4.19 &       70.99 \\
-0 &         pfeatures &  dist &      ave &        0.3 &       z-score &        MVELO &  1.0 &                     MDIST &         12 &                    9.78 &                4.19 &       70.97 \\
+0 &     afeat\_si &  dist &      ave &        0.2 &       z-score &        RANGE &  1.0 &       72.71 &      71.93 &        0.29 \\
+0 &    pfeatures &  dist &      ave &        0.2 &       z-score &        RANGE &  1.0 &       72.61 &      71.88 &        0.29 \\
+0 &    pfeatures &  dist &      ave &        0.2 &       z-score &        TOTEX &  1.0 &       72.14 &      72.43 &        0.31 \\
+0 &     afeat\_ot &  dist &      ave &        0.2 &       z-score &        RANGE &  1.0 &       72.11 &      70.39 &        0.30 \\
+0 &     afeat\_si &  dist &      min &        0.2 &       z-score &        TOTEX &  1.0 &       71.77 &      71.09 &        0.31 \\
+0 &    pfeatures &  dist &      ave &        0.2 &       z-score &        MVELO &  1.0 &       71.68 &      72.19 &        0.31 \\
+0 &     afeat\_si &  dist &      min &        0.2 &       z-score &        MVELO &  1.0 &       71.25 &      70.79 &        0.31 \\
+0 &    pfeatures &  dist &      med &        0.2 &       z-score &        RANGE &  1.0 &       71.20 &      68.73 &        0.28 \\
+0 &    pfeatures &  dist &      ave &        0.2 &        minmax &        RANGE &  1.0 &       71.11 &      69.55 &        0.32 \\
+0 &     afeat\_si &  dist &      min &        0.2 &        minmax &        MVELO &  1.0 &       71.07 &      70.08 &        0.32 \\
 \bottomrule
 \end{tabular}

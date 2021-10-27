@@ -1,22 +1,26 @@
 import warnings
-
-from pandas.core.frame import DataFrame
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
-import sys, os, itertools
+import sys, os
 from pathlib import Path as Pathlb
 
+
+# from scipy.spatial import distance
+# from sklearn import preprocessing
+# from sklearn.metrics import accuracy_score
+# from itertools import combinations, product
 
 
 from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 
 
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import util as perf
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from MLPackage import util as perf
+from MLPackage import FS 
 
 
 plt.rcParams["font.size"] = 13
@@ -26,7 +30,7 @@ print("[INFO] Setting directories")
 project_dir = os.getcwd()
 fig_dir = os.path.join(project_dir, "Manuscripts", "src", "figures")
 tbl_dir = os.path.join(project_dir, "Manuscripts", "src", "tables")
-data_dir = os.path.join(project_dir, "Archive", "results WS1")
+data_dir = os.path.join(project_dir, "results on testsize")
 
 Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
 Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
@@ -42,108 +46,15 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
-Results_DF = pd.read_excel(os.path.join(data_dir, 'DF.xlsx'), index_col = 0)
+
+
+
+Results_DF = pd.read_excel(os.path.join(project_dir, 'DF.xlsx'), index_col = 0)
 Results_DF.columns = perf.cols
 
-pd.set_option('display.max_rows', 55)
-
-
-# print(Results_DF.head())
-# features_excelss = ["afeatures-simple", "pfeatures"]
-# for features_excel in features_excelss:
-#     for i in perf.modes:
-#         for ii in ["All"] + perf.feature_names:
-#             folder = str(1.0) + "_z-score_" + str(ii) + "_" + i + "_" + "min" + "_" +  str(0.0) + "_None_2" 
-#             # print(folder)
-#             left = pd.read_excel(os.path.join(data_dir, features_excel, folder,'Left.xlsx'), index_col = 0)
-#             right = pd.read_excel(os.path.join(data_dir, features_excel, folder,'Right.xlsx'), index_col = 0)
-#             mask = (Results_DF.Feature_Type == features_excel) & (Results_DF.Mode == i) & (Results_DF.Features_Set == ii)
-#             Results_DF.loc[mask,"Mean_EER_L_tr"] = left.mean().dropna()["EER"] 
-#             Results_DF.loc[mask,"Mean_EER_R_tr"] = right.mean().dropna()["EER"] 
-#             # print(Results_DF[mask])
-
-
-#             # # Results_DF.at[]
-#             # print(left.mean().dropna()["EER"] )
-
-#             # print(right.mean().dropna()["EER"] )
-
-    
-
-
-# print(Results_DF.iloc[:,7:17])
-# Results_DF.to_excel(perf.working_path + "/DF_EER.xlsx")
 
 
 
-
-Results_DF = pd.read_excel(os.path.join(data_dir, 'DF_EER.xlsx'), index_col = 0)
-
-
-
-
-# plt.show()
-# plt.close('all')
-
-
-
-
-
-for f_type in ["COA features-simple", "COP features"]:  
-    FAR_L = list()
-    FRR_L = list()
-    FAR_R = list()
-    FRR_R = list()   
-    counter = itertools.cycle([0,0,0,0,1,1,1,1])
-    for i in ["correlation", "distance"]:
-        mask = (Results_DF.Feature_Type == f_type) & (Results_DF.Mode == i) & (Results_DF.Features_Set == "All")
-        Results_DF_f = Results_DF.loc[mask]
-
-        FAR_L.append(Results_DF_f[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-        FRR_L.append(Results_DF_f[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-        FAR_R.append(Results_DF_f[["FAR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-        FRR_R.append(Results_DF_f[["FRR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-
-        perf.plot_ACC(FAR_L[next(counter)], FRR_L[next(counter)], FAR_R[next(counter)], FRR_R[next(counter)], THRESHOLDs)
-        plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_" + i + "_ACC.png"))
-
-
-
-    labels = ["correlation", "distance"]
-    perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels)
-    plt.savefig(os.path.join("Manuscripts", "src", "figures", "WS1_"+f_type+"_ROC.png"))
-
-
-    Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set"])
-    values = Results_DF["Features_Set"].unique()
-
-    Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
-    FAR_L = list()
-    FRR_L = list()
-    FAR_R = list()
-    FRR_R = list()
-    for value in values:
-        
-        DF = Results_DF_group.get_group((f_type, value))
-        Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L_tr"].mean(),       DF["Mean_EER_L_tr"].std(), DF["Mean_EER_L_tr"].min(), DF["Mean_EER_L_tr"].max())
-        Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R_tr"].mean(),      DF["Mean_EER_R_tr"].std(), DF["Mean_EER_R_tr"].min(), DF["Mean_EER_R_tr"].max())    
-
-        # print(DF)
-        FAR_L.append(DF[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-        FRR_L.append(DF[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-        FAR_R.append(DF[["FAR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-        FRR_R.append(DF[["FRR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-
-    perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, values)
-    plt.tight_layout()
-    plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + "_ROC.png"))
-    plt.close('all')
-
-    with pd.ExcelWriter(os.path.join("Manuscripts", "src", "tables", f_type + "-EER.xlsx")) as writer:  
-        Y.to_excel(writer, sheet_name='Sheet_name_1')
-
-print("Done!!!")
-sys.exit()
 
 Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
 
@@ -219,10 +130,10 @@ for value in values:
     # Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R_te"].mean(),      DF["Mean_EER_R_te"].std(), DF["Mean_EER_R_te"].min(), DF["Mean_EER_R_te"].max())    
 
     # print(DF)
-    FAR_L.append(DF[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-    FRR_L.append(DF[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-    FAR_R.append(DF[["FAR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-    FRR_R.append(DF[["FRR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+    FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+    FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+    FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+    FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
 
 perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, str(values))
 plt.tight_layout()
@@ -234,3 +145,173 @@ with open(os.path.join("Manuscripts", "src", "tables", "testsize.tex"), "w") as 
     tf.write(X.to_latex())
 # with open(os.path.join("Manuscripts", "src", "tables", "testsize-EER.tex"), "w") as tf:
 #     tf.write(Y.to_latex())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sys.exit()
+
+for f_type in ["afeatures-simple", "afeatures-otsu", "pfeatures"]:   
+    plt.figure(figsize=(14,8))
+
+    Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set"])
+    values = Results_DF["Features_Set"].unique()
+
+    X = pd.DataFrame(index=values , columns=["Accuracy Left", "Accuracy Right"])
+    Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
+    FAR_L = list()
+    FRR_L = list()
+    FAR_R = list()
+    FRR_R = list()
+    for value in values:
+        
+        DF = Results_DF_group.get_group((f_type, value))
+        X.loc[value, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
+        X.loc[value, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+        Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L"].mean(),       DF["Mean_EER_L"].std(), DF["Mean_EER_L"].min(), DF["Mean_EER_L"].max())
+        Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R"].mean(),      DF["Mean_EER_R"].std(), DF["Mean_EER_R"].min(), DF["Mean_EER_R"].max())    
+
+        # print(DF)
+        FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+        FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+        FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+        FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+    perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, values)
+    plt.tight_layout()
+    plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + ".png"))
+    plt.close('all')
+
+
+    with open(os.path.join("Manuscripts", "src", "tables", f_type + "-Acc.tex"), "w") as tf:
+        tf.write(X.to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", f_type + "-EER.tex"), "w") as tf:
+        tf.write(Y.to_latex())
+
+
+
+
+for f_type in perf.features_types:   
+    for column in ['Mode', 'Criteria', 'Normalizition', 'PCA']:
+        plt.figure(figsize=(14,8))
+        Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set", column])
+        values = Results_DF[column].unique()
+        X = pd.DataFrame(index=values , columns=["Accuracy Left", "Accuracy Right"])
+        Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
+        FAR_L = list()
+        FRR_L = list()
+        FAR_R = list()
+        FRR_R = list()
+        for value in values:
+            
+            DF = Results_DF_group.get_group((f_type, 'All', value))
+            X.loc[value, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
+            X.loc[value, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+            Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L"].mean(),       DF["Mean_EER_L"].std(), DF["Mean_EER_L"].min(), DF["Mean_EER_L"].max())
+            Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R"].mean(),      DF["Mean_EER_R"].std(), DF["Mean_EER_R"].min(), DF["Mean_EER_R"].max())    
+
+            # print(DF)
+            FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+            FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+            FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+            FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+        perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, values)
+        plt.tight_layout()
+        plt.savefig(os.path.join("Manuscripts", "src", "figures", f_type + "-" + column + ".png"))
+        plt.close('all')
+
+
+        with open(os.path.join("Manuscripts", "src", "tables", f_type + "-" + column + "-Acc.tex"), "w") as tf:
+            tf.write(X.to_latex())
+        with open(os.path.join("Manuscripts", "src", "tables", f_type + "-" + column + "-EER.tex"), "w") as tf:
+            tf.write(Y.to_latex())
+
+
+
+
+for features_excel in ["afeatures-simple", "afeatures-otsu", "pfeatures"]:
+
+    feature_path = os.path.join(perf.working_path, 'Datasets', features_excel + ".xlsx")
+    DF_features = pd.read_excel(feature_path, index_col = 0)
+
+
+    print( "[INFO] feature shape: ", DF_features.shape)
+
+
+    f_names = ['MDIST_RD', 'MDIST_AP', 'MDIST_ML', 'RDIST_RD', 'RDIST_AP', 'RDIST_ML', 'TOTEX_RD', 'TOTEX_AP', 'TOTEX_ML', 'MVELO_RD', 'MVELO_AP', 'MVELO_ML', 'RANGE_RD', 'RANGE_AP', 'RANGE_ML','AREA_CC', 'AREA_CE', 'AREA_SW', 'MFREQ_RD', 'MFREQ_AP', 'MFREQ_ML', 'FDPD_RD', 'FDPD_AP', 'FDPD_ML', 'FDCC', 'FDCE']
+    columnsName = f_names + [ "subject_ID", "left(0)/right(1)"]
+    DF_features.columns = columnsName
+
+
+
+
+    DF_side = DF_features[DF_features["left(0)/right(1)"] == 0]
+    DF_side.loc[DF_side.subject_ID == 4.0, "left(0)/right(1)"] = 1
+    DF_side.loc[DF_side.subject_ID != 4.0, "left(0)/right(1)"] = 0
+
+
+    DF = FS.mRMR(DF_side.iloc[:,:-2], DF_side.iloc[:,-1])
+
+    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "-10best-FS.tex"), "w") as tf:
+        tf.write(DF.iloc[:10,:].to_latex())
+    with open(os.path.join("Manuscripts", "src", "tables", features_excel + "-10worst-FS.tex"), "w") as tf:
+        tf.write(DF.iloc[-10:,:].to_latex())
+
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
+plt.figure(figsize=(14,8))
+X = pd.DataFrame(index=["COAs-otsu", "COAs-simple", "COPs"] , columns=["Accuracy Left", "Accuracy Right"])
+Y = pd.DataFrame(index=["COAs-otsu", "COAs-simple", "COPs"] , columns=[ "EER Left", "EER Right"])
+Results_DF_group = Results_DF.groupby(["Feature_Type"])
+
+for f_type in ["COAs-otsu", "COAs-simple", "COPs"]:   
+    
+    DF = Results_DF_group.get_group((f_type))
+    X.loc[f_type, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
+    X.loc[f_type, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+    Y.loc[f_type, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L"].mean(),       DF["Mean_EER_L"].std(), DF["Mean_EER_L"].min(), DF["Mean_EER_L"].max())
+    Y.loc[f_type, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R"].mean(),      DF["Mean_EER_R"].std(), DF["Mean_EER_R"].min(), DF["Mean_EER_R"].max())    
+
+    FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
+    FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].mean().values)
+    FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
+    FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
+
+
+with open(os.path.join("Manuscripts", "src", "tables", "COX-time-series-Acc.tex"), "w") as tf:
+    tf.write(X.to_latex())
+with open(os.path.join("Manuscripts", "src", "tables", "COX-time-series-EER.tex"), "w") as tf:
+    tf.write(Y.to_latex())
+perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, ["COAs_otsu", "COAs_simple", "COPs"])
+plt.tight_layout()
+plt.savefig(os.path.join("Manuscripts", "src", "figures", "COX-time-series.png"))
+plt.close('all')
+
+
+

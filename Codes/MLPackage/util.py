@@ -22,18 +22,18 @@ pd.options.mode.chained_assignment = None
 
 
 THRESHOLDs = np.linspace(0, 1, 100)
-test_ratios = [0]#.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [1.0]
+test_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
+persentages = [0.95]
 modes = ["dist", "corr"]
-model_types = [ "min"]#"median", "min", "average"]
+model_types = [ "median", "min", "average"]
 normilizings = ["z-score"]#, "minmax"]
 verbose = False
 Debug = False
-random_test_acc = 0
+random_test_acc = 50
 template_selection_methods = ["None"]#, "DEND", "MDIST"]
 k_clusters = [4]#, 7, 12]
 
-features_types = ["pfeatures", "afeatures-simple", "afeatures-otsu"]#, "COAs-otsu", "COAs-simple", "COPs"]
+features_types = ["pfeatures"]#, "afeatures-simple", "afeatures-otsu", "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 working_path = os.getcwd()
@@ -201,6 +201,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                                                                     random_state = 2)
             DF_negative_samples_train = DF_negative_samples.drop(DF_negative_samples_test.index)
             
+            
             df_train = pd.concat([DF_positive_samples_train, DF_negative_samples_train])
             df_test = pd.concat([DF_positive_samples_test, DF_negative_samples_test])
 
@@ -240,7 +241,6 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
             
             DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
             DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
-            
 
             if template_selection_method != "None":
                 DF_positive_samples_train = template_selection(DF_positive_samples_train, method = template_selection_method, k_cluster = k_cluster, verbose = verbose)
@@ -259,6 +259,33 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
 
 
+
+            
+            # FRR_temp = list()
+            # FAR_temp = list()
+
+            # if score is not None:
+            #     for tx in THRESHOLDs:
+            #         E1 = np.zeros((Model_client.shape))
+            #         E1[Model_client < tx] = 1
+            #         FRR_temp.append(np.sum(E1)/(distModel1.shape[1]))
+
+
+            #         E2 = np.zeros((Model_imposter.shape))
+            #         E2[Model_imposter > tx] = 1
+            #         FAR_temp.append(np.sum(E2)/distModel2.shape[1])
+
+            # elif score is None:
+            #     for tx in THRESHOLDs:
+            #         E1 = np.zeros((Model_client.shape))
+            #         E1[Model_client > tx] = 1
+            #         FRR_temp.append(np.sum(E1)/(distModel1.shape[1]))
+
+
+            #         E2 = np.zeros((Model_imposter.shape))
+            #         E2[Model_imposter < tx] = 1
+            #         FAR_temp.append(np.sum(E2)/distModel2.shape[1])
+
             FAR_temp, FRR_temp = calculating_fxr(Model_client, Model_imposter, distModel1, distModel2, THRESHOLDs, score)
             EER_temp = compute_eer(FAR_temp, FRR_temp)
 
@@ -269,7 +296,6 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
             eer1 = list()
             eer2 = list()
             t_idx = EER_temp[1]
-
             for _ in range(random_test_acc):
                 pos_samples = DF_positive_samples_test.shape
                 temp = DF_negative_samples_test.sample(n = pos_samples[0])
@@ -286,46 +312,51 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
             
                 y_pred = np.zeros((Model_test.shape))
-                y_test = DF_temp.iloc[:,-2].values
 
 
                 y_pred[Model_test > THRESHOLDs[t_idx]] = 1
-                frr = 0
-                far = 0
+                fr = 0
+                fa = 0
 
-                for actual, prediction in zip(y_test, y_pred):
-                    if actual == 1 and prediction == 0:
-                        frr = frr + 1
-                    if actual == 0 and prediction == 1:
-                        far = far + 1
+                for tr, pr in zip(DF_temp.iloc[:,-2].values,y_pred):
+                    if tr == 1 and pr == 0:
+                        fr = fr + 1
+                    if tr == 0 and pr == 1:
+                        fa = fa + 1
 
-                fpr, tpr, thresholds = roc_curve(y_test, y_pred)
-                # logger.info("fpr: {}".format(fpr))
+                # logger.info(DF_temp.iloc[:,-2].sum())
+                # logger.info(y_pred)
+                # logger.info(((fr + fa)/DF_temp.iloc[:,-2].sum())/2)
 
-                acc.append( accuracy_score(y_test, y_pred)*100 )
-                f1.append(  f1_score(y_test, y_pred)*100 )
+                # sys.exit()
+
+                fpr, tpr, thresholds = roc_curve(DF_temp.iloc[:,-2].values, y_pred)
+                logger.debug(compute_eer(fpr, 1-tpr))
+
+                acc.append( accuracy_score(DF_temp.iloc[:,-2].values, y_pred)*100 )
+                f1.append(  f1_score(DF_temp.iloc[:,-2].values, y_pred)*100 )
                 eer.append(compute_eer(fpr, 1-tpr))
-                # eer1.append((FAR_temp_1[t_idx]+ FRR_temp_1[t_idx])/2)
-                eer2.append((frr + far)/(2*y_test.sum()))
-                # logger.info("far: {}".format(far))
-                # logger.info("frr: {}".format(frr))
-                # logger.info("eer2: {}\n".format((frr + far)/(2*y_test.sum())))
+                eer1.append((FAR_temp_1[t_idx]+ FRR_temp_1[t_idx])/2)
+                eer2.append((fr + fa)/(2*DF_temp.iloc[:,-2].sum()))
+                # print(Model_test)
 
+                # print(y_pred)
+                # print(THRESHOLDs[t_idx])
+                # print(t_idx)
+                # sys.exit()
 
-    
-            # # logger.info("\nfar: {}\n".format(FAR_temp_1[t_idx]))
-            # # logger.info("\nfrr: {}\n".format(FRR_temp_1[t_idx]))
+            # logger.info("\nfar: {}\n".format(FAR_temp_1[t_idx]))
+            # logger.info("\nfrr: {}\n".format(FRR_temp_1[t_idx]))
             # logger.info("t_idx: {}".format(t_idx))
-            # logger.info("eer sklearn: {}".format(np.mean(eer)))
-            # # logger.info("eer1: {}".format(np.mean(eer1)))
-            # logger.info("eer average of FAR and FRR: {}".format(np.mean(eer2)))
-            # # logger.info("Model_test: {}".format(Model_test.shape))
-            # # logger.info("DF_positive_samples_test: {}".format(DF_positive_samples_test.shape))
+            # logger.info("eer: {}".format(np.mean(eer)))
+            # logger.info("eer1: {}".format(np.mean(eer1)))
+            # logger.info("eer2: {}".format(np.mean(eer2)))
+            # logger.info("Model_test: {}".format(Model_test.shape))
+            # logger.info("DF_positive_samples_test: {}".format(DF_positive_samples_test.shape))
             # logger.info("1-tpr: {}".format(1-tpr))
             # logger.info("fpr: {}\n\n\n".format(fpr))
 
             # ROC_plot_v2(fpr, 1-tpr,thresholds)
-            
             if direction == "left_0":
                 EER_L.append(EER_temp)
                 FAR_L.append(FAR_temp)
@@ -402,7 +433,7 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
         auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
         # label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
@@ -415,7 +446,7 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
 
         plt.subplot(1,2,2)
         auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
-        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
@@ -752,16 +783,18 @@ def collect_results(result):
 
 
 def main():
-    features_excel = "afeatures-simple"
+    features_excel = "pfeatures"
     
 
     feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
     for iiii in modes:
-        folder = str(1.0) + "_z-score_" + str(-3) + "_" + iiii + "_" + "min" + "_" +  str(0) 
-        # print(folder)     
-        collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
+        for iii in model_types:
+            for ii in test_ratios:
+                folder = str(0.95) + "_z-score_" + str(-3) + "_" + iiii + "_" + iii + "_" +  str(ii) 
+                # print(folder)     
+                collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
 
 
     # pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
