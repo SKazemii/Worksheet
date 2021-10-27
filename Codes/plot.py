@@ -30,7 +30,7 @@ print("[INFO] Setting directories")
 project_dir = os.getcwd()
 fig_dir = os.path.join(project_dir, "Manuscripts", "src", "figures")
 tbl_dir = os.path.join(project_dir, "Manuscripts", "src", "tables")
-data_dir = os.path.join(project_dir, "Archive", "results all 0.3")
+data_dir = os.path.join(project_dir, "results")
 
 Pathlb(fig_dir).mkdir(parents=True, exist_ok=True)
 Pathlb(tbl_dir).mkdir(parents=True, exist_ok=True)
@@ -65,28 +65,29 @@ Results_DF_temp["Feature_Type"] = Results_DF_temp["Feature_Type"].map(lambda x: 
 Results_DF_temp["Criteria"] = Results_DF_temp["Criteria"].map(lambda x: "ave" if x == "average" else x)
 Results_DF_temp["Criteria"] = Results_DF_temp["Criteria"].map(lambda x: "med" if x == "median" else x)
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L_te', 'Mean_f1_L'], ascending = [False, True, False]).iloc[:10,:15].drop(columns =['Time', 'Number_of_PCs', 'sklearn_EER_L'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L_te', 'Mean_f1_L'], ascending = [False, True, False]).iloc[:10,:15].drop(columns =['Time', 'Number_of_PCs'])
 with open(os.path.join("Manuscripts", "src", "tables", "top10-L.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L_te', 'Mean_f1_L'], ascending = [True, False, True]).iloc[:10,:15].drop(columns =['Time', 'Number_of_PCs', 'sklearn_EER_L'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_L', 'Mean_EER_L_te', 'Mean_f1_L'], ascending = [True, False, True]).iloc[:10,:15].drop(columns =['Time', 'Number_of_PCs'])
 with open(os.path.join("Manuscripts", "src", "tables", "worse10-L.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())
 
 
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R_te', 'Mean_f1_R'], ascending = [False, True, False]).iloc[:10,:19].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'sklearn_EER_L', 'Mean_Acc_L', 'Mean_EER_L_te', 'Mean_EER_L_tr'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R_te', 'Mean_f1_R'], ascending = [False, True, False]).iloc[:10,:19].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'Mean_Acc_L', 'Mean_EER_L_te'])
 with open(os.path.join("Manuscripts", "src", "tables", "top10-R.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())      
 
-X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R_te', 'Mean_f1_R'], ascending = [True, False, True]).iloc[:10,:19].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L', 'sklearn_EER_L',  'Mean_Acc_L', 'Mean_EER_L_te', 'Mean_EER_L_tr'])
+X = Results_DF_temp.sort_values(by=['Mean_Acc_R', 'Mean_EER_R_te', 'Mean_f1_R'], ascending = [True, False, True]).iloc[:10,:19].drop(columns =['Time', 'Number_of_PCs', 'Mean_f1_L',  'Mean_Acc_L', 'Mean_EER_L_te'])
 with open(os.path.join("Manuscripts", "src", "tables", "worse10-R.tex"), "w") as tf:
     tf.write(X.round(decimals=2).to_latex())          
 
 
 Results_DF["Mode"] = Results_DF["Mode"].map(lambda x: "Correlation" if x == "corr" else "Euclidean distance")
 Results_DF["Normalizition"] = Results_DF["Normalizition"].map(lambda x: "Z-score algorithm" if x == "z-score" else "Minmax algorithm")
-Results_DF["PCA"] = Results_DF["PCA"].map(lambda x: "All PCs" if x == 1.0 else "keeping 95% variance")
+Results_DF["PCA"] = Results_DF["PCA"].map(lambda x: "Withput PCA" if x == 1.0 else "keeping {:2.0f}% variance".format(x*100))
+
 Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "afeatures-simple" if x == "afeatures_simple" else x)
 Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "afeatures-otsu" if x == "afeatures_otsu" else x)
 Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-otsu" if x == "COAs_otsu" else x)
@@ -171,7 +172,7 @@ Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-simp
 
 
 
-for f_type in ["afeatures-simple", "afeatures-otsu", "pfeatures"]:   
+for f_type in ["pfeatures"]:   
     plt.figure(figsize=(14,8))
 
     Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set"])

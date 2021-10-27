@@ -231,7 +231,6 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
                 DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-                logger.info("MaduleName: {}\n".format(DF_positive_samples_train.shape))             
 
             elif persentage != 1.0 and features_excel in  ["pfeatures", "afeatures-simple", "afeatures-otsu"]:
 
