@@ -59,14 +59,7 @@ Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-otsu
 Results_DF["Feature_Type"] = Results_DF["Feature_Type"].map(lambda x: "COAs-simple" if x == "COAs_simple" else x)
 
 
-pd.set_option('display.max_rows', 200)
-Results_DF["mean_acc"] = (Results_DF["Mean_Acc_L"] + Results_DF["Mean_Acc_R"])/2
-Results_DF["mean_eer"] = (Results_DF["Mean_EER_L_te"] + Results_DF["Mean_EER_R_te"])/2
-print(stat.stat(Results_DF[["Test_Size", "mean_acc"]], labels=["Test_Size", "mean_acc"], plot = True).head(100))
-print(stat.stat(Results_DF[["Test_Size", "mean_eer"]], labels=["Test_Size", "mean_eer"], plot = True).head(100))
-plt.show()
-
-1/0       
+       
 plt.figure(figsize=(14,8))
 Results_DF_group = Results_DF.groupby(["Test_Size"])
 values = Results_DF["Test_Size"].sort_values().unique()
@@ -108,16 +101,17 @@ for value in values:
 
 
 
-perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, [str(x*100)+" %" for x in values])
+perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, [str(x*100)+" %" for x in values])
 plt.tight_layout()
-plt.savefig(os.path.join("Manuscripts", "src", "figures", "testsize.png"))
+plt.savefig(os.path.join(fig_dir, "WS3_testsize.png"))
 plt.close('all')
 
 
-with open(os.path.join("Manuscripts", "src", "tables", "testsize.tex"), "w") as tf:
+with open(os.path.join(tbl_dir, "WS3_testsize.tex"), "w") as tf:
     tf.write(X.to_latex())
 
-
+with pd.ExcelWriter(os.path.join(tbl_dir,  "WS3_testsize.xlsx")) as writer:  
+    X.to_excel(writer, sheet_name='Sheet_name_1')
 
 
 
