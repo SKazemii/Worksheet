@@ -20,9 +20,9 @@ def stat(DF, labels, th = 0.05, plot = False):
         p = shapiro(j)
         res["shapiro("+str(DF[labels[0]].unique()[c])+")" ] = [p.pvalue, "Gaussian" if p.pvalue > th else "Not Gaussian"]
         if plot == True:
-            plt.title("The histogram of "+ labels[1] + " on " + str(DF[labels[0]].unique()[c]) + " " + labels[0])
-            plt.hist(j)
             plt.figure()
+            plt.title("The histogram of "+ labels[1] + " on " + str(DF[labels[0]].unique()[c]) )
+            plt.hist(j)
 
 
         c = c + 1

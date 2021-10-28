@@ -105,7 +105,7 @@ def main():
 	for family in pywt.families():
 		print("%s family: " % family + ", ".join(pywt.wavelist(family)))	# print(dir(pywt))
 	waveletname = "coif1"
-	wavelet_level = pywt.dwt_max_level(100, waveletname)
+	wavelet_level = 4#pywt.dwt_max_level(100, waveletname)
 	pywt_mode = "constant"
 
 
