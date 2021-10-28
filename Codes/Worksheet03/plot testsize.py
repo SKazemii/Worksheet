@@ -16,6 +16,7 @@ from scipy.stats import shapiro, ttest_ind, mannwhitneyu
 import ws3 as perf
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from MLPackage import FS 
+from MLPackage import stat 
 
 
 plt.rcParams["font.size"] = 13
@@ -76,23 +77,28 @@ FRR_L = list()
 FAR_R = list()
 FRR_R = list()        
 for value in values:
+
+
     
     DF = Results_DF_group.get_group((value))
     X.loc[value, "Accuracy"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
-        (DF["Mean_Acc_L"].mean()+DF["Mean_Acc_R"].mean())/2, 
-        (DF["Mean_Acc_L"].std()+ DF["Mean_Acc_R"].min())/2,
-        (DF["Mean_Acc_L"].min()+ DF["Mean_Acc_R"].min())/2, 
-        (DF["Mean_Acc_L"].max()+ DF["Mean_Acc_R"].max())/2)
+        (DF["Mean_Acc_L"].mean()+ DF["Mean_Acc_R"].mean())/2, 
+        (DF["Mean_Acc_L"].std() + DF["Mean_Acc_R"].min())/2,
+        (DF["Mean_Acc_L"].min() + DF["Mean_Acc_R"].min())/2, 
+        (DF["Mean_Acc_L"].max() + DF["Mean_Acc_R"].max())/2)
     X.loc[value, "EER"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
-        (DF["Mean_EER_L_te"].mean()+DF["Mean_EER_R_te"].mean())/2,  
-        (DF["Mean_EER_L_te"].std()+ DF["Mean_EER_R_te"].min())/2,
-        (DF["Mean_EER_L_te"].min()+ DF["Mean_EER_R_te"].min())/2, 
-        (DF["Mean_EER_L_te"].max()+ DF["Mean_EER_R_te"].max())/2)
+        (DF["Mean_EER_L_te"].mean()+ DF["Mean_EER_R_te"].mean())/2,  
+        (DF["Mean_EER_L_te"].std() + DF["Mean_EER_R_te"].min())/2,
+        (DF["Mean_EER_L_te"].min() + DF["Mean_EER_R_te"].min())/2, 
+        (DF["Mean_EER_L_te"].max() + DF["Mean_EER_R_te"].max())/2)
     X.loc[value, "F1-score"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
-        (DF["Mean_f1_L"].mean()+DF["Mean_f1_R"].mean())/2,  
-        (DF["Mean_f1_L"].std()+ DF["Mean_f1_R"].min())/2,
-        (DF["Mean_f1_L"].min()+ DF["Mean_f1_R"].min())/2, 
-        (DF["Mean_f1_L"].max()+ DF["Mean_f1_R"].max())/2)
+        (DF["Mean_f1_L"].mean()+ DF["Mean_f1_R"].mean())/2,  
+        (DF["Mean_f1_L"].std() + DF["Mean_f1_R"].min())/2,
+        (DF["Mean_f1_L"].min() + DF["Mean_f1_R"].min())/2, 
+        (DF["Mean_f1_L"].max() + DF["Mean_f1_R"].max())/2)
+
+
+    
 
 
     FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)
@@ -100,7 +106,9 @@ for value in values:
     FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].mean().values)
     FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].mean().values)
 
-perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, str(values))
+
+
+perf.plot(FAR_L, FRR_L, FAR_R, FRR_R, [str(x*100)+" %" for x in values])
 plt.tight_layout()
 plt.savefig(os.path.join("Manuscripts", "src", "figures", "testsize.png"))
 plt.close('all')
