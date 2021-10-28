@@ -202,6 +202,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                                                                     random_state = 2)
             DF_negative_samples_train = DF_negative_samples.drop(DF_negative_samples_test.index)
             
+            
             df_train = pd.concat([DF_positive_samples_train, DF_negative_samples_train])
             df_test = pd.concat([DF_positive_samples_test, DF_negative_samples_test])
 
@@ -374,18 +375,17 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
             
                 y_pred = np.zeros((Model_test.shape))
-                y_test = DF_temp.iloc[:,-2].values
 
 
                 y_pred[Model_test > THRESHOLDs[t_idx]] = 1
-                frr = 0
-                far = 0
+                fr = 0
+                fa = 0
 
-                for actual, prediction in zip(y_test, y_pred):
-                    if actual == 1 and prediction == 0:
-                        frr = frr + 1
-                    if actual == 0 and prediction == 1:
-                        far = far + 1
+                for tr, pr in zip(DF_temp.iloc[:,-2].values,y_pred):
+                    if tr == 1 and pr == 0:
+                        fr = fr + 1
+                    if tr == 0 and pr == 1:
+                        fa = fa + 1
 
                 # fpr, tpr, thresholds = roc_curve(y_test, y_pred)
                 # logger.info("fpr: {}".format(fpr))
@@ -394,6 +394,10 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 f1.append(  f1_score(y_test, y_pred)*100 )
                 eer2.append((frr + far)/(2*y_test.sum()))
 
+                # print(y_pred)
+                # print(THRESHOLDs[t_idx])
+                # print(t_idx)
+                # sys.exit()
 
 
             
@@ -475,7 +479,7 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
         auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
         # label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
-        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
@@ -488,7 +492,7 @@ def plot(FAR_L, FRR_L, FAR_R, FRR_R, labels):
 
         plt.subplot(1,2,2)
         auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
-        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx] + str(auc), clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
