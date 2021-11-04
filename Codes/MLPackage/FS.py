@@ -75,7 +75,7 @@ from MLPackage import util as perf
 
 
 def main():
-    for features_excel in ["afeatures_simple", "afeatures_otsu", "pfeatures"]:
+    for features_excel in ["afeatures-simple", "afeatures-otsu", "pfeatures"]:
 
         feature_path = os.path.join(perf.working_path, 'Datasets', features_excel + ".xlsx")
         DF_features = pd.read_excel(feature_path, index_col = 0)
@@ -102,6 +102,13 @@ def main():
             tf.write(DF.iloc[:10,:].to_latex())
         with open(os.path.join("Manuscripts", "src", "tables", features_excel + "_10worst_FS.tex"), "w") as tf:
             tf.write(DF.iloc[-10:,:].to_latex())
+
+        with pd.ExcelWriter(os.path.join("temp", features_excel + "_10best_FS.xlsx")) as writer:  
+            DF.iloc[:10,:].to_excel(writer, sheet_name='Sheet_name_1')
+        with pd.ExcelWriter(os.path.join("temp", features_excel + "_10worst_FS.xlsx")) as writer:  
+            DF.iloc[-10:,:].to_excel(writer, sheet_name='Sheet_name_1')
+            
+
     # sys.exit()
     
     

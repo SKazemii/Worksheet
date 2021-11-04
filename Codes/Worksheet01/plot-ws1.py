@@ -42,12 +42,29 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
-Results_DF = pd.read_excel(os.path.join(data_dir, 'DF_EER.xlsx'), index_col = 0)
+Results_DF = pd.read_excel(os.path.join(project_dir, 'DF.xlsx'), index_col = 0)
 # Results_DF.columns = perf.cols
 
 pd.set_option('display.max_rows', 55)
 
 
+
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
+FAR_L.append(Results_DF[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+FRR_L.append(Results_DF[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+FAR_R.append(Results_DF[["FAR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+FRR_R.append(Results_DF[["FRR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
+print(FAR_L[0])
+print(len(FAR_L[0]))
+
+perf.plot_ACC(FAR_L[0], FRR_L[0], FAR_R[0], FRR_R[0], THRESHOLDs)
+plt.savefig(os.path.join("temp","WS1_corr_ACC.png"))
+
+print("Done!!")
+sys.exit()
 # print(Results_DF.head())
 # features_excelss = ["afeatures-simple", "pfeatures"]
 # for features_excel in features_excelss:

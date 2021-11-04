@@ -78,11 +78,39 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
-Results_DF = pd.read_excel(os.path.join(data_dir, 'Results_DF.xlsx'), index_col = 0)
+Results_DF = pd.read_excel(os.path.join(project_dir, "results", 'Results_DF.xlsx'), index_col = 0)
 # Results_DF.columns = perf.cols
 
 
+FAR_L = list()
+FRR_L = list()
+FAR_R = list()
+FRR_R = list()
+plt.figure(figsize=(14,8))
 
+
+Results_DF_group = Results_DF.groupby(["Feature_Type"])
+values = ["pfeatures", "afeatures-simple", "afeatures-otsu", "COAs-otsu", "COAs-simple", "COPs"]
+
+
+for value in values:
+    DF = Results_DF_group.get_group((value))
+
+    FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].values[0])
+    FRR_L.append(DF[["FRR_L_" + str(i) for i in range(100)]].values[0])
+    FAR_R.append(DF[["FAR_R_" + str(i) for i in range(100)]].values[0])
+    FRR_R.append(DF[["FRR_R_" + str(i) for i in range(100)]].values[0])
+
+# print((DF[["FRR_R_" + str(i) for i in range(100)]].values[0]))
+# print(FRR_R)
+# logger.info("Done!!")
+# sys.exit()
+perf.plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, values)
+plt.tight_layout()
+plt.savefig(os.path.join(project_dir, "temp", "WS3_features.png"))
+plt.close('all')
+logger.info("Done!!")
+sys.exit()
 
 
 Results_DF_temp = Results_DF[   Results_DF["Features_Set"] != "All"   ]
@@ -176,8 +204,8 @@ for f_type in ["pfeatures"]:
         plt.figure(figsize=(14,8))
         Results_DF_group = Results_DF.groupby(["Feature_Type", "Features_Set", column])
         values = Results_DF[column].unique()
-        X = pd.DataFrame(index=values , columns=["Accuracy Left", "Accuracy Right"])
-        Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right"])
+        X = pd.DataFrame(index=values , columns=["Accuracy Left", "Accuracy Right", "Both"])
+        Y = pd.DataFrame(index=values , columns=[ "EER Left", "EER Right", "Both"])
         FAR_L = list()
         FRR_L = list()
         FAR_R = list()
@@ -187,8 +215,27 @@ for f_type in ["pfeatures"]:
             DF = Results_DF_group.get_group((f_type, 'All', value))
             X.loc[value, "Accuracy Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_L"].mean(),  DF["Mean_Acc_L"].std(), DF["Mean_Acc_L"].min(), DF["Mean_Acc_L"].max())
             X.loc[value, "Accuracy Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_Acc_R"].mean(), DF["Mean_Acc_R"].std(), DF["Mean_Acc_R"].min(), DF["Mean_Acc_R"].max())
+            
+
+            X.loc[value, "Both"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
+                np.mean(DF[["Mean_Acc_L","Mean_Acc_R"]].values),
+                np.std(DF[["Mean_Acc_L","Mean_Acc_R"]].values),
+                np.min(DF[["Mean_Acc_L","Mean_Acc_R"]].values),
+                np.max(DF[["Mean_Acc_L","Mean_Acc_R"]].values))
+            
+            
+
+
+            
             Y.loc[value, "EER Left"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_L_te"].mean(),       DF["Mean_EER_L_te"].std(), DF["Mean_EER_L_te"].min(), DF["Mean_EER_L_te"].max())
             Y.loc[value, "EER Right"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(DF["Mean_EER_R_te"].mean(),      DF["Mean_EER_R_te"].std(), DF["Mean_EER_R_te"].min(), DF["Mean_EER_R_te"].max())    
+
+            Y.loc[value, "Both"] = "{:2.2f} +/- {:2.2f} ({:.2f}, {:.2f})".format(
+                np.mean(DF[["Mean_EER_L_te","Mean_EER_R_te"]].values),
+                np.std(DF[["Mean_EER_L_te","Mean_EER_R_te"]].values),
+                np.min(DF[["Mean_EER_L_te","Mean_EER_R_te"]].values),
+                np.max(DF[["Mean_EER_L_te","Mean_EER_R_te"]].values))
+
 
             # print(DF)
             FAR_L.append(DF[["FAR_L_" + str(i) for i in range(100)]].mean().values)

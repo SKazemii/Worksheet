@@ -60,15 +60,19 @@ def main():
     # model_types = ["min", "median", "average"]
     # normilizings = ["z-score"]#, "minmax"]
 
+
+    logger.info("OS: {}".format(sys.platform))
+    logger.info("Core Numbers: {}".format(multiprocessing.cpu_count()))
+    # logger.info("Feature shape: {}".format(DF_features_all.shape))
+
+    # pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
     for features_excel in perf.features_types:
 
         feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
         DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
 
-        logger.info("OS: {}".format(sys.platform))
-        logger.info("Core Numbers: {}".format(multiprocessing.cpu_count()))
-        logger.info("Feature shape: {}".format(DF_features_all.shape))
+        
         
         if features_excel == "COAs_otsu" or features_excel == "COAs_simple" or features_excel == "COPs":
             for mode in modes:
@@ -84,7 +88,7 @@ def main():
                                         for test_ratio in test_ratios:
                                             folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
                                             pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel, k_cluster, template_selection_method), callback=collect_results)
-                                            # collect_results(perf.fcn(DF_features_all, folder))
+                                            # collect_results(perf.fcn(DF_features_all, folder, features_excel, k_cluster, template_selection_method))
 
                                 pool.close()
                                 pool.join()
@@ -96,7 +100,7 @@ def main():
                         if k_cluster != k_clusters[0] and template_selection_method == "None":
                             continue
                         for normilizing in normilizings:
-                            for x in [-3]:#range(-3,DF_features_all.shape[1]-2,3):
+                            for x in range(-3,DF_features_all.shape[1]-2,3):
                                 pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
                                 for persentage in persentages:  
                                     for model_type in model_types:
@@ -106,12 +110,13 @@ def main():
                                         for test_ratio in test_ratios:
                                             folder = str(persentage) + "_" + normilizing + "_" + str(x) + "_" + mode + "_" + model_type + "_" +  str(test_ratio) 
                                             pool.apply_async(perf.fcn, args=(DF_features_all, folder, features_excel, k_cluster, template_selection_method), callback=collect_results)
-                                            # collect_results(perf.fcn(DF_features_all,folder))
+                                            # collect_results(perf.fcn(DF_features_all, folder, features_excel, k_cluster, template_selection_method))
 
 
                                 pool.close()
                                 pool.join()
-
+    # pool.close()
+    # pool.join()
 
 def create_logger(level):
     loggerName = Pathlb(__file__).stem

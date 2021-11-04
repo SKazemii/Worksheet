@@ -23,17 +23,17 @@ pd.options.mode.chained_assignment = None
 
 THRESHOLDs = np.linspace(0, 1, 100)
 test_ratios = [0.3]#, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [1.0, 0.95, 0.90, 0.80]
+persentages = [0.95]#, 0.90, 0.80]
 modes = ["dist"]
-model_types = [ "median", "min", "average"]
-normilizings = ["z-score", "minmax"]
+model_types = [ "min"]#"median", "min", "average"]
+normilizings = ["z-score"]#, "minmax"]
 verbose = False
 Debug = False
 random_test_acc = 50
 template_selection_methods = ["None"]#, "DEND", "MDIST"]
 k_clusters = [4]#, 7, 12]
 
-features_types = ["pfeatures"]#, "afeatures-simple", "afeatures-otsu"]#, "COAs-otsu", "COAs-simple", "COPs"]
+features_types = ["pfeatures", "afeatures-simple", "afeatures-otsu", "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 working_path = os.getcwd()
@@ -232,7 +232,6 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
                 DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-
             elif persentage != 1.0 and features_excel in  ["pfeatures", "afeatures-simple", "afeatures-otsu"]:
 
                 principal = PCA()
@@ -263,6 +262,7 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
             elif persentage != 1.0 and (features_excel is not ["pfeatures", "afeatures-simple", "afeatures-otsu"]):
                 a = []
                 b = []
+                
                 for temp in range(3):
 
                     xx = int((DF_features_all.shape[1]-2)/3)
@@ -328,14 +328,9 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
                 temp = DF_negative_samples_train.sample(n = pos_samples[0])
 
 
-                
-                
-                
-            
                 distModel1, distModel2 = compute_model(DF_positive_samples_train.iloc[:, :-2].values,
                                                             temp.iloc[:, :-2].values,
                                                             mode = mode, score = score)
-
 
                 Model_client, Model_imposter = model(distModel1,
                                                             distModel2, 
@@ -378,21 +373,21 @@ def fcn(DF_features_all, foldername, features_excel, k_cluster, template_selecti
 
 
                 y_pred[Model_test > THRESHOLDs[t_idx]] = 1
-                fr = 0
-                fa = 0
+                frr = 0
+                far = 0
 
                 for tr, pr in zip(DF_temp.iloc[:,-2].values,y_pred):
                     if tr == 1 and pr == 0:
-                        fr = fr + 1
+                        frr = frr + 1
                     if tr == 0 and pr == 1:
-                        fa = fa + 1
+                        far = far + 1
 
                 # fpr, tpr, thresholds = roc_curve(y_test, y_pred)
                 # logger.info("fpr: {}".format(fpr))
 
-                acc.append( accuracy_score(y_test, y_pred)*100 )
-                f1.append(  f1_score(y_test, y_pred)*100 )
-                eer2.append((frr + far)/(2*y_test.sum()))
+                acc.append( accuracy_score(DF_temp.iloc[:,-2].values, y_pred)*100 )
+                f1.append(  f1_score(DF_temp.iloc[:,-2].values, y_pred)*100 )
+                eer2.append((frr + far)/(2*DF_temp.iloc[:,-2].values.sum()))
 
                 # print(y_pred)
                 # print(THRESHOLDs[t_idx])

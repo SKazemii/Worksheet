@@ -58,17 +58,17 @@ logger = create_logger(logging.DEBUG)
 
 def main():
     folder1 = "0.95_z-score_All_dist_min_0.3_None_4"
-    path = os.path.join(project_dir, "Archive", "results all 0.3", "pfeatures", folder1, "Left.xlsx")
+    path = os.path.join(project_dir, "Archive", "results all 0.3", "afeatures-otsu", folder1, "Left.xlsx")
     Results_DF_1 = pd.read_excel(path, index_col = 0)
     Results_DF_1["subject ID"] = Results_DF_1["subject ID"].map(lambda x: "min")
 
     folder1 = "0.95_z-score_All_dist_median_0.3_None_4"
-    path = os.path.join(project_dir, "Archive", "results all 0.3", "pfeatures", folder1, "Left.xlsx")
+    path = os.path.join(project_dir, "Archive", "results all 0.3", "afeatures-otsu", folder1, "Left.xlsx")
     Results_DF_2 = pd.read_excel(path, index_col = 0)
     Results_DF_2["subject ID"] = Results_DF_2["subject ID"].map(lambda x: "median")
 
     folder1 = "0.95_z-score_All_dist_average_0.3_None_4"
-    path = os.path.join(project_dir, "Archive", "results all 0.3", "pfeatures", folder1, "Left.xlsx")
+    path = os.path.join(project_dir, "Archive", "results all 0.3", "afeatures-otsu", folder1, "Left.xlsx")
     Results_DF_3 = pd.read_excel(path, index_col = 0)
     Results_DF_3["subject ID"] = Results_DF_3["subject ID"].map(lambda x: "average")
 

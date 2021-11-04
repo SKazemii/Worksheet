@@ -24,17 +24,17 @@ pd.options.mode.chained_assignment = None
 TH_dev = 100
 THRESHOLDs = np.linspace(0, 1, TH_dev)
 test_ratios = [0.3]#.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
-persentages = [1.0, 0.95]
-modes = ["dist", "corr"]
-model_types = ["median", "min", "average"]
-normilizings = ["z-score", "minmax"]
+persentages = [0.95]
+modes = ["dist"]#, "corr"]
+model_types = ["min"]#"median", "min", "average"]
+normilizings = ["z-score"]#, "minmax"]
 verbose = False
 Debug = False
 random_test_acc = 0
 template_selection_methods = ["None"]#, "DEND", "MDIST"]
 k_clusters = [4]#, 7, 12]
 
-features_types = ["pfeatures", "afeatures-simple", "afeatures-otsu"]#, "COAs-otsu", "COAs-simple", "COPs"]
+features_types = ["pfeatures", "afeatures-simple", "afeatures-otsu", "COAs-otsu", "COAs-simple", "COPs"]
 color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcoral', 'olive', 'mediumpurple', 'khaki', 'hotpink', 'blueviolet']
 
 working_path = os.getcwd()
@@ -403,7 +403,7 @@ def plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels):
 
     for idx in range(len(FAR_L)):
         plt.subplot(1,2,1)
-        auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
+        auc = np.round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
         # label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
 
         plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
@@ -418,7 +418,7 @@ def plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels):
         plt.legend(loc="best")
 
         plt.subplot(1,2,2)
-        auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
+        auc = np.round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
         plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
@@ -728,14 +728,14 @@ Results_DF = pd.DataFrame(columns=cols)
 def collect_results(result):
     global Results_DF
     Results_DF = Results_DF.append(result)
-    Results_DF.to_excel(working_path + "/DF.xlsx")
+    Results_DF.to_excel(working_path + "\\temp\\DF.xlsx")
 
 
 def main():
     features_excelss = ["afeatures-simple", "pfeatures"]
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
-    for features_excel in features_excelss:
+    for features_excel in features_types:
         feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
         DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
@@ -745,11 +745,10 @@ def main():
         #     collect_results(fcn(DF_features_all,folder, features_excel, 2, template_selection_method = "None"))
 
 
-        for i in modes:
-            for ii in range(-3,DF_features_all.shape[1]-2,3):
-                folder = str(1.0) + "_z-score_" + str(ii) + "_" + i + "_" + "min" + "_" +  str(0) 
-                pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
-                # collect_results(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None"))
+        # for ii in range(-3,DF_features_all.shape[1]-2,3):
+        folder = str(0.95) + "_z-score_-3_dist_" + "min" + "_" +  str(0.3) 
+        pool.apply_async(fcn, args=(DF_features_all, folder, features_excel, 2, "None"), callback=collect_results)
+            # collect_results(fcn(DF_features_all, folder, features_excel, 2, template_selection_method = "None"))
         
     pool.close()
     pool.join()
