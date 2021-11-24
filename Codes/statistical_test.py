@@ -11,7 +11,8 @@ from pathlib import Path as Pathlb
 
 from sklearn import preprocessing
 from sklearn.metrics import accuracy_score
-import itertools
+import itertools, seaborn as sns
+from statannot import add_stat_annotation
 
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))	
@@ -57,10 +58,41 @@ logger = create_logger(logging.DEBUG)
 
 
 def main():
-    folder1 = "0.95_z-score_All_dist_min_0.3_None_4"
-    path = os.path.join(project_dir, "Archive", "results all 0.3", "afeatures-otsu", folder1, "Left.xlsx")
+    folder1 = "1.0_z-score_All_corr_min_0.0_None_2"
+    path = os.path.join(project_dir, "Archive", "results WS1", "eer.xlsx")
     Results_DF_1 = pd.read_excel(path, index_col = 0)
-    Results_DF_1["subject ID"] = Results_DF_1["subject ID"].map(lambda x: "min")
+    Results_DF_1 = Results_DF_1[ Results_DF_1["feature type"] == "COP"]
+    print(Results_DF_1)
+
+    x = "feature type"
+    y = "EER"
+    hue = "score matrix"
+    box_pairs=[
+        (("COA", "Euclidean distance"), ("COP", "Euclidean distance")),
+        (("COP", "Correlation coefficient"), ("COA", "Correlation coefficient")),
+        
+        
+        ]
+    print(Results_DF_1)
+    print(box_pairs)
+    ax = sns.boxplot(data=Results_DF_1, y=y, hue=hue, x=x, showmeans=True,)
+    add_stat_annotation(ax, data=Results_DF_1, y=y, x=x, hue=hue, 
+                        box_pairs=box_pairs,
+                        test='Mann-Whitney', text_format='star', loc='inside', verbose=2)
+    plt.legend(loc='upper left', bbox_to_anchor=(0, 1.16))
+
+
+    # print(stat.stat(vertical_concat[["subject ID", "mean(acc)"]], labels=["subject ID", "mean(acc)"], plot = True).head(100))
+    plt.show()
+    logger.info("Done!!")
+    sys.exit()
+    logger.info("Done!!")
+    sys.exit()
+
+    folder1 = "1.0_z-score_All_corr_min_0.0_None_2"
+    path = os.path.join(project_dir, "Archive", "results WS1", "pfeatures", folder1, "Right.xlsx")
+    Results_DF_1 = pd.read_excel(path, index_col = 0)
+    Results_DF_1["subject ID"] = Results_DF_1["EER"]
 
     folder1 = "0.95_z-score_All_dist_median_0.3_None_4"
     path = os.path.join(project_dir, "Archive", "results all 0.3", "afeatures-otsu", folder1, "Left.xlsx")
@@ -74,8 +106,20 @@ def main():
 
 
     vertical_concat = pd.concat([Results_DF_2, Results_DF_1, Results_DF_3], axis=0)
+    print(vertical_concat.describe())
+    x = "subject ID"
+    y = "mean(acc)"
+    hue =  "mean(f1)"
+    ax = sns.boxplot(data=vertical_concat, y=y, hue = "subject ID", x=hue)
+    add_stat_annotation(ax, data=vertical_concat, y=y, x = "subject ID",hue=hue,
+                        box_pairs=[("min", "median"), ("min", "average"), ("average", "median")],
+                        test='t-test_ind', text_format='star', loc='inside', verbose=2)
+    plt.legend(loc='upper left', bbox_to_anchor=(1.03, 1))
 
-    print(stat.stat(vertical_concat[["subject ID", "mean(acc)"]], labels=["subject ID", "mean(acc)"], plot = True).head(100))
+
+    vertical_concat = pd.concat([Results_DF_2, Results_DF_1, Results_DF_3], axis=0)
+
+    # print(stat.stat(vertical_concat[["subject ID", "mean(acc)"]], labels=["subject ID", "mean(acc)"], plot = True).head(100))
     plt.show()
     logger.info("Done!!")
     sys.exit()

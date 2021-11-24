@@ -100,7 +100,10 @@ def main():
 
 
 
-		# logger.info(metadata[sample,0:2])
+		logger.info([max_value_1, max_value_1_ind,
+						max_value_2, max_value_2_ind,
+						min_value, min_value_ind,
+						mean_value, std_value, sum_value])
 
 		# plt.plot(range(100), Sum)
 		# plt.figure()

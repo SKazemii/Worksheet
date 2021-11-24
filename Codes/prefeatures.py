@@ -101,45 +101,48 @@ def main():
 
     data = np.load(data_path)
     metadata = np.load(meta_path)
-    print("[INFO] data shape: ", data.shape)
-    print("[INFO] metadata shape: ", metadata.shape)
+    logger.info("Data shape: {}".format(data.shape))
+    logger.info("Metadata shape: {}".format(metadata.shape))
 
-    pfeatures = list()
-    COPs = list()
+    prefeatures = list()
+    for j in range(data.shape[0]):
+        
+        I = np.zeros((data[j].shape))
+        I[data[j] > eps] = 1
+        CD = np.sum(I, axis=2)
 
-    afeatures_simple = list()
-    COAs_simple = list()
-    afeatures_otsu = list()
-    COAs_otsu = list()
-
-    for j in range(10):#data.shape[0]):
-        print(data[j].shape)
-        print(np.max(data[j]))
-        # I = np.zeros((data[j].shape))
-        # I[data[j] > eps] = 1
-       
-        # CD = np.sum(I, axis=2)
-        # PTI = np.sum(data[j], axis=2)
+        PTI = np.sum(data[j], axis=2)
 
         Tmax = np.argmax(data[j], axis=2)
-        logger.info("data[j]: {}\n".format(data[j, 30, 20, 40:41]))
-        logger.info("data[j]: {}\n".format(Tmax[30, 20]))
+        
         I = data[j].copy()
         I[data[j] < eps] = 0
         x = np.ma.masked_array(I, mask=I==0)
         Tmin = np.argmin(x , axis=2, )
-        logger.info("data[j]: {}\n".format(data[j, 30, 20, :20]))
-        logger.info("data[j]: {}\n".format(I[ 30, 20, :20]))
-        # logger.info("data[j]: {}\n".format(data[j,20:40, 10:30, 30]))
-        # logger.info("data[j]: {}\n".format(I[20:40, 10:30, 30]))
-        logger.info("I: {}\n".format(Tmin[30, 20]))
-        logger.info(Tmin.shape)
-        plt.imshow(PTI)
+
+
+
+        P50  = np.percentile(data[j],  50, axis=2)
+        P60  = np.percentile(data[j],  60, axis=2)
+        P70  = np.percentile(data[j],  70, axis=2)
+        P80  = np.percentile(data[j],  80, axis=2)
+        P90  = np.percentile(data[j],  90, axis=2)
+        P100 = np.percentile(data[j], 100, axis=2)
+
+        prefeatures.append(np.stack((CD, PTI, Tmin, Tmax, P50, P60, P70, P80, P90, P100), axis = -1))
+
+        logger.info(prefeatures[0].shape)
+        plt.figure()
+        plt.imshow(prefeatures[:, :, 4])
         plt.show()
         sys.exit()
 
+    saving_path = os.path.join(project_dir, 'Datasets', 'prefeatures.npy')
+    np.save(saving_path, prefeatures)
 
-    logger.info("Done!!!")
+    temp = np.load(saving_path)
+    logger.info("prefeature shape:".format(temp.shape))
+
 
 
 

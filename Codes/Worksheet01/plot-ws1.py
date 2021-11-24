@@ -42,26 +42,35 @@ color = ['darkorange', 'navy', 'red', 'greenyellow', 'lightsteelblue', 'lightcor
 
 
 
-Results_DF = pd.read_excel(os.path.join(project_dir, 'DF.xlsx'), index_col = 0)
+Results_DF = pd.read_excel(os.path.join(data_dir, 'DF100.xlsx'), index_col = 0).sort_values(by="Features_Set")
+print(Results_DF)
 # Results_DF.columns = perf.cols
 
 pd.set_option('display.max_rows', 55)
 
 
+Results_DF_group = Results_DF.groupby(["Feature_Type", "Mode"])
 
+      
+DF = Results_DF_group.get_group(("COA features-simple", "distance"))
 FAR_L = list()
 FRR_L = list()
 FAR_R = list()
 FRR_R = list()
-FAR_L.append(Results_DF[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-FRR_L.append(Results_DF[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-FAR_R.append(Results_DF[["FAR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-FRR_R.append(Results_DF[["FRR_R_" + str(i) for i in range(perf.TH_dev)]].mean().values)
-print(FAR_L[0])
-print(len(FAR_L[0]))
+FAR_L.append(DF[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].values)
+FRR_L.append(DF[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].values)
 
-perf.plot_ACC(FAR_L[0], FRR_L[0], FAR_R[0], FRR_R[0], THRESHOLDs)
-plt.savefig(os.path.join("temp","WS1_corr_ACC.png"))
+
+
+DF = Results_DF_group.get_group(("COP features", "distance"))
+FAR_R.append(DF[["FAR_L_" + str(i) for i in range(perf.TH_dev)]].values)
+FRR_R.append(DF[["FRR_L_" + str(i) for i in range(perf.TH_dev)]].values)
+print(FAR_L[0].shape)
+
+
+perf.plot_ROC(FAR_L[0], FRR_L[0], FAR_R[0], FRR_R[0], DF["Features_Set"].values)
+# plt.savefig(os.path.join("temp","WS1_corr_ACC.png"))
+plt.show()
 
 print("Done!!")
 sys.exit()

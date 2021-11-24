@@ -1,8 +1,11 @@
 import numpy as np
+import pandas as pd
 from scipy import ndimage, signal
 import matplotlib.pyplot as plt
 import sys, os, math
 from scipy.spatial.distance import cdist
+
+import pywt
 
 
 from MLPackage import Butterworth
@@ -15,10 +18,9 @@ def computeCOPTimeSeries(Footprint3D):
     Footprint3D : [x,y,t] image
     return COPTS : RD, AP, ML COP time series
     """
+
     ML = list()
     AP = list()
-
-
 
     for i in range(Footprint3D.shape[2]):
         temp = Footprint3D[:, :, i]
@@ -291,4 +293,114 @@ def computeFDCE(COPTS):
     return FDCE
 
 
+def computeGRF(Footprint3D):
+    """
+    computeGFR(Footprint3D)
+    Footprint3D: [x,y,t] image
+    return GFR: [t] time series signal
+    """
+    GRF = list()
+    
 
+    for frame in range(Footprint3D.shape[2]):
+        temp = Footprint3D[:, :, frame].sum()
+        GRF.append(temp)
+    
+    return GRF
+
+
+def computeGRFfeatures(GRF):
+    """
+    computeGRFfeatures(GRF)
+    GRF: [t] time series signal
+    return GFR features: [9] (max_value_1, max_value_1_ind, max_value_2, max_value_2_ind, min_value, min_value_ind, mean_value, std_value, sum_value)
+    """
+    # handcraft_features = list()
+    L = int(len(GRF)/2)
+
+
+
+
+    max_value_1 = np.max(GRF[:L])
+    max_value_1_ind = np.argmax( GRF[:L] )
+    max_value_2 = np.max(GRF[L:])
+    max_value_2_ind = L + np.argmax(	GRF[L:] )
+
+    min_value = np.min(GRF[max_value_1_ind:max_value_2_ind])
+    min_value_ind = max_value_1_ind + np.argmin(	GRF[max_value_1_ind:max_value_2_ind] )
+
+    mean_value = np.mean(GRF)
+    std_value = np.std(GRF)
+    sum_value = np.sum(GRF)
+
+    handcraft_features = [max_value_1, max_value_1_ind,
+                    max_value_2, max_value_2_ind,
+                    min_value, min_value_ind,
+                    mean_value, std_value, sum_value]
+
+    return handcraft_features
+
+
+def wt_feature(signal, waveletname="coif1", pywt_mode="constant", wavelet_level=4):
+    """
+    wt_feature(signal, waveletname, pywt_mode, wavelet_level)
+    signal: [t] time series signal
+    wavelet_level = 4 or pywt.dwt_max_level(100, waveletname)
+	pywt_mode = "constant"
+    waveletname = "coif1"
+        haar family: haar
+        db family: db1, db2, db3, db4, db5, db6, db7, db8, db9, db10, db11, db12, db13, db14, db15, db16, db17, db18, db19, db20, db21, db22, db23, db24, db25, db26, db27, db28, db29, db30, db31, db32, db33, db34, db35, db36, db37, db38
+        sym family: sym2, sym3, sym4, sym5, sym6, sym7, sym8, sym9, sym10, sym11, sym12, sym13, sym14, sym15, sym16, sym17, sym18, sym19, sym20   
+        coif family: coif1, coif2, coif3, coif4, coif5, coif6, coif7, coif8, coif9, coif10, coif11, coif12, coif13, coif14, coif15, coif16, coif17bior family: bior1.1, bior1.3, bior1.5, bior2.2, bior2.4, bior2.6, bior2.8, bior3.1, bior3.3, bior3.5, bior3.7, bior3.9, bior4.4, bior5.5, bior6.8
+        rbio family: rbio1.1, rbio1.3, rbio1.5, rbio2.2, rbio2.4, rbio2.6, rbio2.8, rbio3.1, rbio3.3, rbio3.5, rbio3.7, rbio3.9, rbio4.4, rbio5.5, rbio6.8
+        dmey family: dmey
+        gaus family: gaus1, gaus2, gaus3, gaus4, gaus5, gaus6, gaus7, gaus8
+        mexh family: mexh
+        morl family: morl
+        cgau family: cgau1, cgau2, cgau3, cgau4, cgau5, cgau6, cgau7, cgau8
+        shan family: shan
+        fbsp family: fbsp
+        cmor family: cmor
+	
+
+    return dwt_coeff: Discrete Wavelet Transform coeff
+    """
+
+    dwt_coeff = pywt.wavedec(signal, waveletname, mode=pywt_mode, level=wavelet_level)
+    dwt_coeff = np.concatenate(dwt_coeff).ravel()
+
+    return dwt_coeff
+
+
+def prefeatures(Footprint3D, eps=5):
+    """
+    prefeatures(Footprint3D)
+    Footprint3D: [x,y,t] image
+    return prefeatures: [x, y, 10] (CD, PTI, Tmin, Tmax, P50, P60, P70, P80, P90, P100)
+    """
+
+    prefeatures = list()
+        
+    temp = np.zeros(Footprint3D.shape)
+    temp[Footprint3D > eps] = 1
+    CD = np.sum(temp, axis=2)
+
+    PTI = np.sum(Footprint3D, axis=2)
+
+    Tmax = np.argmax(Footprint3D, axis=2)
+        
+    temp = Footprint3D.copy()
+    temp[Footprint3D < eps] = 0
+    x = np.ma.masked_array(temp, mask=temp==0)
+    Tmin = np.argmin(x , axis=2, )
+
+    P50  = np.percentile(Footprint3D,  50, axis=2)
+    P60  = np.percentile(Footprint3D,  60, axis=2)
+    P70  = np.percentile(Footprint3D,  70, axis=2)
+    P80  = np.percentile(Footprint3D,  80, axis=2)
+    P90  = np.percentile(Footprint3D,  90, axis=2)
+    P100 = np.percentile(Footprint3D, 100, axis=2)
+
+    prefeatures = np.stack((CD, PTI, Tmin, Tmax, P50, P60, P70, P80, P90, P100), axis = -1)
+
+    return prefeatures

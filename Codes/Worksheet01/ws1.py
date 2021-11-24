@@ -21,11 +21,11 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_curv
 pd.options.mode.chained_assignment = None 
 
 
-TH_dev = 1000
-THRESHOLDs = np.linspace(.8, 1, TH_dev)
+TH_dev = 100
+THRESHOLDs = np.linspace(0, 1, TH_dev)
 test_ratios = [0]#.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
 persentages = [1.0]
-modes = ["corr"]
+modes = ["dist"]
 model_types = [ "min"]#"median", "min", "average"]
 normilizings = ["z-score"]#, "minmax"]
 verbose = False
@@ -400,33 +400,29 @@ def calculating_fxr(Model_client, Model_imposter, distModel1, distModel2, THRESH
 
 def plot_ROC(FAR_L, FRR_L, FAR_R, FRR_R, labels):
     plt.figure(figsize=(14,8))
-
+    print(len(FAR_L))
     for idx in range(len(FAR_L)):
         plt.subplot(1,2,1)
-        auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
-        # label=a[idx] #+ ' AUC = ' + str(round(auc, 2))
-
-        plt.plot(FAR_L[idx], FRR_L[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        plt.plot(FAR_L[idx,:], FRR_L[idx,:], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.0])
         plt.xlabel('False Acceptance Rate')
         plt.ylabel('False Rejection Rate')
-        plt.title('ROC curve, left side')
+        plt.title('ROC curve, COA features-simple')
         plt.gca().set_aspect('equal')
         plt.legend(loc="best")
 
         plt.subplot(1,2,2)
-        auc = round((1 + np.trapz( FRR_L[idx], FAR_L[idx])),2)
-        plt.plot(FAR_R[idx], FRR_R[idx], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
+        plt.plot(FAR_R[idx,:], FRR_R[idx,:], linestyle='--', marker='o', color=color[idx], lw = 2, label=labels[idx], clip_on=False)
 
         plt.plot([0, 1], [0, 1], color='blue', linestyle='--')
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.0])
         plt.xlabel('False Acceptance Rate')
         plt.ylabel('False Rejection Rate')
-        plt.title('ROC curve, Right side')
+        plt.title('ROC curve, COP features')
         plt.gca().set_aspect('equal')
         plt.legend(loc="best")
 

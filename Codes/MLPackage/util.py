@@ -24,7 +24,7 @@ pd.options.mode.chained_assignment = None
 THRESHOLDs = np.linspace(0, 1, 100)
 test_ratios = [0.3]#, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9]
 persentages = [0.95]#, 0.90, 0.80]
-modes = ["dist"]
+modes = ["corr"]
 model_types = [ "min"]#"median", "min", "average"]
 normilizings = ["z-score"]#, "minmax"]
 verbose = False
@@ -791,8 +791,6 @@ def compute_model(positive_samples, negative_samples, mode = "dist", score = Non
         elif score == None:
             return positive_model, negative_model
 
-
-
     elif mode == "corr":
 
         for i in range(positive_samples.shape[0]):
@@ -824,7 +822,7 @@ def collect_results(result):
 
 
 def main():
-    features_excel = "COPs_wt"
+    features_excel = "pfeatures"
     
 
     feature_path = os.path.join(working_path, 'Datasets', features_excel + ".xlsx")
