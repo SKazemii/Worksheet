@@ -2,10 +2,11 @@ import os
 import numpy as np
 
 Pipeline = {
-    "classifier": "knn_classifier", # knn_classifier   svm_classifier   Template_Matching_classifier
+    "classifier": "Template_Matching_classifier", # knn_classifier   svm_classifier   Template_Matching_classifier
     "persentage": 0.95,
+    "Deep": False,
     "normilizing": "z-score",
-    "feature_type": "all", # "all", "GRF_HC", "COA_HC", "GRF", "COA", "wt_COA", ## todo: "wt_GRF"
+    "feature_type": "COA", # "all", "GRF_HC", "COA_HC", "GRF", "COA", "wt_COA",  ## todo: "wt_GRF"
     "test_ratio": 0.30,
     "THRESHOLDs": np.linspace(0, 1, 100),
     "template_selection_method": "None",# "DEND" or MDIST
@@ -15,11 +16,11 @@ Pipeline = {
 
 
 CNN = {
-    "model_name": "vgg16", # mobilenet, resnet50
-    "weights": "imagenet", # weights = {none | imagenet}
-    "include_top": False, # include_top = {True | False}
-    "image_size": (300, 300, 3),
-    "batch_size": 32, # batch_size
+    "base_model": "inception_v3.InceptionV3", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0
+    "weights": "imagenet", 
+    "include_top": False, 
+    "image_size": (120, 200, 3),
+    "batch_size": 32, 
     "class_numbers": 97,
     "saving_path": "./Results/deep_model/Best_Model.hdf5",
     "epochs": 5,
@@ -51,7 +52,7 @@ KNN = {
 paths = {
     "project_dir": os.getcwd(),
     "results_dir": os.path.join(os.getcwd(), 'temp', 'Results.xlsx'),
-    "feature_dir": os.path.join(os.getcwd(), "temp", "features_all.xlsx")
+    "feature_dir": os.path.join(os.getcwd(), "temp")
 }
 
 

@@ -131,7 +131,7 @@ def knn_classifier(**kwargs):
     
     results = list()
 
-    results.append([time, kwargs["sub"], kwargs["dir"], "KNN", cfg.Pipeline["persentage"], num_pc, cfg.KNN, cfg.Pipeline["normilizing"], cfg.Pipeline["feature_type"], cfg.Pipeline["test_ratio"]])
+    results.append([time, kwargs["sub"], kwargs["dir"], "KNN", cfg.Pipeline["persentage"], num_pc, cfg.KNN, cfg.Pipeline["normilizing"], kwargs["feature_type"], cfg.Pipeline["test_ratio"]])
 
     results.append([EER, t_idx, np.mean(acc), np.mean(f1), kwargs["pos_train"].shape[0], kwargs["pos_test"].shape[0], kwargs["neg_test"].shape[0], len(FAR), len(FRR)])
 
@@ -147,8 +147,8 @@ def svm_classifier(**kwargs):
     global time
 
     pos_samples = kwargs["pos_train"].shape
-    temp = kwargs["neg_train"].sample(n = pos_samples[0])
-
+    temp = kwargs["neg_train"].sample(n = 100)#pos_samples[0])
+    
 
     kwargs["pos_train"]["left(0)/right(1)"] = kwargs["pos_train"]["left(0)/right(1)"].map(lambda x: 1)
     temp["left(0)/right(1)"] = temp["left(0)/right(1)"].map(lambda x: 0)
@@ -156,6 +156,7 @@ def svm_classifier(**kwargs):
 
 
     clf = svm.SVC(kernel=kwargs["kernel"] , probability=True)
+    breakpoint()
     clf.fit(x_train.iloc[:, :-2], x_train.iloc[:, -1])
 
 
@@ -169,7 +170,7 @@ def svm_classifier(**kwargs):
     EER, t_idx = compute_eer(FAR, FRR)
     
     
-
+    
 
     acc = list()
     f1 = list()
@@ -188,7 +189,7 @@ def svm_classifier(**kwargs):
     
     results = list()
 
-    results.append([time, kwargs["sub"], kwargs["dir"], "SVM", cfg.Pipeline["persentage"], num_pc, cfg.SVM, cfg.Pipeline["normilizing"], cfg.Pipeline["feature_type"], cfg.Pipeline["test_ratio"]])
+    results.append([time, kwargs["sub"], kwargs["dir"], "SVM", cfg.Pipeline["persentage"], num_pc, cfg.SVM, cfg.Pipeline["normilizing"], kwargs["feature_type"], cfg.Pipeline["test_ratio"]])
 
     results.append([EER, t_idx, np.mean(acc), np.mean(f1), kwargs["pos_train"].shape[0], kwargs["pos_test"].shape[0], kwargs["neg_test"].shape[0], len(FAR), len(FRR)])
 
@@ -260,7 +261,7 @@ def Template_Matching_classifier(**kwargs):
     
     results = list()
 
-    results.append([time, kwargs["sub"], kwargs["dir"], "Template_Matching", cfg.Pipeline["persentage"], num_pc, cfg.Template_Matching, cfg.Pipeline["normilizing"], cfg.Pipeline["feature_type"], cfg.Pipeline["test_ratio"]])
+    results.append([time, kwargs["sub"], kwargs["dir"], "Template_Matching", cfg.Pipeline["persentage"], num_pc, cfg.Template_Matching, cfg.Pipeline["normilizing"], kwargs["feature_type"], cfg.Pipeline["test_ratio"]])
 
     results.append([np.mean(EER), t_idx, np.mean(acc), np.mean(f1), kwargs["pos_train"].shape[0], kwargs["pos_test"].shape[0], kwargs["neg_test"].shape[0], len(FAR[0]), len(FRR[0])])
     results.append(list(np.mean(FAR, axis=0)))
@@ -276,6 +277,12 @@ def pipeline():
     
     
     feature_path = cfg.paths["feature_dir"]
+    if cfg.Pipeline["Deep"]==True:
+        feature_path = os.path.join(feature_path, cfg.CNN["base_model"].split(".")[0]+'_features.xlsx')
+    else:
+        feature_path = os.path.join(feature_path, 'features_all.xlsx')
+
+
     DF_features_all = pd.read_excel(feature_path, index_col = 0)
 
     subjects = DF_features_all["subject ID"].unique()
@@ -283,10 +290,12 @@ def pipeline():
     persentage = cfg.Pipeline["persentage"]
     normilizing = cfg.Pipeline["normilizing"]
     test_ratio = cfg.Pipeline["test_ratio"]
-    feature_type = cfg.Pipeline["feature_type"]
+    if cfg.Pipeline["Deep"]==True:
+        feature_type = cfg.CNN["base_model"].split(".")[0]
+    else:
+        feature_type = cfg.Pipeline["feature_type"]
 
     DF_features = extracting_features(DF_features_all, feature_type)
-
 
     tic=timeit.default_timer()
 
@@ -295,7 +304,7 @@ def pipeline():
 
 
     results = list()
-    # subjects = [4, 5]
+    subjects = [4, 5, 6, 7, 8]
     for subject in subjects:
         if (subject % 86) == 0: continue
         
@@ -330,6 +339,7 @@ def pipeline():
             
             # logger.info("direction: {}".format(direction))
             # logger.info("subject: {}".format(subject))
+            # breakpoint()
 
             (DF_positive_samples_test, 
             DF_positive_samples_train, 
@@ -349,18 +359,22 @@ def pipeline():
                 
 
 
-            DF_positive_samples_train = template_selection(DF_positive_samples_train, 
-                                                           method=cfg.Pipeline["template_selection_method"], 
-                                                           k_cluster=cfg.Pipeline["template_selection_k_cluster"], 
+            # DF_positive_samples_train = template_selection(DF_positive_samples_train, 
+            #                                                method=cfg.Pipeline["template_selection_method"], 
+            #                                                k_cluster=cfg.Pipeline["template_selection_k_cluster"], 
+            #                                                verbose=cfg.Pipeline["verbose"])
+            DF_negative_samples_train = template_selection(DF_negative_samples_train, 
+                                                           method="MDIST", 
+                                                           k_cluster=200, 
                                                            verbose=cfg.Pipeline["verbose"])
-
 
             result = eval(classifier)(pos_train=DF_positive_samples_train, 
                                 neg_train=DF_negative_samples_train, 
                                 pos_test=DF_positive_samples_test, 
                                 neg_test=DF_negative_samples_test, 
                                 sub=subject, 
-                                dir=direction, 
+                                dir=direction,
+                                feature_type=feature_type, 
                                 mode=cfg.Template_Matching["mode"] , 
                                 criteria=cfg.Template_Matching["criteria"],
                                 kernel=cfg.SVM["kernel"],
@@ -380,7 +394,9 @@ def pipeline():
 
 
 def extracting_features(DF_features_all, feature_type):
-    if feature_type == "all": #"all", "GRF_HC", "COA_HC", "GRF", "COA", "wt_GRF", "wt_COA"
+    if cfg.Pipeline["Deep"]==True:
+        return DF_features_all
+    elif feature_type == "all": #"all", "GRF_HC", "COA_HC", "GRF", "COA", "wt_GRF", "wt_COA"
         DF_features = DF_features_all.drop(columns=cfg.wt_GRF).copy()
     elif feature_type == "GRF_HC":
         DF_features = DF_features_all.loc[:, cfg.GRF_HC + cfg.label]
@@ -417,8 +433,8 @@ def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train
         DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
         DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-    elif persentage != 1.0 and feature_type in ["GRF_HC", "COA_HC", "GRF", "wt_GRF"]:
-        principal = PCA()
+    elif persentage != 1.0 and (feature_type in ["GRF_HC", "COA_HC", "GRF", "wt_GRF", cfg.CNN["base_model"].split(".")[0]]):
+        principal = PCA(svd_solver="full")
         PCA_out_train = principal.fit_transform(Scaled_train)
         PCA_out_test = principal.transform(Scaled_test)
 
@@ -456,7 +472,7 @@ def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train
 
 
         for i in range(len(tempx)):
-            principal = PCA()
+            principal = PCA(svd_solver="full")
             # logger.info("feature type and shape: {} - {}".format(tempx[i], Scaled_train.loc[:, eval("cfg." + tempx[i])].shape))
             
             
@@ -663,7 +679,7 @@ def compute_similarity(distance, mode = "A"):
 
 
 
-def template_selection(DF_positive_samples_train,  method, k_cluster, verbose = cfg.Pipeline["verbose"]):
+def template_selection(DF_positive_samples_train,  method, k_cluster, verbose=cfg.Pipeline["verbose"]):
     if method == "DEND":
         kmeans = KMeans(n_clusters = k_cluster)
         kmeans.fit(DF_positive_samples_train.iloc[:, :-2].values)
@@ -676,15 +692,20 @@ def template_selection(DF_positive_samples_train,  method, k_cluster, verbose = 
         for cluster in clusters:
             mean_cluster = DF_positive_samples_train[DF_positive_samples_train["label"] == cluster].sort_values(by=['dist'])
             DF_positive_samples_train_clustered.iloc[cluster, :] = mean_cluster.iloc[0,:-2]
-
         if verbose: 
-            logger.info("Clustered data size: ", DF_positive_samples_train_clustered.shape)
+            logger.info(f"Clustered data size: { DF_positive_samples_train_clustered.shape}")
+        DF_positive_samples_train_clustered.columns = DF_positive_samples_train.columns.values[:-2]
+
     elif method == "MDIST":
         A = distance.squareform(distance.pdist(DF_positive_samples_train.iloc[:, :-2].values)).mean(axis=1)
         i = np.argsort(A)[:k_cluster]
         DF_positive_samples_train_clustered = DF_positive_samples_train.iloc[i, :]
+        DF_positive_samples_train_clustered.columns = DF_positive_samples_train.columns.values
+
     elif method == "None":
         DF_positive_samples_train_clustered = DF_positive_samples_train
+        DF_positive_samples_train_clustered.columns = DF_positive_samples_train.columns.values
+
     return DF_positive_samples_train_clustered
 
 '''
@@ -960,15 +981,12 @@ def collect_results(result):
     try:
         Results_DF.to_excel(excel_path, columns=columnsname)
     except:
-        Results_DF.to_excel(os.path.join(os.getcwd(), 'temp', str(time)+'.xlsx'), columns=columnsname)
+        Results_DF.to_excel(os.path.join(os.getcwd(), 'temp', 'Results'+str(time)+'.xlsx'), columns=columnsname)
 
 
 
 
 def main():
-
-    
-
     
     z = pipeline( )  
 

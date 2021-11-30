@@ -98,9 +98,7 @@ if cfg.CNN["model_name"] == "vgg16":
     x = base_model(input)
     output = tf.keras.layers.GlobalMaxPooling2D()(x)
 
-    model = tf.keras.Model(input, output, name=cfg.CNN["model_name"])
-    # model.summary() 
-    tf.keras.utils.plot_model(model, to_file=cfg.CNN["model_name"]+".png", show_shapes=True)
+
    
 
 
@@ -116,7 +114,6 @@ elif cfg.CNN["model_name"] == "mobilenet":
     # predictions = GlobalAveragePooling2D()(x)
     # model = Model(inputs=base_model.input, outputs=predictions)
     # image_size = (224, 224)
-
 elif cfg.CNN["model_name"] == "resnet50":
     base_model = ResNet50(
         input_tensor=Input(shape=(224, 224, 3)),
@@ -135,6 +132,12 @@ else:
     base_model = None
     logger.error("the model name is not correct!!!")
 
+logger.info("Successfully loaded base model and model...")
+
+
+model = tf.keras.Model(input, output, name=cfg.CNN["model_name"])
+# model.summary() 
+tf.keras.utils.plot_model(model, to_file=cfg.CNN["model_name"]+".png", show_shapes=True)
 
 
 
@@ -149,8 +152,6 @@ image = tf.image.decode_png(tf.io.read_file('file.png'))
 result = model(image)
 
 
-logger.info("Successfully loaded base model and model...")
-# base_model.summary()
 
 saving_path = os.path.join(project_dir, 'Datasets', 'prefeatures.npy')
 prefeatures = np.load(saving_path)
@@ -162,6 +163,8 @@ logger.info("batch_size: {}".format(cfg.CNN["batch_size"]))
 
 for layer in base_model.layers:
     layer.trainable=False
+
+
 
 
 x = base_model.output
