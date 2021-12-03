@@ -24,16 +24,31 @@ from sklearn import svm
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier as knn
 
-import config as cfg
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))    
+from MLPackage import config as cfg
+
+
 
 # global variables
-num_pc = 0
+
+# Pipeline = cfg.configs["Pipeline"]
+# CNN = cfg.configs["CNN"]
+# Template_Matching = cfg.configs["Template_Matching"]
+# SVM = cfg.configs["SVM"]
+# KNN = cfg.configs["KNN"]
+# paths = cfg.configs["paths"]
+
+# num_pc = 0
 columnsname = ["testID", "subject ID", "direction", "clasifier", "PCA", "num_pc", "classifier_parameters", "normilizing", "feature_type", "test_ratio", "mean(EER)", "t_idx", "mean(acc)", "mean(f1)", "# positive samples training", "# positive samples test", "# negative samples test", "len(FAR)", "len(FRR)"] + ["FAR_" + str(i) for i in range(100)] + ["FRR_" + str(i) for i in range(100)] 
 time = int(timeit.default_timer() * 1_000_000)
 
 
 
-log_path = os.path.join(cfg.paths["project_dir"], 'logs')
+
+
+
+
+log_path = os.path.join(cfg.configs["paths"]["project_dir"], 'logs')
 def create_logger(level):
     loggerName = Pathlb(__file__).stem
     Pathlb(log_path).mkdir(parents=True, exist_ok=True)
@@ -67,6 +82,9 @@ logger = create_logger(logging.DEBUG)
 
 def knn_classifier(**kwargs):
     global time
+    num_pc = kwargs["num_pc"]
+    configs = kwargs["configs"]
+
     pos_samples = kwargs["pos_train"].shape
     temp = kwargs["neg_train"].sample(n = pos_samples[0])
 
@@ -83,10 +101,10 @@ def knn_classifier(**kwargs):
     # cv = StratifiedKFold(n_splits=5, shuffle=True)
 
 
-    clf = knn(n_neighbors=cfg.KNN["n_neighbors"], metric=cfg.KNN["metric"], weights=cfg.KNN["weights"])
+    clf = knn(n_neighbors=configs["KNN"]["n_neighbors"], metric=configs["KNN"]["metric"], weights=configs["KNN"]["weights"])
 
 
-    # space = cfg.KNN
+    # space = KNN
 
     # # define search
     # search = GridSearchCV(
@@ -116,7 +134,7 @@ def knn_classifier(**kwargs):
 
     acc = list()
     f1 = list()
-    for _ in range(cfg.SVM["random_runs"]):
+    for _ in range(configs["KNN"]["random_runs"]):
         pos_samples = kwargs["pos_test"].shape
         temp = kwargs["neg_test"].sample(n = pos_samples[0])
 
@@ -131,7 +149,7 @@ def knn_classifier(**kwargs):
     
     results = list()
 
-    results.append([time, kwargs["sub"], kwargs["dir"], "KNN", cfg.Pipeline["persentage"], num_pc, cfg.KNN, cfg.Pipeline["normilizing"], kwargs["feature_type"], cfg.Pipeline["test_ratio"]])
+    results.append([time, kwargs["sub"], kwargs["dir"], "KNN", configs["Pipeline"]["persentage"], num_pc, configs["KNN"], configs["Pipeline"]["normilizing"], kwargs["feature_type"], configs["Pipeline"]["test_ratio"]])
 
     results.append([EER, t_idx, np.mean(acc), np.mean(f1), kwargs["pos_train"].shape[0], kwargs["pos_test"].shape[0], kwargs["neg_test"].shape[0], len(FAR), len(FRR)])
 
@@ -145,6 +163,8 @@ def knn_classifier(**kwargs):
 
 def svm_classifier(**kwargs):
     global time
+    num_pc = kwargs["num_pc"]
+    configs = kwargs["configs"]
 
     pos_samples = kwargs["pos_train"].shape
     temp = kwargs["neg_train"].sample(n = 100)#pos_samples[0])
@@ -155,15 +175,14 @@ def svm_classifier(**kwargs):
     x_train = kwargs["pos_train"].append(temp)
 
 
-    clf = svm.SVC(kernel=kwargs["kernel"] , probability=True)
-    breakpoint()
+    clf = svm.SVC(kernel=configs["SVM"]["kernel"] , probability=True)
     clf.fit(x_train.iloc[:, :-2], x_train.iloc[:, -1])
 
 
     y_pred = clf.predict_proba(x_train.iloc[:, :-2])[:, 1]
     
 
-    # for _ in range(cfg.SVM["random_runs"]):
+    # for _ in range(SVM["random_runs"]):
     FAR, tpr, threshold = roc_curve(x_train.iloc[:, -1], y_pred, pos_label=1)
     FRR = 1 - tpr
 
@@ -174,7 +193,7 @@ def svm_classifier(**kwargs):
 
     acc = list()
     f1 = list()
-    for _ in range(cfg.SVM["random_runs"]):
+    for _ in range(configs["SVM"]["random_runs"]):
         pos_samples = kwargs["pos_test"].shape
         temp = kwargs["neg_test"].sample(n = pos_samples[0])
 
@@ -189,7 +208,7 @@ def svm_classifier(**kwargs):
     
     results = list()
 
-    results.append([time, kwargs["sub"], kwargs["dir"], "SVM", cfg.Pipeline["persentage"], num_pc, cfg.SVM, cfg.Pipeline["normilizing"], kwargs["feature_type"], cfg.Pipeline["test_ratio"]])
+    results.append([time, kwargs["sub"], kwargs["dir"], "SVM", configs["Pipeline"]["persentage"], num_pc, configs["SVM"], configs["Pipeline"]["normilizing"], kwargs["feature_type"], configs["Pipeline"]["test_ratio"]])
 
     results.append([EER, t_idx, np.mean(acc), np.mean(f1), kwargs["pos_train"].shape[0], kwargs["pos_test"].shape[0], kwargs["neg_test"].shape[0], len(FAR), len(FRR)])
 
@@ -203,28 +222,29 @@ def svm_classifier(**kwargs):
 
 def Template_Matching_classifier(**kwargs):
     global time
-    
+    configs = kwargs["configs"]
+    num_pc = kwargs["num_pc"]
     FAR = list()
     FRR = list()
     EER = list()
     TH  = list()
-    for _ in range(cfg.Template_Matching["random_runs"]):
+    for _ in range(configs["Template_Matching"]["random_runs"]):
         pos_samples = kwargs["pos_train"].shape
         temp = kwargs["neg_train"].sample(n = pos_samples[0])
 
 
         distModel1, distModel2 = compute_score_matrix(kwargs["pos_train"].iloc[:, :-2].values,
                                                     temp.iloc[:, :-2].values,
-                                                    mode = kwargs["mode"], score = cfg.Template_Matching["score"])
+                                                    mode = configs["Template_Matching"]["mode"], score = configs["Template_Matching"]["score"])
 
         Model_client, Model_imposter = model(distModel1,
                                                 distModel2, 
-                                                criteria=kwargs["criteria"], 
-                                                score = cfg.Template_Matching["score"] )
+                                                criteria=configs["Template_Matching"]["criteria"], 
+                                                score=configs["Template_Matching"]["score"] )
 
 
 
-        FAR_temp, FRR_temp = calculating_fxr(Model_client, Model_imposter, distModel1, distModel2, cfg.Pipeline["THRESHOLDs"], cfg.Template_Matching["score"])
+        FAR_temp, FRR_temp = calculating_fxr(Model_client, Model_imposter, distModel1, distModel2, configs["Pipeline"]["THRESHOLDs"], configs["Template_Matching"]["score"])
         EER_temp = compute_eer(FAR_temp, FRR_temp)
 
         FAR.append(FAR_temp)
@@ -238,7 +258,7 @@ def Template_Matching_classifier(**kwargs):
     f1 = list()
     t_idx = int(np.ceil(np.mean(TH)))
 
-    for _ in range(cfg.Template_Matching["random_runs"]):
+    for _ in range(configs["Template_Matching"]["random_runs"]):
         pos_samples = kwargs["pos_test"].shape
         temp = kwargs["neg_test"].sample(n = pos_samples[0])
 
@@ -246,14 +266,14 @@ def Template_Matching_classifier(**kwargs):
         DF_temp["subject ID"] = DF_temp["subject ID"].map(lambda x: 1 if x == kwargs["sub"] else 0)
 
 
-        distModel1 , distModel2 = compute_score_matrix(kwargs["pos_train"].iloc[:, :-2].values, DF_temp.iloc[:, :-2].values, mode = kwargs["mode"], score = cfg.Template_Matching["score"])
-        Model_client, Model_test = model(distModel1, distModel2, criteria = kwargs["criteria"], score = cfg.Template_Matching["score"])
+        distModel1 , distModel2 = compute_score_matrix(kwargs["pos_train"].iloc[:, :-2].values, DF_temp.iloc[:, :-2].values, mode=configs["Template_Matching"]["mode"], score=configs["Template_Matching"]["score"])
+        Model_client, Model_test = model(distModel1, distModel2, criteria=configs["Template_Matching"]["criteria"], score=configs["Template_Matching"]["score"])
 
 
         y_pred = np.zeros((Model_test.shape))
 
 
-        y_pred[Model_test > cfg.Pipeline["THRESHOLDs"][t_idx]] = 1
+        y_pred[Model_test > configs["Pipeline"]["THRESHOLDs"][t_idx]] = 1
 
 
         acc.append( accuracy_score(DF_temp.iloc[:,-2].values, y_pred)*100 )
@@ -261,7 +281,7 @@ def Template_Matching_classifier(**kwargs):
     
     results = list()
 
-    results.append([time, kwargs["sub"], kwargs["dir"], "Template_Matching", cfg.Pipeline["persentage"], num_pc, cfg.Template_Matching, cfg.Pipeline["normilizing"], kwargs["feature_type"], cfg.Pipeline["test_ratio"]])
+    results.append([time, kwargs["sub"], kwargs["dir"], "Template_Matching", configs["Pipeline"]["persentage"], num_pc, configs["Template_Matching"], configs["Pipeline"]["normilizing"], kwargs["feature_type"], configs["Pipeline"]["test_ratio"]])
 
     results.append([np.mean(EER), t_idx, np.mean(acc), np.mean(f1), kwargs["pos_train"].shape[0], kwargs["pos_test"].shape[0], kwargs["neg_test"].shape[0], len(FAR[0]), len(FRR[0])])
     results.append(list(np.mean(FAR, axis=0)))
@@ -272,13 +292,15 @@ def Template_Matching_classifier(**kwargs):
 
     
 
-def pipeline():
-    classifier = cfg.Pipeline["classifier"]
-    
-    
-    feature_path = cfg.paths["feature_dir"]
-    if cfg.Pipeline["Deep"]==True:
-        feature_path = os.path.join(feature_path, cfg.CNN["base_model"].split(".")[0]+'_features.xlsx')
+def pipeline(configs):
+
+    # set_sonfig(configs)
+
+    classifier = configs["Pipeline"]["classifier"]
+
+    feature_path = configs["paths"]["feature_dir"]
+    if configs["Pipeline"]["Deep"]==True:
+        feature_path = os.path.join(feature_path, configs["CNN"]["base_model"].split(".")[0]+'_features.xlsx')
     else:
         feature_path = os.path.join(feature_path, 'features_all.xlsx')
 
@@ -287,29 +309,29 @@ def pipeline():
 
     subjects = DF_features_all["subject ID"].unique()
     
-    persentage = cfg.Pipeline["persentage"]
-    normilizing = cfg.Pipeline["normilizing"]
-    test_ratio = cfg.Pipeline["test_ratio"]
-    if cfg.Pipeline["Deep"]==True:
-        feature_type = cfg.CNN["base_model"].split(".")[0]
+    persentage = configs["Pipeline"]["persentage"]
+    normilizing = configs["Pipeline"]["normilizing"]
+    test_ratio = configs["Pipeline"]["test_ratio"]
+    if configs["Pipeline"]["Deep"]==True:
+        feature_type = configs["CNN"]["base_model"].split(".")[0]
     else:
-        feature_type = cfg.Pipeline["feature_type"]
+        feature_type = configs["Pipeline"]["feature_type"]
 
-    DF_features = extracting_features(DF_features_all, feature_type)
+    DF_features = extracting_features(DF_features_all, feature_type, configs)
 
     tic=timeit.default_timer()
 
 
-    logger.info("Start [pipeline]:   +++   {}".format(feature_type))
+    logger.info("Start [pipeline]:   +++   {}".format(classifier))
 
 
     results = list()
-    subjects = [4, 5, 6, 7, 8]
+    subjects = [4, 5, 6]
     for subject in subjects:
         if (subject % 86) == 0: continue
         
         
-        if (subject % 10) == 0 and cfg.Pipeline["verbose"] is True:
+        if (subject % 10) == 0 and configs["Pipeline"]["verbose"] is True:
             logger.info("--------------- Subject Number: {}".format(subject))
         
 
@@ -344,13 +366,15 @@ def pipeline():
             (DF_positive_samples_test, 
             DF_positive_samples_train, 
             DF_negative_samples_test, 
-            DF_negative_samples_train) = projector(persentage, 
+            DF_negative_samples_train,
+            num_pc) = projector(persentage, 
                                                     feature_type, 
                                                     subject, 
                                                     df_train, 
                                                     df_test, 
                                                     Scaled_train, 
-                                                    Scaled_test)
+                                                    Scaled_test,
+                                                    configs)
 
             logger.debug("DF_positive_samples_train.shape {}".format(DF_positive_samples_train.shape))    
             logger.debug("DF_negative_samples_train.shape {}".format(DF_negative_samples_train.shape))   
@@ -360,13 +384,13 @@ def pipeline():
 
 
             # DF_positive_samples_train = template_selection(DF_positive_samples_train, 
-            #                                                method=cfg.Pipeline["template_selection_method"], 
-            #                                                k_cluster=cfg.Pipeline["template_selection_k_cluster"], 
-            #                                                verbose=cfg.Pipeline["verbose"])
-            DF_negative_samples_train = template_selection(DF_negative_samples_train, 
-                                                           method="MDIST", 
-                                                           k_cluster=200, 
-                                                           verbose=cfg.Pipeline["verbose"])
+            #                                                method=Pipeline["template_selection_method"], 
+            #                                                k_cluster=Pipeline["template_selection_k_cluster"], 
+            #                                                verbose=Pipeline["verbose"])
+            # DF_negative_samples_train = template_selection(DF_negative_samples_train, 
+            #                                                method="MDIST", 
+            #                                                k_cluster=200, 
+            #                                                verbose=Pipeline["verbose"])
 
             result = eval(classifier)(pos_train=DF_positive_samples_train, 
                                 neg_train=DF_negative_samples_train, 
@@ -374,11 +398,9 @@ def pipeline():
                                 neg_test=DF_negative_samples_test, 
                                 sub=subject, 
                                 dir=direction,
+                                num_pc=num_pc,
                                 feature_type=feature_type, 
-                                mode=cfg.Template_Matching["mode"] , 
-                                criteria=cfg.Template_Matching["criteria"],
-                                kernel=cfg.SVM["kernel"],
-                                n_neighbors=cfg.KNN["n_neighbors"])
+                                configs=configs)
 
             result = np.pad(result, (0, len(columnsname) - len(result)), 'constant')
                     
@@ -393,8 +415,8 @@ def pipeline():
 
 
 
-def extracting_features(DF_features_all, feature_type):
-    if cfg.Pipeline["Deep"]==True:
+def extracting_features(DF_features_all, feature_type, configs):
+    if configs["Pipeline"]["Deep"]==True:
         return DF_features_all
     elif feature_type == "all": #"all", "GRF_HC", "COA_HC", "GRF", "COA", "wt_GRF", "wt_COA"
         DF_features = DF_features_all.drop(columns=cfg.wt_GRF).copy()
@@ -416,8 +438,8 @@ def extracting_features(DF_features_all, feature_type):
 
 
 
-def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train, Scaled_test):
-    global num_pc
+def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train, Scaled_test, configs):
+    # global num_pc #todo 
     if persentage == 1.0:
         num_pc = Scaled_train.shape[1]
                 
@@ -433,7 +455,7 @@ def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train
         DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
         DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-    elif persentage != 1.0 and (feature_type in ["GRF_HC", "COA_HC", "GRF", "wt_GRF", cfg.CNN["base_model"].split(".")[0]]):
+    elif persentage != 1.0 and (feature_type in ["GRF_HC", "COA_HC", "GRF", "wt_GRF", configs["CNN"]["base_model"].split(".")[0]]):
         principal = PCA(svd_solver="full")
         PCA_out_train = principal.fit_transform(Scaled_train)
         PCA_out_test = principal.transform(Scaled_test)
@@ -514,7 +536,7 @@ def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train
         DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
         DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-    return DF_positive_samples_test,DF_positive_samples_train,DF_negative_samples_test,DF_negative_samples_train
+    return DF_positive_samples_test,DF_positive_samples_train,DF_negative_samples_test,DF_negative_samples_train, num_pc
 
 
 
@@ -531,7 +553,7 @@ def scaler(normilizing, df_train, df_test):
 
     Scaled_train = pd.DataFrame(Scaled_train, columns=df_train.columns[:-2])
     Scaled_test = pd.DataFrame(Scaled_test, columns=df_test.columns[:-2])
-    return Scaled_train,Scaled_test
+    return Scaled_train, Scaled_test
 
 
 
@@ -679,7 +701,7 @@ def compute_similarity(distance, mode = "A"):
 
 
 
-def template_selection(DF_positive_samples_train,  method, k_cluster, verbose=cfg.Pipeline["verbose"]):
+def template_selection(DF_positive_samples_train,  method, k_cluster, verbose=1):
     if method == "DEND":
         kmeans = KMeans(n_clusters = k_cluster)
         kmeans.fit(DF_positive_samples_train.iloc[:, :-2].values)
@@ -970,7 +992,7 @@ def performance(model1, model2, path):
 
 def collect_results(result):
     global columnsname, time
-    excel_path = cfg.paths["results_dir"]
+    excel_path = cfg.configs["paths"]["results_dir"]
 
     if os.path.isfile(excel_path):
         Results_DF = pd.read_excel(excel_path, index_col = 0)
@@ -984,11 +1006,22 @@ def collect_results(result):
         Results_DF.to_excel(os.path.join(os.getcwd(), 'temp', 'Results'+str(time)+'.xlsx'), columns=columnsname)
 
 
+# def set_sonfig(configs):
+#     global paths, Pipeline, CNN, Template_Matching, SVM, KNN
 
-
-def main():
+#     Pipeline = configs["Pipeline"]
+#     CNN = configs["CNN"]
+#     Template_Matching = configs["Template_Matching"]
+#     SVM = configs["SVM"]
+#     KNN = configs["KNN"]
+#     paths = configs["paths"]
     
-    z = pipeline( )  
+def main():
+    configs = cfg.configs
+    configs["Pipeline"]["classifier"] = "knn_classifier"
+
+
+    z = pipeline(configs)  
 
     collect_results(z)
 

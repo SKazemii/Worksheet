@@ -1,11 +1,13 @@
 import warnings
+
+from numpy.core.einsumfunc import _update_other_results
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
-import sys, os, logging, timeit
+import sys, os, logging, timeit, pprint, copy
 from pathlib import Path as Pathlb
 
 
@@ -44,8 +46,8 @@ from sklearn.random_projection import SparseRandomProjection
 
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))    
-from MLPackage import util as ut
-from MLPackage import Butterworth
+from MLPackage import config as cfg
+from MLPackage import Utilities as util
 
 
 project_dir = os.getcwd()
@@ -94,7 +96,40 @@ def create_logger(level):
     return logger
 logger = create_logger(logging.DEBUG)
 
+
+
+
+time = int(timeit.default_timer() * 1_000_000)
+
+def collect_results(result):
+    global time
+    excel_path = cfg.configs["paths"]["results_dir"]
+
+    if os.path.isfile(excel_path):
+        Results_DF = pd.read_excel(excel_path, index_col = 0)
+    else:
+        Results_DF = pd.DataFrame(columns=util.columnsname)
+
+    Results_DF = Results_DF.append(result)
+    try:
+        Results_DF.to_excel(excel_path, columns=util.columnsname)
+    except:
+        Results_DF.to_excel(os.path.join(os.getcwd(), 'temp', 'Results'+str(time)+'.xlsx'), columns=util.columnsname)
 def main():
+
+
+    space=["knn_classifier", "svm_classifier", "Template_Matching_classifier"]
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+
+    for parameter in space:
+        configs = copy.deepcopy(cfg.configs)
+        configs["Pipeline"]["classifier"] = parameter
+        pool.apply_async(util.pipeline, args=(configs,), callback=collect_results)
+        
+    pool.close()
+    pool.join()
+
+
 
     logger.info("Done!!!")
 

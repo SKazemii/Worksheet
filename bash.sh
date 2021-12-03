@@ -8,18 +8,20 @@
 #SBATCH --mail-user=saeed.kazemi@unb.ca
 #SBATCH --mail-type=ALL
 
-module load python/3.9
-virtualenv --no-download $SLURM_TMPDIR/env
-source $SLURM_TMPDIR/env/bin/activate
-pip install --no-index --upgrade pip
-
-pip install --no-index -r requirements.txt
+module load python/3.8
+virtualenv ~/env
+source ~/env/bin/activate
+pip install --upgrade pip
 
 
-python Codes/test2.py
+pip install --no-index pandas scikit_learn matplotlib seaborn
+pip install --no-index tensorflow jupyterlab
 
 
+python ./Codes/test2.py
 
+
+## $ chmod 755 bash.sh
 ## $ seff {Job_ID}                                                                                       # list resources used by a completed job 
 ## $ sacct -j jobID [--format=jobid,maxrss,elapsed]                                                      # list resources used by a completed job
 ## $ scancel <jobid>                                                                                     # Cancelling jobs
@@ -30,3 +32,8 @@ python Codes/test2.py
 
 ## $ scp filename saeed67@cedar.computecanada.ca:/path/to                                               # File transfer
 ## $ scp saeed67@cedar.computecanada.ca:/path/to/filename localPath                                     # File transfer
+
+
+
+
+

@@ -377,6 +377,9 @@ def prefeatures(Footprint3D, eps=5):
     prefeatures(Footprint3D)
     Footprint3D: [x,y,t] image
     return prefeatures: [x, y, 10] (CD, PTI, Tmin, Tmax, P50, P60, P70, P80, P90, P100)
+
+    If The 30th percentile of a is 24.0: This means that 30% of values fall below 24.
+    
     """
 
     prefeatures = list()
