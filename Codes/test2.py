@@ -119,12 +119,15 @@ def main():
 
 
     space=["knn_classifier", "svm_classifier", "Template_Matching_classifier"]
+    space1=["vgg16.VGG16", "resnet50.ResNet50", "efficientnet.EfficientNetB0"]
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
     for parameter in space:
-        configs = copy.deepcopy(cfg.configs)
-        configs["Pipeline"]["classifier"] = parameter
-        pool.apply_async(util.pipeline, args=(configs,), callback=collect_results)
+        for parameter1 in space1:
+            configs = copy.deepcopy(cfg.configs)
+            configs["Pipeline"]["classifier"] = parameter
+            configs["CNN"]["base_model"] = parameter1
+            pool.apply_async(util.pipeline, args=(configs,), callback=collect_results)
         
     pool.close()
     pool.join()

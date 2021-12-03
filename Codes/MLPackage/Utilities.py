@@ -326,7 +326,7 @@ def pipeline(configs):
 
 
     results = list()
-    subjects = [4, 5, 6]
+    # subjects = [4, 5, 6]
     for subject in subjects:
         if (subject % 86) == 0: continue
         

@@ -6,7 +6,7 @@ configs = {
     "Pipeline": {
         "classifier": "Template_Matching_classifier", # knn_classifier   svm_classifier   Template_Matching_classifier
         "persentage": 0.95,
-        "Deep": False,
+        "Deep": True,
         "normilizing": "z-score",
         "feature_type": "COA", # "all", "GRF_HC", "COA_HC", "GRF", "COA", "wt_COA",  ## todo: "wt_GRF"
         "test_ratio": 0.30,
@@ -16,7 +16,7 @@ configs = {
         "verbose": 1,
     },
     "CNN": {
-        "base_model": "inception_v3.InceptionV3", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0
+        "base_model": "efficientnet.EfficientNetB0", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0
         "weights": "imagenet", 
         "include_top": False, 
         "image_size": (120, 200, 3),
