@@ -16,7 +16,7 @@ configs = {
         "verbose": 1,
     },
     "CNN": {
-        "base_model": "efficientnet.EfficientNetB0", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0
+        "base_model": "resnet50.ResNet50", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0, mobilenet.MobileNet
         "weights": "imagenet", 
         "include_top": False, 
         "image_size": (120, 200, 3),
@@ -50,7 +50,7 @@ configs = {
         "project_dir": os.getcwd(),
         "results_dir": os.path.join(os.getcwd(), 'temp', 'Results.xlsx'),
         "feature_dir": os.path.join(os.getcwd(), "temp"),
-        "stepscan_dataset": os.path.join(os.getcwd()[:-5], "Datasets", "footpressures_align.h5"),
+        "stepscan_dataset": os.path.join(os.getcwd(), "Datasets", "footpressures_align.h5"),
     }
 }
 
