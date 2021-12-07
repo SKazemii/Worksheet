@@ -77,7 +77,7 @@ def create_logger(level):
     return logger
 logger = create_logger(logging.DEBUG)
 
-
+logger.info("Start Loading Utilities")
 
 
 def knn_classifier(**kwargs):
@@ -1041,3 +1041,6 @@ if __name__ == "__main__":
     main()
     toc = timeit.default_timer()
     logger.info("Done [main] ({:2.2f} process time)!!!\n\n\n".format(toc-tic))
+
+
+logger.info("Finish Loading Utilities")
