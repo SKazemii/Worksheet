@@ -16,10 +16,10 @@ configs = {
         "verbose": 1,
     },
     "CNN": {
-        "base_model": "resnet50.ResNet50", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0, mobilenet.MobileNet
+        "base_model": "mobilenet.MobileNet", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0, mobilenet.MobileNet  inception_v3.InceptionV3
         "weights": "imagenet", 
         "include_top": False, 
-        "image_size": (120, 200, 3),
+        "image_size": (60, 40, 3),
         "batch_size": 32, 
         "class_numbers": 80,
         "saving_path": "./Results/deep_model/Best_Model.hdf5",

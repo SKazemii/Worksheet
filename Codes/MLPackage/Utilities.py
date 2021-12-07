@@ -326,7 +326,7 @@ def pipeline(configs):
 
 
     results = list()
-    # subjects = [4, 5, 6]
+    # subjects = [4, 5,]
     for subject in subjects:
         if (subject % 86) == 0: continue
         
@@ -336,6 +336,8 @@ def pipeline(configs):
         
 
         for idx, direction in enumerate(["left_0", "right_1"]):
+            logger.debug(f"-->> Model {subject},\t {direction} \t\t PID: {os.getpid()}")    
+
 
             DF_side = DF_features[DF_features["left(0)/right(1)"] == idx]
         
@@ -376,10 +378,10 @@ def pipeline(configs):
                                                     Scaled_test,
                                                     configs)
 
-            logger.debug("DF_positive_samples_train.shape {}".format(DF_positive_samples_train.shape))    
-            logger.debug("DF_negative_samples_train.shape {}".format(DF_negative_samples_train.shape))   
-            logger.debug("DF_positive_samples_test.shape {}".format(DF_positive_samples_test.shape))    
-            logger.debug("DF_negative_samples_test.shape {}".format(DF_negative_samples_test.shape))    
+            # logger.debug("DF_positive_samples_train.shape {}".format(DF_positive_samples_train.shape))    
+            # logger.debug("DF_negative_samples_train.shape {}".format(DF_negative_samples_train.shape))   
+            # logger.debug("DF_positive_samples_test.shape {}".format(DF_positive_samples_test.shape))    
+            # logger.debug("DF_negative_samples_test.shape {}".format(DF_negative_samples_test.shape))    
                 
 
 

@@ -13,9 +13,9 @@ from pathlib import Path as Pathlb
 
 from sklearn import preprocessing
 from sklearn.metrics import accuracy_score
-import itertools, multiprocessing
+import multiprocessing
 
-
+from itertools import product
 
 
 import sklearn as sk
@@ -118,17 +118,23 @@ def collect_results(result):
 def main():
 
 
-    space=["knn_classifier", "svm_classifier", "Template_Matching_classifier"]
-    space1=["vgg16.VGG16", "resnet50.ResNet50", "efficientnet.EfficientNetB0"]
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-    logger.info(f"CPU count: {multiprocessing.cpu_count()}")
-    for parameter in space:
-        for parameter1 in space1:
-            configs = copy.deepcopy(cfg.configs)
-            configs["Pipeline"]["classifier"] = parameter
-            configs["CNN"]["base_model"] = parameter1
-            pool.apply_async(util.pipeline, args=(configs,), callback=collect_results)
-            collect_results(util.pipeline(configs))
+    p=["knn_classifier", "svm_classifier"]#, "Template_Matching_classifier"]
+    p1=["vgg16.VGG16", "resnet50.ResNet50"]#, "efficientnet.EfficientNetB0"]
+    space = list(product(p,p1))
+    # logger.info("Done!!")
+    # sys.exit()
+    ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK',default=1))
+
+    pool = multiprocessing.Pool(processes=ncpus)
+    logger.info(f"CPU count: {ncpus}")
+    for parameters in space:
+        configs = copy.deepcopy(cfg.configs)
+        configs["Pipeline"]["classifier"] = parameters[0]
+        configs["CNN"]["base_model"] = parameters[1]
+        # pprint.pprint(configs)
+        # breakpoint()
+        pool.apply_async(util.pipeline, args=(configs,), callback=collect_results)
+        # collect_results(util.pipeline(configs))
         
     pool.close()
     pool.join()
