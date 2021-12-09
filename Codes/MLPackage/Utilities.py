@@ -326,7 +326,7 @@ def pipeline(configs):
 
 
     results = list()
-    # subjects = [4, 5,]
+    subjects = [4, 5,]
     for subject in subjects:
         if (subject % 86) == 0: continue
         
@@ -991,7 +991,31 @@ def performance(model1, model2, path):
     # np.save("./Datasets/distModel1.npy", distModel1)
     # np.save("./Datasets/distModel2.npy", distModel2)
 '''
+def tile(samples):
+    '''return a tile of different images'''
+    sample_size = samples.shape
+    tile_image = list()
+    batch = sample_size[0]
 
+    for i in range(batch):
+        sample = np.array(samples[i,...])
+        sample = sample.transpose((2, 0, 1))
+
+        total_image = sample[0,:,:]
+        total_image1 = sample[5,:,:]
+
+        for i in range(1,5):
+            total_image = np.concatenate((total_image, sample[i,:,:]), axis=1)
+            total_image1 = np.concatenate((total_image1, sample[i+5,:,:]), axis=1)
+
+        total_image = np.concatenate((total_image, total_image1), axis=0)
+        total_image = total_image[:,:, np.newaxis]
+        total_image = np.concatenate((total_image, total_image, total_image), axis=2)
+        tile_image.append(total_image)
+
+    return np.array(tile_image)
+
+    
 def collect_results(result):
     global columnsname, time
     excel_path = cfg.configs["paths"]["results_dir"]

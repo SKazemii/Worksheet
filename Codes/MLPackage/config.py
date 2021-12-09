@@ -25,7 +25,8 @@ configs = {
         "saving_path": "./Results/deep_model/Best_Model.hdf5",
         "epochs": 10,
         "validation_split": 0.2,
-        "verbose": 1,
+        "verbose": 0,
+        "image_feature": "CD", # CD, PTI, Tmax, Tmin, P50, P60, P70, P80, P90, P100, tile
     },
     "Template_Matching": {
         "mode": "dist",
@@ -69,7 +70,7 @@ configs = {
 
 
 # CNN= {
-#     "base_model": "inception_v3.InceptionV3", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0
+#     "base_model": "inception_v3.InceptionV3", # vgg16.VGG16, resnet50.ResNet50, efficientnet.EfficientNetB0, mobilenet.MobileNet
 #     "weights": "imagenet", 
 #     "include_top": False, 
 #     "image_size": (120, 200, 3),
@@ -132,6 +133,9 @@ wt_COA_AP = ["wt_COA_AP_" + str(i) for i in range(116)]
 wt_COA_ML = ["wt_COA_ML_" + str(i) for i in range(116)]
 
 label = [ "subject ID", "left(0)/right(1)"]
+
+image_feature_name = ["CD", "PTI", "Tmax", "Tmin", "P50", "P60", "P70", "P80", "P90", "P100"]
+
 
 
 
