@@ -11,7 +11,7 @@ working_path = os.getcwd()
 print(sys.platform)
 print(working_path)
 
-meta_path = os.path.join(working_path, 'Datasets', 'RSScanData', 'perFootDataBarefoot', 'PerFootMetaDataBarefoot.npy')
+meta_path = os.path.join(working_path, 'Datasets', 'Casia-D', 'perFootDataBarefoot', 'PerFootMetaDataBarefoot.npy')
 
 
 print(meta_path)
@@ -40,7 +40,7 @@ print("[INFO] shape of Meta Data", CompleteMetaDataBarefoot.shape)
 CompleteMetaDataBarefoot = CompleteMetaDataBarefoot.reset_index()
 
 # Dataset_path = r"C:\Users\skazemi1\Documents\Projects\Worksheet\Datasets/RSScanData//AlignedFootDataBarefoot.npz"
-dataset_path = os.path.join(working_path, 'Datasets', 'RSScanData', 'alignedPerFootDataBarefoot', 'AlignedFootDataBarefoot.npz')
+dataset_path = os.path.join(working_path, 'Datasets', 'Casia-D', 'alignedPerFootDataBarefoot', 'AlignedFootDataBarefoot.npz')
 
 AlignedFootDataBarefoot = np.load(
     dataset_path
@@ -54,10 +54,10 @@ for i in CompleteMetaDataBarefoot.index:
     metadatalist.append(CompleteMetaDataBarefoot.iloc[i,:].values[2:])
 print("[INFO] length of data", len(datalist))
 
-saving_path = os.path.join(working_path, 'Datasets', 'datalist.npy')
+saving_path = os.path.join(working_path, 'Datasets', 'Casia-D', 'Data-barefoot.npy')
 np.save(saving_path, datalist)
 
-saving_path = os.path.join(working_path, 'Datasets', 'metadatalist.npy')
+saving_path = os.path.join(working_path, 'Datasets', 'Casia-D', 'Metadata-barefoot.npy')
 np.save(saving_path, metadatalist)
 
 

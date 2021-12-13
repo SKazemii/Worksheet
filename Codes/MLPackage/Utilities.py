@@ -24,7 +24,6 @@ from sklearn import svm
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier as knn
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))    
 from MLPackage import config as cfg
 
 
@@ -77,7 +76,6 @@ def create_logger(level):
     return logger
 logger = create_logger(logging.DEBUG)
 
-logger.info("Start Loading Utilities")
 
 
 def knn_classifier(**kwargs):
@@ -295,30 +293,46 @@ def Template_Matching_classifier(**kwargs):
 def pipeline(configs):
 
     # set_sonfig(configs)
-
     classifier = configs["Pipeline"]["classifier"]
 
-    feature_path = configs["paths"]["feature_dir"]
-    if configs["Pipeline"]["Deep"]==True:
-        feature_path = os.path.join(feature_path, configs["CNN"]["base_model"].split(".")[0]+'_features.xlsx')
-    else:
-        feature_path = os.path.join(feature_path, 'features_all.xlsx')
+    if configs["Pipeline"]["category"]=="deep":
+        feature_path = os.path.join(configs["paths"]["casia_deep_feature"], configs["CNN"]["base_model"].split(".")[0]+'_'+configs["CNN"]["image_feature"]+'_features.xlsx')
+        DF_features_all = pd.read_excel(feature_path, index_col = 0)
+    elif configs["Pipeline"]["category"]=="hand_crafted":
+        feature_path = configs["paths"]["casia_all_feature.xlsx"]
+        DF_features_all = pd.read_excel(feature_path, index_col = 0)
+    elif configs["Pipeline"]["category"]=="image":
+        feature_path = configs["paths"]["casia_image_feature.npy"]
+        image_features = np.load(feature_path)
+        image_feature_name_dict = dict(zip(cfg.image_feature_name, range(len(cfg.image_feature_name))))
+        image_features = image_features[..., image_feature_name_dict[configs["CNN"]["image_feature"]]]
+        image_features = image_features.reshape(2851, 2400 ,1).squeeze()
+
+        
+        meta = np.load(configs["paths"]["casia_dataset-meta.npy"])
+
+        DF_features_all = pd.DataFrame(np.concatenate((image_features, meta[:,0:2]), axis=1 ), columns=["pixel_"+str(i) for i in range(image_features.shape[1])]+cfg.label)
 
 
-    DF_features_all = pd.read_excel(feature_path, index_col = 0)
+
+
+
+
 
     subjects = DF_features_all["subject ID"].unique()
     
     persentage = configs["Pipeline"]["persentage"]
     normilizing = configs["Pipeline"]["normilizing"]
     test_ratio = configs["Pipeline"]["test_ratio"]
-    if configs["Pipeline"]["Deep"]==True:
+
+    if configs["Pipeline"]["category"]=="deep":
         feature_type = configs["CNN"]["base_model"].split(".")[0]
-    else:
+    elif configs["Pipeline"]["category"]=="hand_crafted":
         feature_type = configs["Pipeline"]["feature_type"]
-
+    elif configs["Pipeline"]["category"]=="image":
+        feature_type = "image"
+    
     DF_features = extracting_features(DF_features_all, feature_type, configs)
-
     tic=timeit.default_timer()
 
 
@@ -326,7 +340,8 @@ def pipeline(configs):
 
 
     results = list()
-    subjects = [4, 5,]
+    if configs["Pipeline"]["Debug"]==True: subjects = [4, 5,]
+
     for subject in subjects:
         if (subject % 86) == 0: continue
         
@@ -336,7 +351,7 @@ def pipeline(configs):
         
 
         for idx, direction in enumerate(["left_0", "right_1"]):
-            logger.debug(f"-->> Model {subject},\t {direction} \t\t PID: {os.getpid()}")    
+            logger.info(f"-->> Model {subject},\t {direction} \t\t PID: {os.getpid()}")    
 
 
             DF_side = DF_features[DF_features["left(0)/right(1)"] == idx]
@@ -370,13 +385,13 @@ def pipeline(configs):
             DF_negative_samples_test, 
             DF_negative_samples_train,
             num_pc) = projector(persentage, 
-                                                    feature_type, 
-                                                    subject, 
-                                                    df_train, 
-                                                    df_test, 
-                                                    Scaled_train, 
-                                                    Scaled_test,
-                                                    configs)
+                                feature_type, 
+                                subject, 
+                                df_train, 
+                                df_test, 
+                                Scaled_train, 
+                                Scaled_test,
+                                configs)
 
             # logger.debug("DF_positive_samples_train.shape {}".format(DF_positive_samples_train.shape))    
             # logger.debug("DF_negative_samples_train.shape {}".format(DF_negative_samples_train.shape))   
@@ -393,7 +408,8 @@ def pipeline(configs):
             #                                                method="MDIST", 
             #                                                k_cluster=200, 
             #                                                verbose=Pipeline["verbose"])
-
+            if configs["Pipeline"]["category"]=="deep" or configs["Pipeline"]["category"]=="image" :
+                temp1=feature_type+'-'+configs["CNN"]["image_feature"]
             result = eval(classifier)(pos_train=DF_positive_samples_train, 
                                 neg_train=DF_negative_samples_train, 
                                 pos_test=DF_positive_samples_test, 
@@ -401,7 +417,7 @@ def pipeline(configs):
                                 sub=subject, 
                                 dir=direction,
                                 num_pc=num_pc,
-                                feature_type=feature_type, 
+                                feature_type=temp1, 
                                 configs=configs)
 
             result = np.pad(result, (0, len(columnsname) - len(result)), 'constant')
@@ -418,7 +434,7 @@ def pipeline(configs):
 
 
 def extracting_features(DF_features_all, feature_type, configs):
-    if configs["Pipeline"]["Deep"]==True:
+    if configs["Pipeline"]["category"]=="deep" or configs["Pipeline"]["category"]=="image":
         return DF_features_all
     elif feature_type == "all": #"all", "GRF_HC", "COA_HC", "GRF", "COA", "wt_GRF", "wt_COA"
         DF_features = DF_features_all.drop(columns=cfg.wt_GRF).copy()
@@ -441,7 +457,6 @@ def extracting_features(DF_features_all, feature_type, configs):
 
 
 def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train, Scaled_test, configs):
-    # global num_pc #todo 
     if persentage == 1.0:
         num_pc = Scaled_train.shape[1]
                 
@@ -457,7 +472,7 @@ def projector(persentage, feature_type, subject, df_train, df_test, Scaled_train
         DF_positive_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] == subject]   
         DF_negative_samples_test = DF_features_PCA_test[DF_features_PCA_test["subject ID"] != subject]
 
-    elif persentage != 1.0 and (feature_type in ["GRF_HC", "COA_HC", "GRF", "wt_GRF", configs["CNN"]["base_model"].split(".")[0]]):
+    elif persentage != 1.0 and (feature_type in ["image", "GRF_HC", "COA_HC", "GRF", "wt_GRF", configs["CNN"]["base_model"].split(".")[0]]):
         principal = PCA(svd_solver="full")
         PCA_out_train = principal.fit_transform(Scaled_train)
         PCA_out_test = principal.transform(Scaled_test)
@@ -1020,16 +1035,16 @@ def collect_results(result):
     global columnsname, time
     excel_path = cfg.configs["paths"]["results_dir"]
 
-    if os.path.isfile(excel_path):
-        Results_DF = pd.read_excel(excel_path, index_col = 0)
+    if os.path.isfile(os.path.join(excel_path, 'Results.xlsx')):
+        Results_DF = pd.read_excel(os.path.join(excel_path, 'Results.xlsx'), index_col = 0)
     else:
         Results_DF = pd.DataFrame(columns=columnsname)
 
     Results_DF = Results_DF.append(result)
     try:
-        Results_DF.to_excel(excel_path, columns=columnsname)
+        Results_DF.to_excel(os.path.join(excel_path, 'Results.xlsx'), columns=columnsname)
     except:
-        Results_DF.to_excel(os.path.join(os.getcwd(), 'temp', 'Results'+str(time)+'.xlsx'), columns=columnsname)
+        Results_DF.to_excel(os.path.join(excel_path, 'Results'+str(time)+'.xlsx'), columns=columnsname)
 
 
 # def set_sonfig(configs):
@@ -1044,7 +1059,7 @@ def collect_results(result):
     
 def main():
     configs = cfg.configs
-    configs["Pipeline"]["classifier"] = "knn_classifier"
+    # configs["Pipeline"]["classifier"] = "knn_classifier"
 
 
     z = pipeline(configs)  
@@ -1069,4 +1084,3 @@ if __name__ == "__main__":
     logger.info("Done [main] ({:2.2f} process time)!!!\n\n\n".format(toc-tic))
 
 
-logger.info("Finish Loading Utilities")

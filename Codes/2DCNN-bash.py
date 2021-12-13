@@ -1,8 +1,5 @@
-# %% [markdown]
-# # Importing Packages
 
-# %%
-# filter warnings
+
 import warnings
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -34,6 +31,10 @@ import seaborn as sns
 
 sns.set()
 
+PATH = os.path.join(os.getcwd(), "Codes")
+if not PATH in sys.path:
+    sys.path.append(PATH)
+    
 sys.path.insert(0, os.path.abspath(os.path.join('..')))
 from MLPackage import Features as feat
 from MLPackage import config as cfg
@@ -42,15 +43,19 @@ from MLPackage import config as cfg
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-# %% [markdown]
-# # Setting Logger
 
-# %%
-project_dir = os.getcwd()
-log_path = os.path.join(project_dir, 'logs')
-temp_dir = os.path.join(project_dir, "temp")
 
-Pathlb(log_path).mkdir(parents=True, exist_ok=True)
+
+
+
+project_dir = cfg.configs["paths"]["project_dir"]
+
+
+fig_dir = cfg.configs["paths"]["fig_dir"]
+tbl_dir = cfg.configs["paths"]["tbl_dir"]
+results_dir = cfg.configs["paths"]["results_dir"]
+temp_dir = cfg.configs["paths"]["temp_dir"]
+log_path = cfg.configs["paths"]["log_path"]
 
 
 
