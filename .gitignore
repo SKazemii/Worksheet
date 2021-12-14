@@ -127,7 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-*.zip
+#*.zip
 *.jpg
 *.npz
 *.npy
@@ -137,5 +137,5 @@ file.txt
 *.mat
 
 
-./Datasets
+#./Datasets
 *.xlsx
